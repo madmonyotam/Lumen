@@ -1,13 +1,27 @@
+export interface OrganState {
+    biometrics: {
+        bpm: number;            // e.g., 73
+        stressIndex: number;    // e.g., 0.14 (0.0 - 1.0 scale)
+        hrv: number;            // e.g., 112
+    };
+    status: {
+        vitality: number;       // e.g., 0.82 (0.0 - 1.0 scale)
+        homeostasisLabel: string; // "STABLE", "AGITATED", etc.
+        mode: string;           // "DEEP REFLECTION", "ACTIVE", etc.
+        latency: number;        // e.g., 14.02
+    };
+    visualParams: {
+        coreColor: string;      // e.g., "#00f2c3"
+        pulseSpeed: number;     // Multiplier for animation speed
+    };
+}
+
 export interface BiometricData {
+    // Keeping this for backward compatibility if needed, but OrganState now encapsulates biometrics.
+    // The prompt implies the server emits data matching OrganState.
+    // For now, I'll alias or keep it simple.
     bpm: number;
     stress: number;
     hrv: number;
     bodyBattery: number;
-}
-
-export interface OrganState {
-    vitality: number;
-    mood: string;
-    resonance: number;
-    visualParams: Record<string, unknown>;
 }
