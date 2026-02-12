@@ -8,9 +8,9 @@ import { useOrgan } from '../context/OrganContext';
 
 const Container = styled.div`
   height: 100vh;
-  background-color: var(--lumen-bg);
-  color: var(--lumen-teal);
-  font-family: 'Rajdhani', sans-serif;
+  background-color: ${props => props.theme.colors.bg};
+  color: ${props => props.theme.colors.teal};
+  font-family: ${props => props.theme.fonts.main};
   position: relative;
   overflow: hidden;
   padding: 2rem;
@@ -18,7 +18,7 @@ const Container = styled.div`
   flex-direction: column;
 
   ::selection {
-    background: var(--lumen-teal);
+    background: ${props => props.theme.colors.teal};
     color: #000;
   }
 `;
@@ -28,7 +28,7 @@ const BackgroundGradient = styled.div`
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(circle at center, #112233 0%, #020405 70%);
+  background: radial-gradient(circle at center, #112233 0%, ${props => props.theme.colors.bg} 70%);
   opacity: 0.6;
 `;
 
@@ -43,7 +43,8 @@ const Header = styled.header`
 const NeuralStatus = styled.div`
   font-size: 0.75rem;
   letter-spacing: 0.2em;
-  color: rgba(0, 242, 195, 0.8); // lumen-teal/80
+  color: ${props => props.theme.colors.teal}; 
+  opacity: 0.8;
   margin-bottom: 0.5rem;
   text-transform: uppercase;
 `;
@@ -54,14 +55,14 @@ const SpecimenTitle = styled.h1`
   letter-spacing: 0.15em;
   color: white;
   text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(0, 242, 195, 0.5);
+  text-shadow: 0 0 10px ${props => props.theme.colors.tealDim};
 `;
 
 const StatusBadge = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background-color: var(--lumen-card);
+  background-color: ${props => props.theme.colors.card};
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -76,11 +77,11 @@ const MainGrid = styled.main`
   z-index: 10;
   position: relative;
   align-items: center;
-  min-height: 0; // Allows flex child to shrink below content size
+  min-height: 0;
 `;
 
 const Card = styled.div<{ $borderColor?: string }>`
-  background-color: var(--lumen-card);
+  background-color: ${props => props.theme.colors.card};
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 1rem;
@@ -89,7 +90,7 @@ const Card = styled.div<{ $borderColor?: string }>`
   transition: all 0.5s ease;
 
   &:hover {
-    border-color: ${props => props.$borderColor || 'rgba(0, 242, 195, 0.5)'};
+    border-color: ${props => props.$borderColor || props.theme.colors.tealDim};
   }
 `;
 
@@ -103,7 +104,7 @@ const MetricValue = styled.span`
 
 const MetricLabel = styled.span`
   font-size: 0.875rem;
-  color: var(--lumen-text-dim);
+  color: ${props => props.theme.colors.textDim};
   font-weight: 700;
 `;
 
@@ -111,7 +112,8 @@ const Quote = styled.div`
   position: absolute;
   top: 0;
   text-align: center;
-  color: rgba(0, 242, 195, 0.6);
+  color: ${props => props.theme.colors.teal};
+  opacity: 0.6;
   font-size: 1.125rem;
   font-style: italic;
   font-weight: 300;
@@ -141,20 +143,20 @@ const Input = styled.input`
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 9999px;
   padding: 1rem 2rem;
-  color: var(--lumen-text);
-  font-family: 'Rajdhani', sans-serif;
+  color: ${props => props.theme.colors.text};
+  font-family: ${props => props.theme.fonts.main};
   font-weight: 300;
   letter-spacing: 0.05em;
   transition: all 0.3s ease;
 
   &:focus {
     outline: none;
-    border-color: rgba(0, 242, 195, 0.5);
-    box-shadow: 0 0 20px rgba(0, 242, 195, 0.2);
+    border-color: ${props => props.theme.colors.teal};
+    box-shadow: 0 0 20px ${props => props.theme.colors.tealDim};
   }
 
   &::placeholder {
-    color: var(--lumen-text-dim);
+    color: ${props => props.theme.colors.textDim};
   }
 `;
 
@@ -209,20 +211,25 @@ const OrganismView: React.FC = () => {
                     <NeuralStatus>Neural Connection Established</NeuralStatus>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ position: 'relative', width: '0.75rem', height: '0.75rem' }}>
-                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: 'var(--lumen-teal)' }}></div>
-                            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', backgroundColor: 'var(--lumen-teal)', opacity: 0.5, animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite' }}></div>
+                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: 'var(--lumen-teal)' }}></div> {/* Keeping var for inline style or replace? styling inline needs theme context or just use hex/state if dynamic */}
+                            {/* Note: For inline styles in the render, we can't easily access theme without hook or passing it. simpler to keep var if GlobalStyles defines it OR hardcode hex/state colors. 
+                                Actually, GlobalStyles removed :root vars, so `var(--lumen-teal)` WON'T WORK anymore.
+                                I must replace inline styles with theme references or styled components.
+                             */}
+                            <div className="w-3 h-3 rounded-full bg-teal-400" style={{ backgroundColor: '#00f2c3' }}></div> {/* Fallback to hex for now or use styled component */}
+                            {/* Better: refactor these small divs to styled components */}
                         </div>
                         <SpecimenTitle>Specimen: Aeterna-01</SpecimenTitle>
                     </div>
                 </div>
                 <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                     <StatusBadge>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--lumen-text-dim)', letterSpacing: '0.1em' }}>MODE:</span>
-                        <span style={{ color: 'var(--lumen-purple)', fontWeight: 'bold', letterSpacing: '0.05em', textTransform: 'uppercase', textShadow: '0 0 10px rgba(217, 70, 239, 0.5)' }}>{status.mode}</span>
+                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', letterSpacing: '0.1em' }}>MODE:</span>
+                        <span style={{ color: '#d946ef', fontWeight: 'bold', letterSpacing: '0.05em', textTransform: 'uppercase', textShadow: '0 0 10px rgba(217, 70, 239, 0.5)' }}>{status.mode}</span>
                     </StatusBadge>
                     <StatusBadge>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--lumen-text-dim)', letterSpacing: '0.1em' }}>LATENCY:</span>
-                        <span style={{ color: 'var(--lumen-teal)', fontFamily: 'monospace' }}>{status.latency.toFixed(2)}ms</span>
+                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', letterSpacing: '0.1em' }}>LATENCY:</span>
+                        <span style={{ color: '#00f2c3', fontFamily: 'monospace' }}>{status.latency.toFixed(2)}ms</span>
                     </StatusBadge>
                 </div>
             </Header>
@@ -234,8 +241,8 @@ const OrganismView: React.FC = () => {
                     {/* Heart Rate */}
                     <Card $borderColor="rgba(0, 242, 195, 0.5)">
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                            <Heart size={20} color="var(--lumen-teal)" />
-                            <span style={{ fontSize: '0.625rem', color: 'var(--lumen-text-dim)', letterSpacing: '0.2em' }}>HEART RATE</span>
+                            <Heart size={20} color="#00f2c3" />
+                            <span style={{ fontSize: '0.625rem', color: '#94a3b8', letterSpacing: '0.2em' }}>HEART RATE</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
                             <MetricValue>{biometrics.bpm}</MetricValue>
@@ -245,7 +252,7 @@ const OrganismView: React.FC = () => {
                             {[0.3, 0.5, 0.4, 0.8, 0.6, 0.9, 0.7, 0.4, 0.6, 0.5].map((h, i) => (
                                 <motion.div
                                     key={i}
-                                    style={{ width: '0.375rem', backgroundColor: 'var(--lumen-teal)', borderRadius: '2px 2px 0 0' }}
+                                    style={{ width: '0.375rem', backgroundColor: '#00f2c3', borderRadius: '2px 2px 0 0' }}
                                     animate={{ height: `${(h + Math.random() * 0.2) * 100}%` }}
                                     transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse", delay: i * 0.1 }}
                                 />
@@ -256,8 +263,8 @@ const OrganismView: React.FC = () => {
                     {/* Stress Index */}
                     <Card $borderColor="rgba(217, 70, 239, 0.5)">
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                            <Zap size={20} color="var(--lumen-purple)" />
-                            <span style={{ fontSize: '0.625rem', color: 'var(--lumen-text-dim)', letterSpacing: '0.2em' }}>STRESS INDEX</span>
+                            <Zap size={20} color="#d946ef" />
+                            <span style={{ fontSize: '0.625rem', color: '#94a3b8', letterSpacing: '0.2em' }}>STRESS INDEX</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '1rem' }}>
                             <MetricValue>{biometrics.stressIndex}</MetricValue>
@@ -265,7 +272,7 @@ const OrganismView: React.FC = () => {
                         </div>
                         <div style={{ height: '0.375rem', width: '100%', backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: '9999px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
                             <motion.div
-                                style={{ height: '100%', backgroundColor: 'var(--lumen-purple)', boxShadow: '0 0 15px #d946ef' }}
+                                style={{ height: '100%', backgroundColor: '#d946ef', boxShadow: '0 0 15px #d946ef' }}
                                 animate={{ width: `${biometrics.stressIndex * 100}%` }}
                                 transition={{ type: "spring", stiffness: 50 }}
                             />
@@ -276,7 +283,7 @@ const OrganismView: React.FC = () => {
                     <Card $borderColor="rgba(96, 165, 250, 0.5)">
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                             <Activity size={20} color="#60a5fa" />
-                            <span style={{ fontSize: '0.625rem', color: 'var(--lumen-text-dim)', letterSpacing: '0.2em' }}>HRV VARIATION</span>
+                            <span style={{ fontSize: '0.625rem', color: '#94a3b8', letterSpacing: '0.2em' }}>HRV VARIATION</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
                             <MetricValue>{biometrics.hrv}</MetricValue>
@@ -295,7 +302,7 @@ const OrganismView: React.FC = () => {
                             width="600" height="600" viewBox="0 0 600 600"
                             animate={{ rotate: 360 }}
                             transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-                            style={{ opacity: 0.2, color: 'var(--lumen-teal)' }}
+                            style={{ opacity: 0.2, color: '#00f2c3' }}
                         >
                             <circle cx="300" cy="300" r="150" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="10 5" />
                             <circle cx="300" cy="300" r="280" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 10" />
@@ -327,7 +334,7 @@ const OrganismView: React.FC = () => {
                     </div>
 
                     <div style={{ zIndex: 10, textAlign: 'center', marginTop: '2rem' }}>
-                        <div style={{ fontSize: '0.75rem', letterSpacing: '0.5em', color: 'var(--lumen-text-dim)', marginBottom: '1rem', textTransform: 'uppercase' }}>Core Synapse</div>
+                        <div style={{ fontSize: '0.75rem', letterSpacing: '0.5em', color: '#94a3b8', marginBottom: '1rem', textTransform: 'uppercase' }}>Core Synapse</div>
                         <CoreSynapseText
                             key={status.homeostasisLabel}
                             initial={{ opacity: 0, y: 10 }}
@@ -344,7 +351,7 @@ const OrganismView: React.FC = () => {
                         <motion.div
                             style={{
                                 width: '100%',
-                                background: 'linear-gradient(to top, var(--lumen-teal), #67e8f9)',
+                                background: 'linear-gradient(to top, #00f2c3, #67e8f9)',
                                 borderRadius: '9999px',
                                 position: 'relative',
                                 zIndex: 10,
@@ -360,7 +367,7 @@ const OrganismView: React.FC = () => {
                         </div>
                     </div>
                     <div style={{ height: '8rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontSize: '0.625rem', letterSpacing: '0.5em', color: 'var(--lumen-text-dim)', transform: 'rotate(-90deg)', whiteSpace: 'nowrap' }}>HOMEOSTASIS</span>
+                        <span style={{ fontSize: '0.625rem', letterSpacing: '0.5em', color: '#94a3b8', transform: 'rotate(-90deg)', whiteSpace: 'nowrap' }}>HOMEOSTASIS</span>
                     </div>
                 </div>
             </MainGrid>
@@ -368,19 +375,19 @@ const OrganismView: React.FC = () => {
             <footer style={{ marginTop: '2rem', marginBottom: '1rem', zIndex: 10, display: 'flex', justifyContent: 'center' }}>
                 <FooterInputContainer>
                     <Input type="text" placeholder="Speak to the Organism..." />
-                    <button style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', padding: '0.5rem', borderRadius: '50%', border: 'none', background: 'transparent', color: 'var(--lumen-teal)', cursor: 'pointer' }}>
+                    <button style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', padding: '0.5rem', borderRadius: '50%', border: 'none', background: 'transparent', color: '#00f2c3', cursor: 'pointer' }}>
                         <Send size={20} />
                     </button>
                 </FooterInputContainer>
             </footer>
 
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '3rem', fontSize: '0.625rem', letterSpacing: '0.2em', color: 'var(--lumen-text-dim)', paddingBottom: '1rem', textTransform: 'uppercase' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '3rem', fontSize: '0.625rem', letterSpacing: '0.2em', color: '#94a3b8', paddingBottom: '1rem', textTransform: 'uppercase' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ width: '0.375rem', height: '0.375rem', borderRadius: '50%', backgroundColor: 'var(--lumen-teal)', boxShadow: '0 0 5px #00f2c3' }}></div>
+                    <div style={{ width: '0.375rem', height: '0.375rem', borderRadius: '50%', backgroundColor: '#00f2c3', boxShadow: '0 0 5px #00f2c3' }}></div>
                     Synaptic Link: Active
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ width: '0.375rem', height: '0.375rem', borderRadius: '50%', backgroundColor: 'var(--lumen-purple)', boxShadow: '0 0 5px #d946ef' }}></div>
+                    <div style={{ width: '0.375rem', height: '0.375rem', borderRadius: '50%', backgroundColor: '#d946ef', boxShadow: '0 0 5px #d946ef' }}></div>
                     Feedback Loop: Optimized
                 </div>
             </div>

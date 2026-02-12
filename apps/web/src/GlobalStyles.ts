@@ -3,16 +3,6 @@ import { createGlobalStyle } from 'styled-components';
 export const GlobalStyles = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
-  :root {
-    --lumen-bg: #020405;
-    --lumen-card: rgba(10, 20, 25, 0.6);
-    --lumen-teal: #00f2c3;
-    --lumen-teal-dim: rgba(0, 242, 195, 0.1);
-    --lumen-purple: #d946ef;
-    --lumen-text: #e2e8f0;
-    --lumen-text-dim: #94a3b8;
-  }
-
   * {
     box-sizing: border-box;
     margin: 0;
@@ -27,9 +17,9 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   body {
-    background-color: var(--lumen-bg);
-    color: var(--lumen-text);
-    font-family: 'Rajdhani', sans-serif;
+    background-color: ${props => props.theme.colors.bg};
+    color: ${props => props.theme.colors.text};
+    font-family: ${props => props.theme.fonts.main};
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -41,11 +31,11 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   code {
-    font-family: 'Rajdhani', monospace; // Using Rajdhani for code blocks too per aesthetic
+    font-family: ${props => props.theme.fonts.code};
   }
 
   ::selection {
-    background: var(--lumen-teal);
+    background: ${props => props.theme.colors.teal};
     color: #000;
   }
 `;
