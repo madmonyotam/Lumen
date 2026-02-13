@@ -457,7 +457,7 @@ const OrganismView: React.FC = () => {
                             <StatusDotCore $color={theme.colors.teal} />
                             <StatusDotPing $color={theme.colors.teal} />
                         </StatusDotContainer>
-                        <SpecimenTitle>Specimen: Aeterna-01</SpecimenTitle>
+                        <SpecimenTitle>Lumen</SpecimenTitle>
                     </Flex>
                 </div>
                 <FlexCol $align="flex-end">
