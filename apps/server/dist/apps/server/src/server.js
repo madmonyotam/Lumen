@@ -10,6 +10,7 @@ const cors_1 = __importDefault(require("cors"));
 const brain_1 = require("./ai/brain");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
+app.use(express_1.default.json());
 const httpServer = (0, http_1.createServer)(app);
 const io = new socket_io_1.Server(httpServer, {
     cors: {
@@ -63,6 +64,25 @@ app.get('/health', async (_req, res) => {
         res.status(500).json({ status: 'error', error: String(e) });
     }
 });
+// Genesis Endpoint - Rebirth the organism
+app.post('/api/genesis', (req, res) => {
+    try {
+        const { name, gender, traits, lifespan } = req.body;
+        if (!name || !gender || !traits || !lifespan) {
+            return res.status(400).json({ error: 'Missing genesis parameters' });
+        }
+        temporalEngine.reborn({ name, gender, traits, lifespan });
+        console.log(`[Genesis] Organism reborn as ${name} (${gender}) with ${traits.length} traits.`);
+        // Reset global messages on rebirth
+        globalMessages = [`I am ${name}. I have just been born.`];
+        // Wipe memory for the new life (simple rebirth protocol)
+        memoryService.wipeMemories().catch(console.error);
+        res.json({ message: 'Genesis complete', lifeStatus: temporalEngine.getLifeStatus() });
+    }
+    catch (e) {
+        res.status(500).json({ error: String(e) });
+    }
+});
 garminService.connect().catch(console.error);
 let lastTick = Date.now();
 // --- HYBRID INTELLIGENCE LOOPS ---
@@ -83,6 +103,7 @@ setInterval(async () => {
         // For now, we emit what we have, but Reflex/Cortex will enrich it asynchronously
         io.emit('lumen-pulse', {
             ...organState,
+            lifeStatus: temporalEngine.getLifeStatus(),
             status: {
                 ...organState.status,
                 messages: globalMessages, // Attached from Cortex Loop

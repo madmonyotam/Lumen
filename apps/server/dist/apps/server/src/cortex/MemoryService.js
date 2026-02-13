@@ -114,6 +114,15 @@ class MemoryService {
             console.error("[MemoryService] Decay Error:", err);
         }
     }
+    async wipeMemories() {
+        try {
+            await this.pool.query('DELETE FROM memories');
+            console.log("[MemoryService] All memories wiped.");
+        }
+        catch (err) {
+            console.error("[MemoryService] Wipe Error:", err);
+        }
+    }
     async checkHealth() {
         try {
             const client = await this.pool.connect();

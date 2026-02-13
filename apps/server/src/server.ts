@@ -1,3 +1,8 @@
+import dotenv from 'dotenv';
+
+// Centralized environment loading
+dotenv.config();
+
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -6,6 +11,7 @@ import { processBiometrics } from './ai/brain';
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -67,6 +73,30 @@ app.get('/health', async (_req, res) => {
     }
 });
 
+// Genesis Endpoint - Rebirth the organism
+app.post('/api/genesis', (req, res) => {
+    try {
+        const { name, gender, traits, lifespan } = req.body;
+
+        if (!name || !gender || !traits || !lifespan) {
+            return res.status(400).json({ error: 'Missing genesis parameters' });
+        }
+
+        temporalEngine.reborn({ name, gender, traits, lifespan });
+        console.log(`[Genesis] Organism reborn as ${name} (${gender}) with ${traits.length} traits.`);
+
+        // Reset global messages on rebirth
+        globalMessages = [`I am ${name}. I have just been born.`];
+
+        // Wipe memory for the new life (simple rebirth protocol)
+        memoryService.wipeMemories().catch(console.error);
+
+        res.json({ message: 'Genesis complete', lifeStatus: temporalEngine.getLifeStatus() });
+    } catch (e) {
+        res.status(500).json({ error: String(e) });
+    }
+});
+
 garminService.connect().catch(console.error);
 
 let lastTick = Date.now();
@@ -93,6 +123,7 @@ setInterval(async () => {
         // For now, we emit what we have, but Reflex/Cortex will enrich it asynchronously
         io.emit('lumen-pulse', {
             ...organState,
+            lifeStatus: temporalEngine.getLifeStatus(),
             status: {
                 ...organState.status,
                 messages: globalMessages, // Attached from Cortex Loop

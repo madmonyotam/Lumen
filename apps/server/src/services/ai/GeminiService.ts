@@ -1,7 +1,4 @@
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
 
 export class GeminiService {
     private genAI: GoogleGenerativeAI;

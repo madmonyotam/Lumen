@@ -124,6 +124,15 @@ export class MemoryService {
         }
     }
 
+    async wipeMemories() {
+        try {
+            await this.pool.query('DELETE FROM memories');
+            console.log("[MemoryService] All memories wiped.");
+        } catch (err) {
+            console.error("[MemoryService] Wipe Error:", err);
+        }
+    }
+
     async checkHealth(): Promise<boolean> {
         try {
             const client = await this.pool.connect();
