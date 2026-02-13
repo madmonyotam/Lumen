@@ -23,11 +23,11 @@ Establishing the core biological functions and infrastructure.
 
 | # | Ticket | Status | Owner |
 |---|--------|--------|-------|
-| 1.1 | **Monorepo Setup:** Initialize Turborepo with apps/web, apps/server, packages/shared. | 🔲 Todo | DevOps |
-| 1.2 | **Design System:** Implement `LumenTheme` and basic tokens in Styled Components. | 🔲 Todo | Frontend |
-| 1.3 | **Nervous System:** Setup Socket.io server with "Heartbeat" mechanism. | 🔲 Todo | Backend |
-| 1.4 | **Bio-Ingestion:** Connect to Garmin API and normalize data structure. | 🔲 Todo | Backend |
-| 1.5 | **Docker:** Create `Dockerfile` for server and `docker-compose` for local dev (Redis/PG). | 🔲 Todo | DevOps |
+| 1.1 | **Monorepo Setup:** Initialize Turborepo with apps/web, apps/server, packages/shared. | ✅ Done | DevOps |
+| 1.2 | **Design System:** Implement `LumenTheme` and basic tokens in Styled Components. | ✅ Done | Frontend |
+| 1.3 | **Nervous System:** Setup Socket.io server with "Heartbeat" mechanism. | ✅ Done | Backend |
+| 1.4 | **Bio-Ingestion:** Connect to Garmin API and normalize data structure. | ✅ Done | Backend |
+| 1.5 | **Docker:** Create `Dockerfile` for server and `docker-compose` for local dev (Redis/PG). | ✅ Done | DevOps |
 
 ## 4. Sprint 1: The Awakening (Core Feature)
 First conscious response to biometric data.

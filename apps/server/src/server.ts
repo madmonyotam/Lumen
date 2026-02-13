@@ -25,20 +25,26 @@ io.on('connection', (socket) => {
     });
 });
 
-setInterval(() => {
-    // Generate raw metrics
-    const bpm = 60 + Math.random() * 40; // 60-100
-    const stress = Math.random(); // 0-1
-    const hrv = 20 + Math.random() * 80;
+import { GarminService } from './services/garmin/GarminService';
 
-    // Process into full OrganState
-    const organState: OrganState = processBiometrics(bpm, stress, hrv);
+const garminService = new GarminService();
+garminService.connect().catch(console.error);
 
-    // Emit the new structure. 
-    // The prompt says "emit a lumen-pulse event containing randomized but realistic BiometricData." 
-    // AND "The component will consume data matching this TypeScript interface..."
-    // So I will emit the `OrganState` object directly as the payload of `lumen-pulse`.
-    io.emit('lumen-pulse', organState);
+setInterval(async () => {
+    try {
+        // Generate raw metrics from Garmin Service
+        const bpm = await garminService.fetchLatestHeartRate();
+        const stress = await garminService.fetchStress();
+        const hrv = await garminService.fetchHRV();
+
+        // Process into full OrganState
+        const organState: OrganState = processBiometrics(bpm, stress, hrv);
+
+        // Emit the new structure. 
+        io.emit('lumen-pulse', organState);
+    } catch (error) {
+        console.error("Error fetching biometrics:", error);
+    }
 
 }, 1000);
 

@@ -1,0 +1,39 @@
+
+> @lumen/server@1.0.0 test
+> jest
+
+PASS src/ai/brain.test.ts
+PASS src/services/garmin/GarminService.test.ts
+  ● Console
+
+    console.log
+      Connecting to Garmin API...
+
+      at GarminService.connect (src/services/garmin/GarminService.ts:6:17)
+
+    console.log
+      Garmin API Connected (MOCK).
+
+      at GarminService.connect (src/services/garmin/GarminService.ts:10:17)
+
+    console.log
+      Connecting to Garmin API...
+
+      at GarminService.connect (src/services/garmin/GarminService.ts:6:17)
+
+    console.log
+      Garmin API Connected (MOCK).
+
+      at GarminService.connect (src/services/garmin/GarminService.ts:10:17)
+
+
+Test Suites: 2 passed, 2 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        6.007 s
+Ran all test suites.
+npm notice
+npm notice New minor version of npm available! 11.4.2 -> 11.10.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.10.0
+npm notice To update run: npm install -g npm@11.10.0
+npm notice
