@@ -9,6 +9,9 @@ export const lumenTheme = {
         purple: '#d946ef',
         text: '#e2e8f0',
         textDim: '#94a3b8',
+        gradientStart: '#112233',
+        gradientVitalityStart: '#00f2c3',
+        gradientVitalityEnd: '#67e8f9',
     },
     fonts: {
         main: "'Rajdhani', sans-serif",

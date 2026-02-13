@@ -1,12 +1,13 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { motion } from 'framer-motion';
 import { Heart, Activity, Zap, Send } from 'lucide-react';
 import { useOrgan } from '../context/OrganContext';
+import { Flex, FlexCol, Center, Relative, AbsoluteFill } from './shared/Layout';
 
 // --- Styled Components ---
 
-const Container = styled.div`
+const Container = styled(FlexCol)`
   height: 100vh;
   background-color: ${props => props.theme.colors.bg};
   color: ${props => props.theme.colors.teal};
@@ -14,26 +15,20 @@ const Container = styled.div`
   position: relative;
   overflow: hidden;
   padding: 2rem;
-  display: flex;
-  flex-direction: column;
-
+  
   ::selection {
     background: ${props => props.theme.colors.teal};
     color: #000;
   }
 `;
 
-const BackgroundGradient = styled.div`
-  position: absolute;
-  inset: 0;
+const BackgroundGradient = styled(AbsoluteFill)`
   z-index: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at center, #112233 0%, ${props => props.theme.colors.bg} 70%);
+  background: radial-gradient(circle at center, ${props => props.theme.colors.gradientStart} 0%, ${props => props.theme.colors.bg} 70%);
   opacity: 0.6;
 `;
 
-const Header = styled.header`
-  display: flex;
+const Header = styled(Flex)`
   justify-content: space-between;
   align-items: flex-start;
   z-index: 10;
@@ -58,8 +53,35 @@ const SpecimenTitle = styled.h1`
   text-shadow: 0 0 10px ${props => props.theme.colors.tealDim};
 `;
 
-const StatusBadge = styled.div`
-  display: flex;
+const StatusDotContainer = styled(Relative)`
+  width: 0.75rem;
+  height: 0.75rem;
+`;
+
+const StatusDotCore = styled.div<{ $color?: string }>`
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: ${props => props.$color || props.theme.colors.teal};
+`;
+
+const StatusDotPing = styled.div<{ $color?: string }>`
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-color: ${props => props.$color || props.theme.colors.teal};
+  opacity: 0.5;
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+
+  @keyframes ping {
+    75%, 100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+`;
+
+const StatusBadge = styled(Flex)`
   align-items: center;
   gap: 0.75rem;
   background-color: ${props => props.theme.colors.card};
@@ -67,6 +89,21 @@ const StatusBadge = styled.div`
   border-radius: 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.05);
   margin-top: 0.5rem;
+`;
+
+const BadgeLabel = styled.span`
+  font-size: 0.75rem;
+  color: ${props => props.theme.colors.textDim};
+  letter-spacing: 0.1em;
+`;
+
+const BadgeValue = styled.span<{ $color?: string }>`
+  color: ${props => props.$color || 'white'};
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-family: ${props => props.theme.fonts.code};
+  text-shadow: ${props => props.$color ? `0 0 10px ${props.$color}80` : 'none'}; 
 `;
 
 const MainGrid = styled.main`
@@ -94,6 +131,22 @@ const Card = styled.div<{ $borderColor?: string }>`
   }
 `;
 
+const CardHeader = styled(Flex)`
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+`;
+
+const CardTitle = styled.span`
+  font-size: 0.625rem;
+  color: ${props => props.theme.colors.textDim};
+  letter-spacing: 0.2em;
+`;
+
+const MetricContainer = styled(Flex)`
+  align-items: baseline;
+  gap: 0.5rem;
+`;
+
 const MetricValue = styled.span`
   font-size: 3.75rem;
   font-weight: 300;
@@ -106,6 +159,52 @@ const MetricLabel = styled.span`
   font-size: 0.875rem;
   color: ${props => props.theme.colors.textDim};
   font-weight: 700;
+`;
+
+const HeartRateVisual = styled(Flex)`
+  margin-top: 1.5rem;
+  height: 2.5rem;
+  align-items: flex-end;
+  gap: 0.375rem;
+  opacity: 0.6;
+`;
+
+const HeartBar = styled(motion.div)`
+  width: 0.375rem;
+  background-color: ${props => props.theme.colors.teal};
+  border-radius: 2px 2px 0 0;
+`;
+
+const StressBarContainer = styled.div`
+  height: 0.375rem;
+  width: 100%;
+  background-color: rgba(0,0,0,0.5);
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+`;
+
+const StressBarFill = styled(motion.div)`
+  height: 100%;
+  background-color: ${props => props.theme.colors.purple};
+  box-shadow: 0 0 15px ${props => props.theme.colors.purple};
+`;
+
+const CenterColumn = styled(FlexCol)`
+  grid-column: span 8;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 100%;
+  min-height: 400px;
+`;
+
+const RightColumn = styled(FlexCol)`
+  grid-column: span 1;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 1rem;
 `;
 
 const Quote = styled.div`
@@ -121,6 +220,20 @@ const Quote = styled.div`
   max-width: 32rem;
 `;
 
+const CoreSynapseContainer = styled.div`
+  z-index: 10;
+  text-align: center;
+  margin-top: 2rem;
+`;
+
+const CoreSynapseLabel = styled.div`
+  font-size: 0.75rem;
+  letter-spacing: 0.5em;
+  color: ${props => props.theme.colors.textDim};
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+`;
+
 const CoreSynapseText = styled(motion.h2)`
   font-size: 3rem;
   font-weight: 700;
@@ -130,10 +243,16 @@ const CoreSynapseText = styled(motion.h2)`
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 `;
 
-const FooterInputContainer = styled.div`
+const Footer = styled(Flex)`
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  z-index: 10;
+  justify-content: center;
+`;
+
+const FooterInputContainer = styled(Relative)`
   width: 100%;
   max-width: 36rem;
-  position: relative;
 `;
 
 const Input = styled.input`
@@ -160,10 +279,138 @@ const Input = styled.input`
   }
 `;
 
+const SendButton = styled.button`
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.5rem;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: ${props => props.theme.colors.teal};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background: ${props => props.theme.colors.tealDim};
+  }
+`;
+
+const StatusBar = styled(Flex)`
+  justify-content: center;
+  gap: 3rem;
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  color: ${props => props.theme.colors.textDim};
+  padding-bottom: 1rem;
+  text-transform: uppercase;
+`;
+
+const StatusItem = styled(Flex)`
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const StatusIndicator = styled.div<{ $color: string }>`
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background-color: ${props => props.$color};
+  box-shadow: 0 0 5px ${props => props.$color};
+`;
+
+const VitalityGaugeContainer = styled.div`
+  position: relative;
+  width: 3.5rem;
+  height: 50vh;
+  max-height: 450px;
+  background-color: ${props => props.theme.colors.card};
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 9999px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0.375rem;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+`;
+
+const VitalityFill = styled(motion.div)`
+  width: 100%;
+  background: linear-gradient(to top, ${props => props.theme.colors.gradientVitalityStart}, ${props => props.theme.colors.gradientVitalityEnd});
+  border-radius: 9999px;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 0 20px ${props => props.theme.colors.tealDim};
+`;
+
+const VitalityValue = styled(Center)`
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2.5rem;
+  pointer-events: none;
+  z-index: 20;
+`;
+
+const VitalityText = styled.span`
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: black;
+  mix-blend-mode: screen;
+  transform: rotate(-90deg);
+  white-space: nowrap;
+`;
+
+const VerticalLabel = styled(Center)`
+  height: 8rem;
+`;
+
+const VerticalText = styled.span`
+  font-size: 0.625rem;
+  letter-spacing: 0.5em;
+  color: ${props => props.theme.colors.textDim};
+  transform: rotate(-90deg);
+  white-space: nowrap;
+`;
+
+const Particle = styled.div`
+  position: absolute;
+  background-color: white;
+  border-radius: 50%;
+  opacity: 0.2;
+`;
+
+const OrbContainer = styled(Relative)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Orb = styled(motion.div) <{ $coreColor: string }>`
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, ${props => props.$coreColor} 0%, transparent 60%);
+  filter: blur(50px);
+  position: absolute;
+  z-index: 0;
+`;
+
+const SvgRings = styled(motion.svg)`
+  opacity: 0.2;
+  color: ${props => props.theme.colors.teal};
+`;
+
+
 // --- Component ---
 
 const OrganismView: React.FC = () => {
     const { organState, isConnected } = useOrgan();
+    const theme = useTheme();
 
     if (!isConnected || !organState) {
         return (
@@ -187,131 +434,120 @@ const OrganismView: React.FC = () => {
         <Container>
             <BackgroundGradient />
             {/* Particles */}
-            <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+            <AbsoluteFill>
                 {[...Array(20)].map((_, i) => (
-                    <div
+                    <Particle
                         key={i}
                         style={{
-                            position: 'absolute',
-                            backgroundColor: 'white',
-                            borderRadius: '50%',
-                            opacity: 0.2,
                             top: `${Math.random() * 100}%`,
                             left: `${Math.random() * 100}%`,
                             width: `${Math.random() * 2 + 1}px`,
                             height: `${Math.random() * 2 + 1}px`,
                             animation: `pulse ${Math.random() * 3 + 2}s infinite`
                         }}
-                    ></div>
+                    />
                 ))}
-            </div>
+            </AbsoluteFill>
 
             <Header>
                 <div>
                     <NeuralStatus>Neural Connection Established</NeuralStatus>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ position: 'relative', width: '0.75rem', height: '0.75rem' }}>
-                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: 'var(--lumen-teal)' }}></div> {/* Keeping var for inline style or replace? styling inline needs theme context or just use hex/state if dynamic */}
-                            {/* Note: For inline styles in the render, we can't easily access theme without hook or passing it. simpler to keep var if GlobalStyles defines it OR hardcode hex/state colors. 
-                                Actually, GlobalStyles removed :root vars, so `var(--lumen-teal)` WON'T WORK anymore.
-                                I must replace inline styles with theme references or styled components.
-                             */}
-                            <div className="w-3 h-3 rounded-full bg-teal-400" style={{ backgroundColor: '#00f2c3' }}></div> {/* Fallback to hex for now or use styled component */}
-                            {/* Better: refactor these small divs to styled components */}
-                        </div>
+                    <Flex $gap="1rem" $align="center">
+                        <StatusDotContainer>
+                            <StatusDotCore $color={theme.colors.teal} />
+                            <StatusDotPing $color={theme.colors.teal} />
+                        </StatusDotContainer>
                         <SpecimenTitle>Specimen: Aeterna-01</SpecimenTitle>
-                    </div>
+                    </Flex>
                 </div>
-                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                <FlexCol $align="flex-end">
                     <StatusBadge>
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', letterSpacing: '0.1em' }}>MODE:</span>
-                        <span style={{ color: '#d946ef', fontWeight: 'bold', letterSpacing: '0.05em', textTransform: 'uppercase', textShadow: '0 0 10px rgba(217, 70, 239, 0.5)' }}>{status.mode}</span>
+                        <BadgeLabel>MODE:</BadgeLabel>
+                        <BadgeValue $color={theme.colors.purple}>{status.mode}</BadgeValue>
                     </StatusBadge>
                     <StatusBadge>
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', letterSpacing: '0.1em' }}>LATENCY:</span>
-                        <span style={{ color: '#00f2c3', fontFamily: 'monospace' }}>{status.latency.toFixed(2)}ms</span>
+                        <BadgeLabel>LATENCY:</BadgeLabel>
+                        <BadgeValue $color={theme.colors.teal}>{status.latency.toFixed(2)}ms</BadgeValue>
                     </StatusBadge>
-                </div>
+                </FlexCol>
             </Header>
 
             <MainGrid>
                 {/* Left Column */}
-                <div style={{ gridColumn: 'span 3', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <FlexCol style={{ gridColumn: 'span 3', gap: '1.25rem' }}>
 
                     {/* Heart Rate */}
-                    <Card $borderColor="rgba(0, 242, 195, 0.5)">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                            <Heart size={20} color="#00f2c3" />
-                            <span style={{ fontSize: '0.625rem', color: '#94a3b8', letterSpacing: '0.2em' }}>HEART RATE</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                    <Card $borderColor={`${theme.colors.teal}80`}>
+                        <CardHeader>
+                            <Heart size={20} color={theme.colors.teal} />
+                            <CardTitle>HEART RATE</CardTitle>
+                        </CardHeader>
+                        <MetricContainer>
                             <MetricValue>{biometrics.bpm}</MetricValue>
                             <MetricLabel>BPM</MetricLabel>
-                        </div>
-                        <div style={{ marginTop: '1.5rem', height: '2.5rem', display: 'flex', alignItems: 'flex-end', gap: '0.375rem', opacity: 0.6 }}>
+                        </MetricContainer>
+                        <HeartRateVisual>
                             {[0.3, 0.5, 0.4, 0.8, 0.6, 0.9, 0.7, 0.4, 0.6, 0.5].map((h, i) => (
-                                <motion.div
+                                <HeartBar
                                     key={i}
-                                    style={{ width: '0.375rem', backgroundColor: '#00f2c3', borderRadius: '2px 2px 0 0' }}
                                     animate={{ height: `${(h + Math.random() * 0.2) * 100}%` }}
                                     transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse", delay: i * 0.1 }}
                                 />
                             ))}
-                        </div>
+                        </HeartRateVisual>
                     </Card>
 
                     {/* Stress Index */}
-                    <Card $borderColor="rgba(217, 70, 239, 0.5)">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                            <Zap size={20} color="#d946ef" />
-                            <span style={{ fontSize: '0.625rem', color: '#94a3b8', letterSpacing: '0.2em' }}>STRESS INDEX</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '1rem' }}>
+                    <Card $borderColor={`${theme.colors.purple}80`}>
+                        <CardHeader>
+                            <Zap size={20} color={theme.colors.purple} />
+                            <CardTitle>STRESS INDEX</CardTitle>
+                        </CardHeader>
+                        <MetricContainer style={{ marginBottom: '1rem' }}>
                             <MetricValue>{biometrics.stressIndex}</MetricValue>
                             <MetricLabel>µS</MetricLabel>
-                        </div>
-                        <div style={{ height: '0.375rem', width: '100%', backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: '9999px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <motion.div
-                                style={{ height: '100%', backgroundColor: '#d946ef', boxShadow: '0 0 15px #d946ef' }}
+                        </MetricContainer>
+                        <StressBarContainer>
+                            <StressBarFill
                                 animate={{ width: `${biometrics.stressIndex * 100}%` }}
                                 transition={{ type: "spring", stiffness: 50 }}
                             />
-                        </div>
+                        </StressBarContainer>
                     </Card>
 
                     {/* HRV */}
-                    <Card $borderColor="rgba(96, 165, 250, 0.5)">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                    <Card $borderColor="#60a5fa80">
+                        <CardHeader>
                             <Activity size={20} color="#60a5fa" />
-                            <span style={{ fontSize: '0.625rem', color: '#94a3b8', letterSpacing: '0.2em' }}>HRV VARIATION</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                            <CardTitle>HRV VARIATION</CardTitle>
+                        </CardHeader>
+                        <MetricContainer>
                             <MetricValue>{biometrics.hrv}</MetricValue>
                             <MetricLabel>ms</MetricLabel>
-                        </div>
+                        </MetricContainer>
                     </Card>
-                </div>
+                </FlexCol>
 
                 {/* Center Column */}
-                <div style={{ gridColumn: 'span 8', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', height: '100%', minHeight: '400px' }}>
+                <CenterColumn>
                     <Quote>"The cadence of your biological rhythm suggests a profound state of contemplation..."</Quote>
 
                     {/* SVG Rings */}
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                        <motion.svg
+                    <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <SvgRings
                             width="600" height="600" viewBox="0 0 600 600"
                             animate={{ rotate: 360 }}
                             transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-                            style={{ opacity: 0.2, color: '#00f2c3' }}
                         >
                             <circle cx="300" cy="300" r="150" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="10 5" />
                             <circle cx="300" cy="300" r="280" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 10" />
-                        </motion.svg>
-                    </div>
+                        </SvgRings>
+                    </AbsoluteFill>
 
                     {/* Orb */}
-                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <motion.div
+                    <OrbContainer>
+                        <Orb
+                            $coreColor={visualParams.coreColor}
                             animate={{
                                 scale: [1, 1.05, 1],
                                 opacity: [0.6, 0.8, 0.6],
@@ -321,20 +557,11 @@ const OrganismView: React.FC = () => {
                                 repeat: Infinity,
                                 ease: "easeInOut"
                             }}
-                            style={{
-                                width: '320px',
-                                height: '320px',
-                                borderRadius: '50%',
-                                background: `radial-gradient(circle, ${visualParams.coreColor} 0%, transparent 60%)`,
-                                filter: 'blur(50px)',
-                                position: 'absolute',
-                                zIndex: 0
-                            }}
                         />
-                    </div>
+                    </OrbContainer>
 
-                    <div style={{ zIndex: 10, textAlign: 'center', marginTop: '2rem' }}>
-                        <div style={{ fontSize: '0.75rem', letterSpacing: '0.5em', color: '#94a3b8', marginBottom: '1rem', textTransform: 'uppercase' }}>Core Synapse</div>
+                    <CoreSynapseContainer>
+                        <CoreSynapseLabel>Core Synapse</CoreSynapseLabel>
                         <CoreSynapseText
                             key={status.homeostasisLabel}
                             initial={{ opacity: 0, y: 10 }}
@@ -342,55 +569,47 @@ const OrganismView: React.FC = () => {
                         >
                             {status.homeostasisLabel}
                         </CoreSynapseText>
-                    </div>
-                </div>
+                    </CoreSynapseContainer>
+                </CenterColumn>
 
                 {/* Right Column */}
-                <div style={{ gridColumn: 'span 1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1rem' }}>
-                    <div style={{ position: 'relative', width: '3.5rem', height: '50vh', maxHeight: '450px', backgroundColor: 'var(--lumen-card)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '9999px', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '0.375rem', boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)' }}>
-                        <motion.div
-                            style={{
-                                width: '100%',
-                                background: 'linear-gradient(to top, #00f2c3, #67e8f9)',
-                                borderRadius: '9999px',
-                                position: 'relative',
-                                zIndex: 10,
-                                boxShadow: '0 0 20px rgba(0, 242, 195, 0.5)'
-                            }}
+                <RightColumn>
+                    <VitalityGaugeContainer>
+                        <VitalityFill
                             animate={{ height: `${status.vitality * 100}%` }}
                             transition={{ type: "spring", stiffness: 30, damping: 20 }}
                         />
-                        <div style={{ position: 'absolute', left: 0, right: 0, bottom: '2.5rem', display: 'flex', justifyContent: 'center', pointerEvents: 'none', zIndex: 20 }}>
-                            <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'black', mixBlendMode: 'screen', transform: 'rotate(-90deg)', whiteSpace: 'nowrap' }}>
+                        <VitalityValue>
+                            <VitalityText>
                                 {Math.round(status.vitality * 100)}%
-                            </span>
-                        </div>
-                    </div>
-                    <div style={{ height: '8rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontSize: '0.625rem', letterSpacing: '0.5em', color: '#94a3b8', transform: 'rotate(-90deg)', whiteSpace: 'nowrap' }}>HOMEOSTASIS</span>
-                    </div>
-                </div>
+                            </VitalityText>
+                        </VitalityValue>
+                    </VitalityGaugeContainer>
+                    <VerticalLabel>
+                        <VerticalText>HOMEOSTASIS</VerticalText>
+                    </VerticalLabel>
+                </RightColumn>
             </MainGrid>
 
-            <footer style={{ marginTop: '2rem', marginBottom: '1rem', zIndex: 10, display: 'flex', justifyContent: 'center' }}>
+            <Footer>
                 <FooterInputContainer>
                     <Input type="text" placeholder="Speak to the Organism..." />
-                    <button style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', padding: '0.5rem', borderRadius: '50%', border: 'none', background: 'transparent', color: '#00f2c3', cursor: 'pointer' }}>
+                    <SendButton>
                         <Send size={20} />
-                    </button>
+                    </SendButton>
                 </FooterInputContainer>
-            </footer>
+            </Footer>
 
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '3rem', fontSize: '0.625rem', letterSpacing: '0.2em', color: '#94a3b8', paddingBottom: '1rem', textTransform: 'uppercase' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ width: '0.375rem', height: '0.375rem', borderRadius: '50%', backgroundColor: '#00f2c3', boxShadow: '0 0 5px #00f2c3' }}></div>
+            <StatusBar>
+                <StatusItem>
+                    <StatusIndicator $color={theme.colors.teal} />
                     Synaptic Link: Active
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div style={{ width: '0.375rem', height: '0.375rem', borderRadius: '50%', backgroundColor: '#d946ef', boxShadow: '0 0 5px #d946ef' }}></div>
+                </StatusItem>
+                <StatusItem>
+                    <StatusIndicator $color={theme.colors.purple} />
                     Feedback Loop: Optimized
-                </div>
-            </div>
+                </StatusItem>
+            </StatusBar>
         </Container>
     );
 };
