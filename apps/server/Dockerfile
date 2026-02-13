@@ -1,25 +1,15 @@
-FROM node:18-alpine AS builder
-# Set working directory
+FROM node:20-alpine AS builder
 WORKDIR /app
-# Install turbo global
-RUN npm install -g turbo
-# Copy all package.jsons
 COPY . .
-# Prune the workspace for server
-RUN turbo prune --scope=@lumen/server --docker
-
-# Installer stage
-FROM node:18-alpine AS installer
-WORKDIR /app
-COPY --from=builder /app/out/json/ .
-COPY --from=builder /app/out/package-lock.json ./package-lock.json
 RUN npm install
+RUN npm run build --workspace=@lumen/server
 
-COPY --from=builder /app/out/full/ .
-RUN npm run build
-
-# Runner stage
-FROM node:18-alpine AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
-COPY --from=installer /app .
+COPY --from=builder /app/package.json .
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/server/dist ./apps/server/dist
+COPY --from=builder /app/apps/server/package.json ./apps/server/package.json
+
+EXPOSE 3001
 CMD ["node", "apps/server/dist/server.js"]
