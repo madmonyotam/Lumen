@@ -34,10 +34,10 @@ First conscious response to biometric data.
 
 | # | Ticket | Status | Owner |
 |---|--------|--------|-------|
-| 2.1 | **Temporal Engine:** Implement subjective time calculation logic. | 🔲 Todo | Backend |
-| 2.2 | **Visual Physics:** Create the first D3 "Organ" that pulses with BPM. | 🔲 Todo | Frontend |
-| 2.3 | **First Memory:** Implement Vector DB storage for conversation history. | 🔲 Todo | DB Arch |
-| 2.4 | **Identity Prompt:** Tune Gemini system prompt with the "Symbiote" persona. | 🔲 Todo | Product |
+| 2.1 | **Temporal Engine:** Implement subjective time calculation logic. | ✅ Done | Backend |
+| 2.2 | **Visual Physics:** Create the first D3 "Organ" that pulses with BPM. | ✅ Done | Frontend |
+| 2.3 | **First Memory:** Implement Vector DB storage for conversation history. | ✅ Done | DB Arch |
+| 2.4 | **Identity Prompt:** Tune Gemini system prompt with the "Symbiote" persona. | ✅ Done | Product |
 
 ## 5. Bugs & Known Issues
 | # | Issue | Severity | Status |

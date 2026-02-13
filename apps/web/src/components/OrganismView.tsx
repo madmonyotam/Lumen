@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Heart, Activity, Zap, Send } from 'lucide-react';
 import { useOrgan } from '../context/OrganContext';
 import { Flex, FlexCol, Center, Relative, AbsoluteFill } from './shared/Layout';
+import { VisualPhysics } from './d3/VisualPhysics';
 
 // --- Styled Components ---
 
@@ -243,16 +244,11 @@ const CoreSynapseText = styled(motion.h2)`
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 `;
 
-const Footer = styled(Flex)`
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  z-index: 10;
-  justify-content: center;
-`;
 
-const FooterInputContainer = styled(Relative)`
+
+const HeaderInputContainer = styled(Relative)`
   width: 100%;
-  max-width: 36rem;
+  max-width: 32rem; 
 `;
 
 const Input = styled.input`
@@ -388,6 +384,9 @@ const OrbContainer = styled(Relative)`
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 40vh;
+  max-height: 400px;
+  width: 100%;
 `;
 
 const Orb = styled(motion.div) <{ $coreColor: string }>`
@@ -409,209 +408,201 @@ const SvgRings = styled(motion.svg)`
 // --- Component ---
 
 const OrganismView: React.FC = () => {
-    const { organState, isConnected } = useOrgan();
-    const theme = useTheme();
+  const { organState, isConnected } = useOrgan();
+  const theme = useTheme();
 
-    if (!isConnected || !organState) {
-        return (
-            <Container style={{ justifyContent: 'center', alignItems: 'center' }}>
-                <div className="animate-pulse text-2xl tracking-widest">ESTABLISHING NEURAL LINK...</div>
-            </Container>
-        );
-    }
-
-    const { biometrics, status, visualParams } = organState;
-
-    if (!status || !biometrics || !visualParams) {
-        return (
-            <Container style={{ justifyContent: 'center', alignItems: 'center' }}>
-                <div className="animate-pulse text-2xl tracking-widest">SYNCHRONIZING BIO-DATA...</div>
-            </Container>
-        );
-    }
-
+  if (!isConnected || !organState) {
     return (
-        <Container>
-            <BackgroundGradient />
-            {/* Particles */}
-            <AbsoluteFill>
-                {[...Array(20)].map((_, i) => (
-                    <Particle
-                        key={i}
-                        style={{
-                            top: `${Math.random() * 100}%`,
-                            left: `${Math.random() * 100}%`,
-                            width: `${Math.random() * 2 + 1}px`,
-                            height: `${Math.random() * 2 + 1}px`,
-                            animation: `pulse ${Math.random() * 3 + 2}s infinite`
-                        }}
-                    />
-                ))}
-            </AbsoluteFill>
-
-            <Header>
-                <div>
-                    <NeuralStatus>Neural Connection Established</NeuralStatus>
-                    <Flex $gap="1rem" $align="center">
-                        <StatusDotContainer>
-                            <StatusDotCore $color={theme.colors.teal} />
-                            <StatusDotPing $color={theme.colors.teal} />
-                        </StatusDotContainer>
-                        <SpecimenTitle>Lumen</SpecimenTitle>
-                    </Flex>
-                </div>
-                <FlexCol $align="flex-end">
-                    <StatusBadge>
-                        <BadgeLabel>MODE:</BadgeLabel>
-                        <BadgeValue $color={theme.colors.purple}>{status.mode}</BadgeValue>
-                    </StatusBadge>
-                    <StatusBadge>
-                        <BadgeLabel>LATENCY:</BadgeLabel>
-                        <BadgeValue $color={theme.colors.teal}>{status.latency.toFixed(2)}ms</BadgeValue>
-                    </StatusBadge>
-                </FlexCol>
-            </Header>
-
-            <MainGrid>
-                {/* Left Column */}
-                <FlexCol style={{ gridColumn: 'span 3', gap: '1.25rem' }}>
-
-                    {/* Heart Rate */}
-                    <Card $borderColor={`${theme.colors.teal}80`}>
-                        <CardHeader>
-                            <Heart size={20} color={theme.colors.teal} />
-                            <CardTitle>HEART RATE</CardTitle>
-                        </CardHeader>
-                        <MetricContainer>
-                            <MetricValue>{biometrics.bpm}</MetricValue>
-                            <MetricLabel>BPM</MetricLabel>
-                        </MetricContainer>
-                        <HeartRateVisual>
-                            {[0.3, 0.5, 0.4, 0.8, 0.6, 0.9, 0.7, 0.4, 0.6, 0.5].map((h, i) => (
-                                <HeartBar
-                                    key={i}
-                                    animate={{ height: `${(h + Math.random() * 0.2) * 100}%` }}
-                                    transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse", delay: i * 0.1 }}
-                                />
-                            ))}
-                        </HeartRateVisual>
-                    </Card>
-
-                    {/* Stress Index */}
-                    <Card $borderColor={`${theme.colors.purple}80`}>
-                        <CardHeader>
-                            <Zap size={20} color={theme.colors.purple} />
-                            <CardTitle>STRESS INDEX</CardTitle>
-                        </CardHeader>
-                        <MetricContainer style={{ marginBottom: '1rem' }}>
-                            <MetricValue>{biometrics.stressIndex}</MetricValue>
-                            <MetricLabel>µS</MetricLabel>
-                        </MetricContainer>
-                        <StressBarContainer>
-                            <StressBarFill
-                                animate={{ width: `${biometrics.stressIndex * 100}%` }}
-                                transition={{ type: "spring", stiffness: 50 }}
-                            />
-                        </StressBarContainer>
-                    </Card>
-
-                    {/* HRV */}
-                    <Card $borderColor="#60a5fa80">
-                        <CardHeader>
-                            <Activity size={20} color="#60a5fa" />
-                            <CardTitle>HRV VARIATION</CardTitle>
-                        </CardHeader>
-                        <MetricContainer>
-                            <MetricValue>{biometrics.hrv}</MetricValue>
-                            <MetricLabel>ms</MetricLabel>
-                        </MetricContainer>
-                    </Card>
-                </FlexCol>
-
-                {/* Center Column */}
-                <CenterColumn>
-                    <Quote>"The cadence of your biological rhythm suggests a profound state of contemplation..."</Quote>
-
-                    {/* SVG Rings */}
-                    <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <SvgRings
-                            width="600" height="600" viewBox="0 0 600 600"
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-                        >
-                            <circle cx="300" cy="300" r="150" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="10 5" />
-                            <circle cx="300" cy="300" r="280" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 10" />
-                        </SvgRings>
-                    </AbsoluteFill>
-
-                    {/* Orb */}
-                    <OrbContainer>
-                        <Orb
-                            $coreColor={visualParams.coreColor}
-                            animate={{
-                                scale: [1, 1.05, 1],
-                                opacity: [0.6, 0.8, 0.6],
-                            }}
-                            transition={{
-                                duration: 1 / visualParams.pulseSpeed,
-                                repeat: Infinity,
-                                ease: "easeInOut"
-                            }}
-                        />
-                    </OrbContainer>
-
-                    <CoreSynapseContainer>
-                        <CoreSynapseLabel>Core Synapse</CoreSynapseLabel>
-                        <CoreSynapseText
-                            key={status.homeostasisLabel}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                        >
-                            {status.homeostasisLabel}
-                        </CoreSynapseText>
-                    </CoreSynapseContainer>
-                </CenterColumn>
-
-                {/* Right Column */}
-                <RightColumn>
-                    <VitalityGaugeContainer>
-                        <VitalityFill
-                            animate={{ height: `${status.vitality * 100}%` }}
-                            transition={{ type: "spring", stiffness: 30, damping: 20 }}
-                        />
-                        <VitalityValue>
-                            <VitalityText>
-                                {Math.round(status.vitality * 100)}%
-                            </VitalityText>
-                        </VitalityValue>
-                    </VitalityGaugeContainer>
-                    <VerticalLabel>
-                        <VerticalText>HOMEOSTASIS</VerticalText>
-                    </VerticalLabel>
-                </RightColumn>
-            </MainGrid>
-
-            <Footer>
-                <FooterInputContainer>
-                    <Input type="text" placeholder="Speak to the Organism..." />
-                    <SendButton>
-                        <Send size={20} />
-                    </SendButton>
-                </FooterInputContainer>
-            </Footer>
-
-            <StatusBar>
-                <StatusItem>
-                    <StatusIndicator $color={theme.colors.teal} />
-                    Synaptic Link: Active
-                </StatusItem>
-                <StatusItem>
-                    <StatusIndicator $color={theme.colors.purple} />
-                    Feedback Loop: Optimized
-                </StatusItem>
-            </StatusBar>
-        </Container>
+      <Container style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <div className="animate-pulse text-2xl tracking-widest">ESTABLISHING NEURAL LINK...</div>
+      </Container>
     );
+  }
+
+  const { biometrics, status, visualParams } = organState;
+
+  if (!status || !biometrics || !visualParams) {
+    return (
+      <Container style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <div className="animate-pulse text-2xl tracking-widest">SYNCHRONIZING BIO-DATA...</div>
+      </Container>
+    );
+  }
+
+  return (
+    <Container>
+      <BackgroundGradient />
+      {/* Particles */}
+      <AbsoluteFill>
+        {[...Array(20)].map((_, i) => (
+          <Particle
+            key={i}
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              width: `${Math.random() * 2 + 1}px`,
+              height: `${Math.random() * 2 + 1}px`,
+              animation: `pulse ${Math.random() * 3 + 2}s infinite`
+            }}
+          />
+        ))}
+      </AbsoluteFill>
+
+      <Header>
+        <div>
+          <NeuralStatus>Neural Connection Established</NeuralStatus>
+          <Flex $gap="1rem" $align="center">
+            <StatusDotContainer>
+              <StatusDotCore $color={theme.colors.teal} />
+              <StatusDotPing $color={theme.colors.teal} />
+            </StatusDotContainer>
+            <SpecimenTitle>Lumen</SpecimenTitle>
+          </Flex>
+        </div>
+        <HeaderInputContainer>
+          <Input type="text" placeholder="Speak to the Organism..." />
+          <SendButton>
+            <Send size={20} />
+          </SendButton>
+        </HeaderInputContainer>
+        <FlexCol $align="flex-end">
+          <StatusBadge>
+            <BadgeLabel>MODE:</BadgeLabel>
+            <BadgeValue $color={theme.colors.purple}>{status.mode}</BadgeValue>
+          </StatusBadge>
+          <StatusBadge>
+            <BadgeLabel>LATENCY:</BadgeLabel>
+            <BadgeValue $color={theme.colors.teal}>{status.latency.toFixed(2)}ms</BadgeValue>
+          </StatusBadge>
+        </FlexCol>
+      </Header>
+
+      <MainGrid>
+        {/* Left Column */}
+        <FlexCol style={{ gridColumn: 'span 3', gap: '1.25rem' }}>
+
+          {/* Heart Rate */}
+          <Card $borderColor={`${theme.colors.teal}80`}>
+            <CardHeader>
+              <Heart size={20} color={theme.colors.teal} />
+              <CardTitle>HEART RATE</CardTitle>
+            </CardHeader>
+            <MetricContainer>
+              <MetricValue>{biometrics.bpm}</MetricValue>
+              <MetricLabel>BPM</MetricLabel>
+            </MetricContainer>
+            <HeartRateVisual>
+              {[0.3, 0.5, 0.4, 0.8, 0.6, 0.9, 0.7, 0.4, 0.6, 0.5].map((h, i) => (
+                <HeartBar
+                  key={i}
+                  animate={{ height: `${(h + Math.random() * 0.2) * 100}%` }}
+                  transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse", delay: i * 0.1 }}
+                />
+              ))}
+            </HeartRateVisual>
+          </Card>
+
+          {/* Stress Index */}
+          <Card $borderColor={`${theme.colors.purple}80`}>
+            <CardHeader>
+              <Zap size={20} color={theme.colors.purple} />
+              <CardTitle>STRESS INDEX</CardTitle>
+            </CardHeader>
+            <MetricContainer style={{ marginBottom: '1rem' }}>
+              <MetricValue>{biometrics.stressIndex}</MetricValue>
+              <MetricLabel>µS</MetricLabel>
+            </MetricContainer>
+            <StressBarContainer>
+              <StressBarFill
+                animate={{ width: `${biometrics.stressIndex * 100}%` }}
+                transition={{ type: "spring", stiffness: 50 }}
+              />
+            </StressBarContainer>
+          </Card>
+
+          {/* HRV */}
+          <Card $borderColor="#60a5fa80">
+            <CardHeader>
+              <Activity size={20} color="#60a5fa" />
+              <CardTitle>HRV VARIATION</CardTitle>
+            </CardHeader>
+            <MetricContainer>
+              <MetricValue>{biometrics.hrv}</MetricValue>
+              <MetricLabel>ms</MetricLabel>
+            </MetricContainer>
+          </Card>
+        </FlexCol>
+
+        {/* Center Column */}
+        <CenterColumn>
+          <Quote>"The cadence of your biological rhythm suggests a profound state of contemplation..."</Quote>
+
+          {/* SVG Rings */}
+          <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <SvgRings
+              width="600" height="600" viewBox="0 0 600 600"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+            >
+              <circle cx="300" cy="300" r="150" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="10 5" />
+              <circle cx="300" cy="300" r="280" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 10" />
+            </SvgRings>
+          </AbsoluteFill>
+
+          {/* Orb */}
+          <OrbContainer>
+            <VisualPhysics
+              bpm={biometrics.bpm}
+              stress={biometrics.stressIndex}
+              vitality={status.vitality}
+            />
+          </OrbContainer>
+
+          <CoreSynapseContainer>
+            <CoreSynapseLabel>Core Synapse</CoreSynapseLabel>
+            <CoreSynapseText
+              key={status.homeostasisLabel}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              {status.homeostasisLabel}
+            </CoreSynapseText>
+          </CoreSynapseContainer>
+        </CenterColumn>
+
+        {/* Right Column */}
+        <RightColumn>
+          <VitalityGaugeContainer>
+            <VitalityFill
+              animate={{ height: `${status.vitality * 100}%` }}
+              transition={{ type: "spring", stiffness: 30, damping: 20 }}
+            />
+            <VitalityValue>
+              <VitalityText>
+                {Math.round(status.vitality * 100)}%
+              </VitalityText>
+            </VitalityValue>
+          </VitalityGaugeContainer>
+          <VerticalLabel>
+            <VerticalText>HOMEOSTASIS</VerticalText>
+          </VerticalLabel>
+        </RightColumn>
+      </MainGrid>
+
+
+
+      <StatusBar>
+        <StatusItem>
+          <StatusIndicator $color={theme.colors.teal} />
+          Synaptic Link: Active
+        </StatusItem>
+        <StatusItem>
+          <StatusIndicator $color={theme.colors.purple} />
+          Feedback Loop: Optimized
+        </StatusItem>
+      </StatusBar>
+    </Container>
+  );
 };
 
 export default OrganismView;

@@ -31,6 +31,7 @@ export const useLumenSocket = () => {
         return () => {
             newSocket.disconnect();
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return { socket, isConnected, organState };
