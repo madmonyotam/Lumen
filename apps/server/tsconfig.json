@@ -3,9 +3,14 @@
     "compilerOptions": {
         "module": "CommonJS",
         "outDir": "dist",
-        "moduleResolution": "node"
+        "moduleResolution": "node",
+        "noEmit": false,
+        "allowImportingTsExtensions": false
     },
     "include": [
         "src/**/*"
+    ],
+    "exclude": [
+        "src/scripts"
     ]
 }

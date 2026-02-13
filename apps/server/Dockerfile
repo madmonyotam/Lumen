@@ -12,4 +12,4 @@ COPY --from=builder /app/apps/server/dist ./apps/server/dist
 COPY --from=builder /app/apps/server/package.json ./apps/server/package.json
 
 EXPOSE 3001
-CMD ["node", "apps/server/dist/server.js"]
+CMD ["node", "apps/server/dist/apps/server/src/server.js"]
