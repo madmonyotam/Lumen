@@ -53,4 +53,14 @@ export class GarminService {
         const n = this.noise(this.timeOffset * 0.8 + 50);
         return 60 + (n * 30); // 30 to 90
     }
+
+    async getLastBPM(): Promise<number> {
+        // Since we are mocking, we can just fetch again or store state. 
+        // For now, fetching is cheap (math).
+        return this.fetchLatestHeartRate();
+    }
+
+    async getLastStress(): Promise<number> {
+        return this.fetchStress();
+    }
 }

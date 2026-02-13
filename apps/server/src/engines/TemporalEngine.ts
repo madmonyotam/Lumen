@@ -29,4 +29,8 @@ export class TemporalEngine {
     getSubjectiveTime(): number {
         return this.subjectiveTime;
     }
+
+    getLastSubjectiveTime(): number {
+        return this.subjectiveTime;
+    }
 }

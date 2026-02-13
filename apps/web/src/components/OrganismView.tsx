@@ -1,6 +1,6 @@
 import React from 'react';
 import styled, { useTheme } from 'styled-components';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Activity, Zap, Send } from 'lucide-react';
 import { useOrgan } from '../context/OrganContext';
 import { Flex, FlexCol, Center, Relative, AbsoluteFill } from './shared/Layout';
@@ -404,12 +404,19 @@ const SvgRings = styled(motion.svg)`
   color: ${props => props.theme.colors.teal};
 `;
 
-
-// --- Component ---
-
 const OrganismView: React.FC = () => {
   const { organState, isConnected } = useOrgan();
   const theme = useTheme();
+  const [thought, setThought] = React.useState<string>("The organism is silent...");
+
+  React.useEffect(() => {
+    if (organState?.status?.messages && organState.status.messages.length > 0) {
+      const latestMessage = organState.status.messages[organState.status.messages.length - 1];
+      if (latestMessage) {
+        setThought(latestMessage);
+      }
+    }
+  }, [organState?.status?.messages]);
 
   if (!isConnected || !organState) {
     return (
@@ -535,12 +542,23 @@ const OrganismView: React.FC = () => {
 
         {/* Center Column */}
         <CenterColumn>
-          <Quote>"The cadence of your biological rhythm suggests a profound state of contemplation..."</Quote>
+          <AnimatePresence mode="wait">
+            <Quote
+              as={motion.div}
+              key={thought}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 0.6, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+            >
+              "{thought}"
+            </Quote>
+          </AnimatePresence>
 
           {/* SVG Rings */}
           <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <SvgRings
-              width="600" height="600" viewBox="0 0 600 600"
+              width="600" height="600" viewBox="0 0 600 600" // Reduced size slightly to fit logic
               animate={{ rotate: 360 }}
               transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
             >

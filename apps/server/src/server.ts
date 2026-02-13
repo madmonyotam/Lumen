@@ -2,7 +2,6 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
-import { OrganState } from '@lumen/shared/types/index';
 import { processBiometrics } from './ai/brain';
 
 const app = express();
@@ -50,64 +49,93 @@ app.get('/health', async (_req, res) => {
 garminService.connect().catch(console.error);
 
 let lastTick = Date.now();
-let thoughtCooldown = 0;
 
-// Configuration
-const MIN_THOUGHT_INTERVAL = parseInt(process.env.MIN_THOUGHT_INTERVAL || '10000'); // 10 seconds
-const STRESS_THOUGHT_INTERVAL = parseInt(process.env.STRESS_THOUGHT_INTERVAL || '3000'); // 3 seconds under high stress
+// --- HYBRID INTELLIGENCE LOOPS ---
 
+// 1. Biological Clock (1Hz) - Basic Life Functions
 setInterval(async () => {
-    const now = Date.now();
-    const delta = now - lastTick;
-    lastTick = now;
-
     try {
-        // Generate raw metrics from Garmin Service
+        const now = Date.now();
+        const delta = now - lastTick;
+        lastTick = now;
+
+        // Fetch Raw Biometrics
         const bpm = await garminService.fetchLatestHeartRate();
         const stress = await garminService.fetchStress();
         const hrv = await garminService.fetchHRV();
 
-        // Calculate Subjective Time
-        const subjectiveTime = temporalEngine.calculateSubjectiveTime(bpm, stress, delta);
+        // Process Organ State
+        temporalEngine.calculateSubjectiveTime(bpm, stress, delta);
+        const organState = processBiometrics(bpm, stress, hrv);
 
-        // Process into full OrganState
-        const organState: OrganState = processBiometrics(bpm, stress, hrv);
-
-        // Cognitive Pulse (Thought Generation) - Every ~10 seconds or high stress
-        thoughtCooldown += delta;
-        let activeThought = undefined;
-
-        if (thoughtCooldown > MIN_THOUGHT_INTERVAL || (stress > 0.8 && thoughtCooldown > STRESS_THOUGHT_INTERVAL)) {
-            const context = `BPM: ${bpm}, Stress: ${stress}, Mode: ${organState.status.mode}`;
-            activeThought = await geminiService.generateThought(context);
-            if (activeThought) {
-                console.log(`[Cortex] Thought: ${activeThought}`);
-                // Store thought as a memory occasionally
-                if (Math.random() > 0.7) {
-                    await memoryService.storeMemory(activeThought, { type: 'thought', ...organState.biometrics });
-                }
-            }
-            thoughtCooldown = 0;
-        }
-
-        // Emit the new structure with subjective time
+        // Store state globally or emit immediately
+        // For now, we emit what we have, but Reflex/Cortex will enrich it asynchronously
         io.emit('lumen-pulse', {
             ...organState,
             status: {
                 ...organState.status,
-                messages: activeThought ? [activeThought] : [], // Send thought to frontend
-                subjectiveTime
+                messages: globalMessages, // Attached from Cortex Loop
+                visualParams: globalVisualParams, // Attached from Reflex Loop
+                subjectiveTime: temporalEngine.getLastSubjectiveTime()
             }
         });
 
-        // Store a memory if stress is high (Significant Event)
-        if (stress > 0.9) { // Increased threshold to avoid spam
-            await memoryService.storeMemory(`Panic event detected. BPM: ${bpm}`, { bpm, stress, subjectiveTime });
+    } catch (error) {
+        console.error("Biological Clock Error:", error);
+    }
+}, 1000);
+
+// State Holders for Asynchronous Intelligence
+let globalMessages: string[] = [];
+let globalVisualParams: any = {}; // TODO: Define strict type
+
+// 2. Reflex Loop (Fast - 5s) - Bio-Reactive Visuals
+setInterval(async () => {
+    try {
+        const bpm = await garminService.getLastBPM();
+        const stress = await garminService.getLastStress();
+        const context = `BPM: ${bpm}, Stress: ${stress}`;
+
+        const reflexParams = await geminiService.generateReflex(context);
+        if (reflexParams) {
+            globalVisualParams = reflexParams;
+            // console.log("[Reflex] Updated visual params:", reflexParams);
         }
     } catch (error) {
-        console.error("Error fetching biometrics:", error);
-    } // End of inner try-catch
-}, 1000); // End of setInterval
+        console.error("[Reflex] Error:", error);
+    }
+}, 5000);
+
+// 3. Cortex Loop (Slow - 30s or Stress Triggered) - Deep Thought
+let thoughtCooldown = 0;
+const CORTEX_INTERVAL = 30000; // 30s base
+const STRESS_THRESHOLD = 0.8;
+
+setInterval(async () => {
+    try {
+        thoughtCooldown += 1000; // Check every second, but only act if cooldown met
+        const stress = await garminService.getLastStress();
+
+        if (thoughtCooldown >= CORTEX_INTERVAL || (stress > STRESS_THRESHOLD && thoughtCooldown >= 10000)) {
+            const bpm = await garminService.getLastBPM();
+            const context = `BPM: ${bpm}, Stress: ${stress}, Mode: Analysis`;
+
+            const thought = await geminiService.generateThought(context);
+            if (thought) {
+                console.log(`[Cortex] Thought: ${thought}`);
+                globalMessages = [thought];
+                thoughtCooldown = 0;
+
+                // Memory formation on deep thoughts
+                if (Math.random() > 0.6) {
+                    await memoryService.storeMemory(thought, { bpm, stress, type: 'thought' });
+                }
+            }
+        }
+    } catch (error) {
+        console.error("[Cortex] Error:", error);
+    }
+}, 1000);
 
 httpServer.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
