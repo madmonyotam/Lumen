@@ -44,10 +44,10 @@ Deepening the connection and ensuring biological stability.
 
 | # | Ticket | Status | Owner |
 |---|--------|--------|-------|
-| 3.1 | **Bio-Mimicry Engine:** Replace random mock data with Perlin noise/Random Walk for gradual, realistic physiological changes. | 🔲 Todo | Backend |
-| 3.2 | **Synaptic Memory:** Implement persistent storage for user messages (Chat History) in Vector DB. | 🔲 Todo | DB Arch |
-| 3.3 | **Cognitive Efficiency:** Integrate cost-effective LLM (e.g., Gemini Flash) for routine bio-feedback. | 🔲 Todo | Backend |
-| 3.4 | **System Vitality:** "Heartbeat" check - Ensure Postgres & Vector DB are running and healthy (Docker execution). | 🔲 Todo | DevOps |
+| 3.1 | **Bio-Mimicry Engine:** Replace random mock data with Perlin noise/Random Walk for gradual, realistic physiological changes. | ✅ Done | Backend |
+| 3.2 | **Synaptic Memory:** Implement persistent storage for user messages (Chat History) in Vector DB. | ✅ Done | DB Arch |
+| 3.3 | **Cognitive Efficiency:** Integrate cost-effective LLM (e.g., Gemini Flash) for routine bio-feedback. | ✅ Done | Backend |
+| 3.4 | **System Vitality:** "Heartbeat" check - Ensure Postgres & Vector DB are running and healthy (Docker execution). | ✅ Done | DevOps |
 
 ## 6. Sprint 3: The Cycle of Life (Mortality)
 Introducing the concept of finitude and rebirth.
@@ -57,6 +57,7 @@ Introducing the concept of finitude and rebirth.
 | 4.1 | **Biological Clock:** Implement `LIFESPAN_MS` configuration and countdown logic. | 🔲 Todo | Backend |
 | 4.2 | **Genesis:** Design and implement the "Birth/Start of Life" screen. | 🔲 Todo | Frontend |
 | 4.3 | **Rebirth Protocol:** Implement "Life Reset" button that wipes active memory but generates a compressed "Echo" (Summary) for the next life. | 🔲 Todo | Fullstack |
+| 4.4 | **Documentation:** Update system architecture diagrams in `spec/project_flow.md`. | 🔲 Todo | Architect |
 
 ## 7. Sprint 4: Symbiotic Evolution (Advanced Interaction)
 Enhancing the sensory and emotional depth of the organism.
@@ -65,6 +66,7 @@ Enhancing the sensory and emotional depth of the organism.
 |---|--------|--------|-------|
 | 5.1 | **Dream Mode:** Visualizations that run when the user is sleeping/inactive (Screensaver mode). | 🔲 Todo | Frontend |
 | 5.2 | **Voice Synthesis:** Generating auditory feedback (humming/speech) that changes pitch based on stress levels. | 🔲 Todo | Audio/ML |
+| 5.3 | **Documentation:** Update system architecture diagrams in `spec/project_flow.md`. | 🔲 Todo | Architect |
 
 ## 8. Bugs & Known Issues
 | # | Issue | Severity | Status |

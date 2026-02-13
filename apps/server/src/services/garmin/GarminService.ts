@@ -17,6 +17,10 @@ export class GarminService {
         return true;
     }
 
+    get connected(): boolean {
+        return this.isConnected;
+    }
+
     /**
      * Generates a smooth organic value using 1D Perlin-like noise (sine stacking)
      */

@@ -123,4 +123,16 @@ export class MemoryService {
             console.error("[MemoryService] Decay Error:", err);
         }
     }
+
+    async checkHealth(): Promise<boolean> {
+        try {
+            const client = await this.pool.connect();
+            await client.query('SELECT 1');
+            client.release();
+            return true;
+        } catch (e) {
+            console.error("[MemoryService] Health Check Failed:", e);
+            return false;
+        }
+    }
 }

@@ -37,10 +37,31 @@ const memoryService = new MemoryService();
 const geminiService = new GeminiService();
 
 // Health Check Endpoint
+// Health Check Endpoint
 app.get('/health', async (_req, res) => {
     try {
-        // Simple check - in real world we'd ping DB
-        res.json({ status: 'ok', timestamp: Date.now() });
+        const dbStatus = await memoryService.checkHealth();
+        const bioStatus = garminService.connected; // Check Garmin connection status
+
+        if (dbStatus && bioStatus) {
+            res.json({
+                status: 'ok',
+                timestamp: Date.now(),
+                details: {
+                    database: 'connected',
+                    bio_ingestion: 'connected'
+                }
+            });
+        } else {
+            res.status(503).json({
+                status: 'degraded',
+                timestamp: Date.now(),
+                details: {
+                    database: dbStatus ? 'connected' : 'disconnected',
+                    bio_ingestion: bioStatus ? 'connected' : 'disconnected'
+                }
+            });
+        }
     } catch (e) {
         res.status(500).json({ status: 'error', error: String(e) });
     }
