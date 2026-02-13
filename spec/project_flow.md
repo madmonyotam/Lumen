@@ -96,3 +96,29 @@ graph LR
     DB -->|Retrieve| Context[Relevant Past Memories]
     Context -->|Augment| Prompt[New Prompt]
 ```
+
+## 5. Life Cycle & Resurrection
+How the organism manages its finitude and rebirth.
+
+```mermaid
+sequenceDiagram
+    participant Client as Frontend
+    participant Server as Server
+    participant Engine as TemporalEngine
+    participant DB as Vector DB
+
+    Note over Client, DB: Life In Progress
+    Server->>Engine: Calculate subjective time
+    Engine->>Engine: Check Mortality (Age > Lifespan)
+    Engine-->>Server: Return isAlive: false
+    Server->>Client: Emit 'lumen-pulse' (isAlive: false)
+    Client->>Client: Display GenesisScreen
+
+    Note over Client, DB: Resurrection (Genesis)
+    Client->>Server: POST /api/genesis (Name, Traits, etc.)
+    Server->>Engine: reborn()
+    Server->>DB: wipeMemories()
+    Engine->>Engine: Reset Time & Age
+    Server-->>Client: Success Status
+    Client->>Client: Display OrganismView (Generation N+1)
+```

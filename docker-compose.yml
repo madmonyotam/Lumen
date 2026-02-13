@@ -11,6 +11,8 @@ services:
       - PORT=3001
       - REDIS_URL=redis://redis:6379
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/lumen
+    env_file:
+      - apps/server/.env
     depends_on:
       - redis
       - postgres

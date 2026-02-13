@@ -9,4 +9,9 @@ export const LUMEN_CONFIG = {
     // Visuals
     DEFAULT_ORB_RADIUS: 100,
     STRESS_COLOR_THRESHOLD: 0.6,
+
+    // Endpoints
+    API_URL: 'http://localhost:3001',
+    // Identity Defaults
+    IS_ALIVE_DEFAULT: false,
 };

@@ -31,6 +31,16 @@ export function processBiometrics(bpm: number, stress: number, hrv: number): Org
             mode,
             latency: parseFloat((10 + Math.random() * 5).toFixed(2))
         },
+        lifeStatus: {
+            isAlive: false,
+            birthTime: Date.now(),
+            age: 0,
+            lifespan: 1000 * 60 * 60 * 24, // 24 hours
+            generation: 1,
+            name: "Lumen",
+            gender: "non-binary",
+            traits: ["Curious", "Stoic"]
+        },
         visualParams: {
             coreColor,
             pulseSpeed: bpm / 60

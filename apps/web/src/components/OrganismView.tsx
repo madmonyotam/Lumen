@@ -5,6 +5,7 @@ import { Heart, Activity, Zap, Send } from 'lucide-react';
 import { useOrgan } from '../context/OrganContext';
 import { Flex, FlexCol, Center, Relative, AbsoluteFill } from './shared/Layout';
 import { VisualPhysics } from './d3/VisualPhysics';
+import GenesisScreen from './GenesisScreen';
 
 // --- Styled Components ---
 
@@ -33,7 +34,6 @@ const Header = styled(Flex)`
   justify-content: space-between;
   align-items: flex-start;
   z-index: 10;
-  margin-bottom: 2rem;
 `;
 
 const NeuralStatus = styled.div`
@@ -426,7 +426,11 @@ const OrganismView: React.FC = () => {
     );
   }
 
-  const { biometrics, status, visualParams } = organState;
+  const { biometrics, status, visualParams, lifeStatus } = organState;
+
+  if (!lifeStatus?.isAlive) {
+    return <GenesisScreen />;
+  }
 
   if (!status || !biometrics || !visualParams) {
     return (
@@ -463,7 +467,7 @@ const OrganismView: React.FC = () => {
               <StatusDotCore $color={theme.colors.teal} />
               <StatusDotPing $color={theme.colors.teal} />
             </StatusDotContainer>
-            <SpecimenTitle>Lumen</SpecimenTitle>
+            <SpecimenTitle>{lifeStatus.name}</SpecimenTitle>
           </Flex>
         </div>
         <HeaderInputContainer>
@@ -474,8 +478,12 @@ const OrganismView: React.FC = () => {
         </HeaderInputContainer>
         <FlexCol $align="flex-end">
           <StatusBadge>
-            <BadgeLabel>MODE:</BadgeLabel>
-            <BadgeValue $color={theme.colors.purple}>{status.mode}</BadgeValue>
+            <BadgeLabel>ESTABLISHED:</BadgeLabel>
+            <BadgeValue $color={theme.colors.teal}>GEN {lifeStatus.generation}</BadgeValue>
+          </StatusBadge>
+          <StatusBadge>
+            <BadgeLabel>VITALITY:</BadgeLabel>
+            <BadgeValue $color={theme.colors.purple}>{Math.round((1 - (lifeStatus.age / lifeStatus.lifespan)) * 100)}%</BadgeValue>
           </StatusBadge>
           <StatusBadge>
             <BadgeLabel>LATENCY:</BadgeLabel>

@@ -1,3 +1,16 @@
+export interface LifeStatus {
+    isAlive: boolean;
+    birthTime: number;
+    age: number;      // Current subjective age in ms
+    lifespan: number; // Total lifespan in ms
+    generation: number; // Increment on rebirth
+
+    // Identity
+    name: string;
+    gender: 'male' | 'female' | 'non-binary';
+    traits: string[]; // e.g., "Curious", "Stoic", "Anxious"
+}
+
 export interface OrganState {
     biometrics: {
         bpm: number;            // e.g., 73
@@ -13,6 +26,7 @@ export interface OrganState {
         subjectiveTime?: number; // Internal time perception
         visualParams?: any;      // Reflex visual parameters attached to status for reactivity
     };
+    lifeStatus: LifeStatus;
     visualParams: {
         coreColor: string;      // e.g., "#00f2c3"
         pulseSpeed: number;     // Multiplier for animation speed
