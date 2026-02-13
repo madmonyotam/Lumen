@@ -14,8 +14,8 @@ export class GeminiService {
             console.warn("⚠️ GEMINI_API_KEY not found in environment variables. AI features will be disabled.");
         }
         this.genAI = new GoogleGenerativeAI(apiKey || "");
-        this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        this.embeddingModel = this.genAI.getGenerativeModel({ model: "embedding-001" });
+        this.model = this.genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+        this.embeddingModel = this.genAI.getGenerativeModel({ model: "gemini-embedding-001" });
     }
 
     async generateThought(context: string): Promise<string> {
@@ -42,7 +42,7 @@ export class GeminiService {
     async generateEmbedding(text: string): Promise<number[]> {
         if (!process.env.GEMINI_API_KEY) {
             // Return zero vector if no key, just to prevent crash
-            return new Array(768).fill(0);
+            return new Array(3072).fill(0);
         }
 
         try {
@@ -50,7 +50,7 @@ export class GeminiService {
             return result.embedding.values;
         } catch (error) {
             console.error("Gemini embedding error:", error);
-            return new Array(768).fill(0);
+            return new Array(3072).fill(0);
         }
     }
 }

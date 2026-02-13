@@ -33,7 +33,7 @@ export class MemoryService {
                     timestamp BIGINT,
                     strength FLOAT,
                     metadata JSONB,
-                    embedding vector(768)
+                    embedding vector(3072)
                 );
             `);
             client.release();

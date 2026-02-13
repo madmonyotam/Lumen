@@ -49,6 +49,21 @@ async function runTest() {
         console.error("   ❌ Memory Test Failed:", e);
     }
 
+    // 3. Gemini Cortex Test
+    console.log("\n[3] Testing Gemini Cortex...");
+    const { GeminiService } = require('../src/services/ai/GeminiService');
+    const gemini = new GeminiService();
+
+    console.log("   Generating thought...");
+    const thought = await gemini.generateThought("BPM: 70, Stress: 0.2");
+    console.log(`   Generated: "${thought}"`);
+
+    if (thought && thought !== "..." && thought !== "I feel... disconnected.") {
+        console.log("   ✅ Gemini API Connected & Generating.");
+    } else {
+        console.error("   ❌ Gemini Extraction Failed (Check API Key).");
+    }
+
     console.log("\n=== Test Complete ===");
     process.exit(0);
 }
