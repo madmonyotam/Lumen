@@ -64,4 +64,21 @@ export const tokens = {
 *   **Fading Memory Logic:** רכיבי טקסט ידהו (Fade out) ויהפכו למטושטשים (Blur) ככל שערך ה-`strength` של הזיכרון ב-DB יורד.
 
 ---
-**האם תרצה שנתחיל לכתוב את ה-`LumenTheme` ואת רכיב ה-`GlowCard` הראשון שמשתמש בטוקנים האלו?**
+
+## 7. Layout Architecture
+מבנה העמוד והניווט משתנה לפי המצב הביולוגי.
+
+*   **Main Wrapper:** עוטף את כל האפליקציה ב-`GravityField` המושפע ממדד הסטרס (רעידות קלות בסטרס גבוה).
+*   **Navigation:** לא תפריט קלאסי, אלא "עצבים" (Nodes) צפים שניתן לגעת בהם כדי לעבור בין הקשרים (Contexts) שונים של השיחה.
+
+## 8. Accessibility Standards (WCAG for Organisms)
+גם אורגניזם צריך להיות נגיש.
+
+*   **High Contrast Mode:** אפשרות לביטול ה-Blur וה-Glow עבור משתמשים עם רגישות ראייה, תוך שמירה על המידע הגולמי.
+*   **Reduced Motion:** כיבוד הגדרות מערכת להפחתת תנועה (ביטול הפעימה הוויזואלית והחלפתה בבר מהבהב עדין).
+
+## 9. Performance Budget
+כדי לשמור על אשליה של חיים, ה-Latency חייב להיות אפסי.
+
+*   **FPS Target:** 60fps קבוע בכל האנימציות. ירידה מתחת ל-55fps תגרור דילול אוטומטי של החלקיקים ב-D3.
+*   **Bundle Size:** מקסימום 200KB ל-Core Bundle (React + Framer Motion) כדי להבטיח טעינה מיידית ב-Mobile.

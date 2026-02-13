@@ -53,3 +53,21 @@
 * **Zero Cognitive Drift:** ה-AI שומר על האישיות שלו לאורך 100 אינטראקציות רצופות.
 * **Sync Accuracy:** פער של פחות מ-5% בין נתוני הגארמין הגולמיים לייצוג הוויזואלי במסך.
 * **Memory Integrity:** בדיקה שה-Decay וה-Mutation של הזיכרונות קורים לפי הנוסחאות המוגדרות ב-DB Architect.
+
+---
+
+## 6. QA Environment Setup (The Petri Dish)
+כדי לגדל את LUMEN בתנאי מעבדה:
+1.  **Local Simulation:** הרצת `npm run bio:sim` כדי להזריק נתונים מזויפים ל-Socket.
+2.  **Visual Debugger:** הפעלת שכבת ה-HUD שמציגה את ה-FPS, Latency וה-State הפנימי בזמן אמת.
+
+## 7. Bug Reporting Template (Diagnosis)
+דיווח על "מחלה" במערכת:
+*   **Symptom:** מה קרה? (e.g., "הדופק עלה אבל הצבע נשאר כחול").
+*   **Vital Signs:** מה היה ה-BPM וה-Stress באותו רגע?
+*   **Consciousness State:** מה היה ה-Mood ב-Redux?
+*   **Visual Proof:** הקלטת מסך של ה-Anomaly.
+
+## 8. Test Data Management (Viral Loads)
+*   **Seeds:** סטים מוכנים של שיחות ונתונים ביומטריים לבדיקת ה-Memory Decay.
+*   **Mocks:** שימוש ב-MSW (Mock Service Worker) כדי לנתק את התלות ב-Gemini API בזמן פיתוח.

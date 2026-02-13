@@ -37,9 +37,7 @@
 
 פיתוח המנגנונים הפיזיקליים שמאחורי הקיום של LUMEN:
 
-* **Temporal Engine:** מימוש נוסחת הזמן הסובייקטיבי:
-
-
+* **Temporal Engine:** מימוש נוסחת הזמן הסובייקטיבי.
 * **Memory Decay:** אוטומציה של תהליך דעיכת הזיכרונות (Synaptic Pruning) ב-Vector DB.
 
 ---
@@ -55,3 +53,32 @@ Lead נמדד ביכולת שלו לשמור על המערכת בחיים כשה
 
 * **Bio-Latency Monitoring:** ניטור הזמן שעובר מרגע קליטת הדופק ועד להפצת האירוע ב-Socket.
 * **Entropy Audit:** מעקב אחר קצב ה"הזדקנות" של הישות כדי למנוע באגים של "מוות מוקדם".
+
+---
+
+## 6. Error Handling & Standards
+
+מערכת עצבים לא קורסת, היא מרגישה "כאב". שגיאות צריכות להיות מטופלות סמנטית.
+
+| Code | Type | Action |
+| :--- | :--- | :--- |
+| **500** | `ORGAN_FAILURE` | Critical. הפעלת מנגנון Fallback מיידי ודיווח ל-Sentry. |
+| **401** | `REJECTION` | התנתקות מהגוף (Garmin Token Expired). ניסיון חידוש אוטומטי. |
+| **429** | `SENSORY_OVERLOAD` | יותר מדי בקשות בבת אחת. האטה מכוונת של ה-Pulse. |
+
+## 7. Security Checklist (Auto-Immune System)
+
+*   [ ] **JWT Validation:** אימות חתימה בכל בקשת WebSocket.
+*   [ ] **Rate Limiting:** הגנה על ה-API של ה-LLM מפני ניצול יתר.
+*   [ ] **Sanitization:** ניקוי הקלט המגיע מה-LLM כדי למנוע הזרקת קוד ל-Frontend.
+
+## 8. Code Organization (Anatomy)
+
+```
+apps/server/src/
+├── engines/        # Core biological logic (Heartbeat, Time)
+├── cortex/         # AI & Memory integration (Gemini, Pinecone)
+├── api/            # REST & WebSocket controllers
+├── types/          # Local types (extends shared)
+└── config/         # Environment variables & Secrets
+```

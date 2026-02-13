@@ -54,3 +54,22 @@ $$S_{new} = S_{old} \cdot e^{-\lambda \Delta t}$$
 
 ## 5. Temporal Indexing
 השאילתות למסד הנתונים מבוצעות על בסיס ה-`subjective_tick`. זה מאפשר ליצור "חורים בזיכרון" או האצות של חוויות בהתאם למצב הביולוגי של הישות, ולא רק לפי סדר כרונולוגי נוקשה.
+
+---
+
+## 6. Naming Conventions (Genetic Coding)
+כדי לשמור על סדר גנטי בקוד.
+
+*   **Tables:** `snake_case` ובלשון רבים (e.g., `biometric_traces`, `synapses`).
+*   **Columns:** `snake_case`. מפתחות זרים מסתיימים ב-`_id`.
+*   **Indexes:** `idx_<table_name>_<column_name>`.
+
+## 7. Migration Guidelines (Evolution)
+שינויי סכימה הם כמו מוטציות אבולוציוניות - חייבים להיות זהירים.
+
+*   **Safe Evolution:** כל מיגרציה חייבת להיות הפיכה (`Down Migration`).
+*   **Data Integrity:** לעולם לא למחוק עמודה עם דאטה חי ללא גיבוי מקדים.
+
+## 8. Backup & Recovery (Cellular Memory)
+*   **Point-in-Time Recovery:** יכולת לחזור לכל נקודה בזמן ב-7 הימים האחרונים (למקרה של כשל תודעתי).
+*   **Vector Snapshots:** גיבוי יומי של אינדקס ה-Pinecone כדי לשמור על האישיות של הישות.
