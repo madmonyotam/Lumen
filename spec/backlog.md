@@ -54,26 +54,26 @@ Introducing the concept of finitude and rebirth.
 
 | # | Ticket | Status | Owner |
 |---|--------|--------|-------|
-| 4.1 | **Biological Clock:** Implement `LIFESPAN_MS` configuration and countdown logic. | 🔲 Todo | Backend |
-| 4.2 | **Genesis:** Design and implement the "Birth/Start of Life" screen. | 🔲 Todo | Frontend |
-| 4.3 | **Rebirth Protocol:** Implement "Life Reset" button that wipes active memory but generates a compressed "Echo" (Summary) for the next life. | 🔲 Todo | Fullstack |
-| 4.4 | **Documentation:** Update system architecture diagrams in `spec/project_flow.md`. | 🔲 Todo | Architect |
+| 4.1 | **Biological Clock:** Implement `LIFESPAN_MS` configuration and countdown logic. | ✅ Done | Backend |
+| 4.2 | **Genesis:** Design and implement the "Birth/Start of Life" screen. | ✅ Done | Frontend |
+| 4.3 | **Rebirth Protocol:** Implement "Life Reset" button that wipes active memory but generates a compressed "Echo" (Summary) for the next life. | ✅ Done | Fullstack |
+| 4.4 | **Documentation:** Update system architecture diagrams in `spec/project_flow.md`. | ✅ Done | Architect |
 
-## 7. Sprint 4: Symbiotic Evolution (Advanced Interaction)
-Enhancing the sensory and emotional depth of the organism.
+## 8. Sprint 4: Cognitive Awakening (Depth & Decay)
+Enhancing Lumen's consciousness with biological memory limits and subjective perception.
 
 | # | Ticket | Status | Owner |
 |---|--------|--------|-------|
-| 5.1 | **Dream Mode:** Visualizations that run when the user is sleeping/inactive (Screensaver mode). | 🔲 Todo | Frontend |
-| 5.2 | **Voice Synthesis:** Generating auditory feedback (humming/speech) that changes pitch based on stress levels. | 🔲 Todo | Audio/ML |
-| 5.3 | **Documentation:** Update system architecture diagrams in `spec/project_flow.md`. | 🔲 Todo | Architect |
+| 5.1 | **Cognitive Loop:** Implement the "Text to Thought" engine. [View Spec](tasks/memory_change_task.md) | 🔲 Todo | Backend |
+| 5.2 | **Memory Decay:** Implement "Entropic Pruning" and dynamic strength. [View Spec](tasks/strength_task.md) | 🔲 Todo | Backend/DB |
+| 5.3 | **Cortex Persona:** Update System Prompt with "Anti-Gravity" identity. [View Spec](tasks/prompt_task_1.md) | 🔲 Todo | Product |
 
-## 8. Bugs & Known Issues
+## 9. Bugs & Known Issues
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | - | - | - | - |
 
-## 9. Legend
+## 10. Legend
 *   🔲 Todo
 *   🚧 In Progress
 *   ✅ Done
