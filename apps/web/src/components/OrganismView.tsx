@@ -111,11 +111,12 @@ const MainGrid = styled.main`
   flex: 1;
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 2rem;
+  gap: 1.5rem; /* Reduced gap */
   z-index: 10;
   position: relative;
   align-items: center;
   min-height: 0;
+  overflow: hidden; /* Prevent scrollbar jumping */
 `;
 
 const Card = styled.div<{ $borderColor?: string }>`
@@ -134,7 +135,7 @@ const Card = styled.div<{ $borderColor?: string }>`
 
 const CardHeader = styled(Flex)`
   justify-content: space-between;
-  margin-bottom: 1.5rem;
+  margin-bottom:1.5rem;
 `;
 
 const CardTitle = styled.span`
@@ -163,11 +164,12 @@ const MetricLabel = styled.span`
 `;
 
 const HeartRateVisual = styled(Flex)`
-  margin-top: 1.5rem;
-  height: 2.5rem;
+  margin-top: 1rem; /* Reduced margin */
+  height: 2rem; /* Reduced height */
   align-items: flex-end;
-  gap: 0.375rem;
+  gap: 0.25rem;
   opacity: 0.6;
+  overflow: hidden; /* Fix: Prevent bars from pushing layout */
 `;
 
 const HeartBar = styled(motion.div)`
@@ -208,17 +210,51 @@ const RightColumn = styled(FlexCol)`
   gap: 1rem;
 `;
 
-const Quote = styled.div`
+const ThoughtBubble = styled(motion.div)`
   position: absolute;
   top: 0;
   text-align: center;
   color: ${props => props.theme.colors.teal};
-  opacity: 0.6;
-  font-size: 1.125rem;
+  opacity: 0.4;
+  font-size: 0.875rem;
   font-style: italic;
   font-weight: 300;
   letter-spacing: 0.05em;
   max-width: 32rem;
+  width: 100%;
+  z-index: 20;
+`;
+
+const ChatContainer = styled(FlexCol)`
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
+  height: 40%;
+  z-index: 30;
+  overflow-y: auto;
+  gap: 0.75rem;
+  padding: 1rem;
+  scrollbar-width: none; /* Hide scrollbar */
+  
+  /* Mask for fading top/bottom */
+  mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+`;
+
+const ChatMessage = styled(motion.div) <{ $sender: 'user' | 'lumen' }>`
+  align-self: ${props => props.$sender === 'user' ? 'flex-end' : 'flex-start'};
+  background: ${props => props.$sender === 'user' ? 'rgba(255,255,255,0.05)' : 'rgba(0, 242, 195, 0.05)'};
+  padding: 0.75rem 1.25rem;
+  border-radius: ${props => props.$sender === 'user' ? '1rem 1rem 0 1rem' : '1rem 1rem 1rem 0'};
+  color: ${props => props.$sender === 'user' ? props.theme.colors.text : props.theme.colors.teal};
+  border: 1px solid ${props => props.$sender === 'user' ? 'rgba(255,255,255,0.1)' : props.theme.colors.tealDim};
+  max-width: 80%;
+  font-size: 1rem;
+  line-height: 1.4;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 `;
 
 const CoreSynapseContainer = styled.div`
@@ -295,28 +331,7 @@ const SendButton = styled.button`
   }
 `;
 
-const StatusBar = styled(Flex)`
-  justify-content: center;
-  gap: 3rem;
-  font-size: 0.625rem;
-  letter-spacing: 0.2em;
-  color: ${props => props.theme.colors.textDim};
-  padding-bottom: 1rem;
-  text-transform: uppercase;
-`;
 
-const StatusItem = styled(Flex)`
-  align-items: center;
-  gap: 0.5rem;
-`;
-
-const StatusIndicator = styled.div<{ $color: string }>`
-  width: 0.375rem;
-  height: 0.375rem;
-  border-radius: 50%;
-  background-color: ${props => props.$color};
-  box-shadow: 0 0 5px ${props => props.$color};
-`;
 
 const VitalityGaugeContainer = styled.div`
   position: relative;
@@ -389,15 +404,7 @@ const OrbContainer = styled(Relative)`
   width: 100%;
 `;
 
-const Orb = styled(motion.div) <{ $coreColor: string }>`
-  width: 320px;
-  height: 320px;
-  border-radius: 50%;
-  background: radial-gradient(circle, ${props => props.$coreColor} 0%, transparent 60%);
-  filter: blur(50px);
-  position: absolute;
-  z-index: 0;
-`;
+
 
 const SvgRings = styled(motion.svg)`
   opacity: 0.2;
@@ -516,15 +523,44 @@ const OrganismView: React.FC = () => {
   const [thought, setThought] = React.useState<string>("The organism is silent...");
   const [inputValue, setInputValue] = React.useState("");
   const [showKillModal, setShowKillModal] = React.useState(false);
+  const [currentInteraction, setCurrentInteraction] = React.useState<{ text: string, sender: 'user' | 'lumen', timestamp: number } | null>(null);
 
   React.useEffect(() => {
-    if (organState?.status?.messages && organState.status.messages.length > 0) {
-      const latestMessage = organState.status.messages[organState.status.messages.length - 1];
-      if (latestMessage) {
-        setThought(latestMessage);
+    const latest = organState?.status?.latestInteraction;
+    if (latest) {
+      const now = Date.now();
+      const isRecent = (now - latest.timestamp) < 60000;
+      const isNew = latest.timestamp !== currentInteraction?.timestamp;
+
+      // Only show if it's recent AND it's a new message
+      if (isRecent && isNew) {
+        setCurrentInteraction(latest);
       }
     }
-  }, [organState?.status?.messages]);
+  }, [organState?.status?.latestInteraction]);
+
+  // Expiration Logic (60s absolute)
+  React.useEffect(() => {
+    if (!currentInteraction) return;
+
+    const checkExpiration = () => {
+      const now = Date.now();
+      const diff = now - currentInteraction.timestamp;
+      if (diff > 60000) { // 60 seconds
+        setCurrentInteraction(null);
+      }
+    };
+
+    const interval = setInterval(checkExpiration, 1000);
+    return () => clearInterval(interval);
+  }, [currentInteraction]);
+
+  React.useEffect(() => {
+    // Sync thought from shared state
+    if (organState?.status?.thought) {
+      setThought(organState.status.thought);
+    }
+  }, [organState?.status?.thought]);
 
   if (!isConnected || !organState) {
     return (
@@ -535,6 +571,8 @@ const OrganismView: React.FC = () => {
   }
 
   const { biometrics, status, visualParams, lifeStatus } = organState;
+
+
 
   if (!lifeStatus?.isAlive) {
     return <GenesisScreen />;
@@ -602,7 +640,7 @@ const OrganismView: React.FC = () => {
       </AbsoluteFill>
 
       <Header>
-        <div>
+        <FlexCol>
           <NeuralStatus>Neural Connection Established</NeuralStatus>
           <Flex $gap="1rem" $align="center">
             <StatusDotContainer>
@@ -611,8 +649,12 @@ const OrganismView: React.FC = () => {
             </StatusDotContainer>
             <SpecimenTitle>{lifeStatus.name}</SpecimenTitle>
           </Flex>
-        </div>
-        <HeaderInputContainer>
+        </FlexCol>
+
+        {/* Center Input - Absolute or Flex? 
+            Let's keep it flex but allow shrink if needed 
+        */}
+        <HeaderInputContainer style={{ margin: '0 2rem', flex: 1, maxWidth: '500px' }}>
           <Input
             type="text"
             placeholder="Speak to the Organism..."
@@ -621,21 +663,24 @@ const OrganismView: React.FC = () => {
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           />
           <SendButton onClick={handleSend}>
-            <Send size={20} />
+            <Send size={18} />
           </SendButton>
         </HeaderInputContainer>
-        <FlexCol $align="flex-end">
-          <StatusBadge>
-            <BadgeLabel>ESTABLISHED:</BadgeLabel>
-            <BadgeValue $color={theme.colors.teal}>GEN {lifeStatus.generation}</BadgeValue>
-          </StatusBadge>
-          <StatusBadge>
-            <BadgeLabel>VITALITY:</BadgeLabel>
-            <BadgeValue $color={theme.colors.purple}>{Math.round((1 - (lifeStatus.age / lifeStatus.lifespan)) * 100)}%</BadgeValue>
-          </StatusBadge>
-          <StatusBadge>
+
+        <FlexCol $align="flex-end" style={{ minWidth: 'fit-content' }}>
+          <Flex $gap="1rem">
+            <StatusBadge>
+              <BadgeLabel>GEN:</BadgeLabel>
+              <BadgeValue $color={theme.colors.teal}>{lifeStatus.generation}</BadgeValue>
+            </StatusBadge>
+            <StatusBadge>
+              <BadgeLabel>AGE:</BadgeLabel>
+              <BadgeValue $color={theme.colors.purple}>{Math.round((1 - (lifeStatus.age / lifeStatus.lifespan)) * 100)}%</BadgeValue>
+            </StatusBadge>
+          </Flex>
+          <StatusBadge style={{ marginTop: '0.5rem' }}>
             <BadgeLabel>LATENCY:</BadgeLabel>
-            <BadgeValue $color={theme.colors.teal}>{status.latency.toFixed(2)}ms</BadgeValue>
+            <BadgeValue $color={theme.colors.teal}>{status.latency.toFixed(0)}ms</BadgeValue>
           </StatusBadge>
         </FlexCol>
       </Header>
@@ -699,17 +744,33 @@ const OrganismView: React.FC = () => {
         {/* Center Column */}
         <CenterColumn>
           <AnimatePresence mode="wait">
-            <Quote
-              as={motion.div}
+            <ThoughtBubble
               key={thought}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 0.6, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 0.4, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
             >
-              "{thought}"
-            </Quote>
+              {thought}
+            </ThoughtBubble>
           </AnimatePresence>
+
+          <ChatContainer>
+            <AnimatePresence>
+              {currentInteraction && (
+                <ChatMessage
+                  key={currentInteraction.timestamp}
+                  $sender={currentInteraction.sender}
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {currentInteraction.text}
+                </ChatMessage>
+              )}
+            </AnimatePresence>
+          </ChatContainer>
 
           {/* SVG Rings */}
           <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -762,9 +823,6 @@ const OrganismView: React.FC = () => {
           </VerticalLabel>
         </RightColumn>
       </MainGrid>
-
-
-
 
 
       {/* Kill Switch */}

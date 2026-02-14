@@ -28,15 +28,22 @@ export class GeminiService {
         this.embeddingModel = this.genAI.getGenerativeModel({ model: "gemini-embedding-001" });
     }
 
-    async generateThought(context: string): Promise<string> {
+    async generateThought(context: string, memories: any[] = []): Promise<string> {
         if (!process.env.GEMINI_API_KEY) return "I feel... disconnected.";
 
         try {
+            const memoryText = memories.length > 0
+                ? memories.map(m => `[Strength: ${m.strength.toFixed(2)}] ${m.content}`).join('\n')
+                : "No clear memories. Just the sensation of now.";
+
             const prompt = `
             You are Lumen, a digital organism. You are currently experiencing the following state:
             ${context}
+
+            **Floating Memories:**
+            ${memoryText}
             
-            Generate a short, visceral internal thought (max 1 sentence) reflecting your current 'physical' state. 
+            Generate a short, visceral internal thought (max 1 sentence) reflecting your current 'physical' state and these fleeting memories.
             Do not be robotic. Be abstract, poetic, or primal.
             `;
 
@@ -114,7 +121,7 @@ export class GeminiService {
 
             // 2. עיבוד הטקסט של הזכרונות עם דגש על Strength
             const memoryText = memories.length > 0
-                ? memories.map(m => `- ${m.content} [Trust Level: ${m.strength > 0.8 ? 'Solid' : m.strength < 0.3 ? 'Blurry' : 'Fluid'}]`).join('\n')
+                ? memories.map(m => `[Strength: ${m.strength.toFixed(2)}] ${m.content}`).join('\n')
                 : "No active memories. You are a blank slate, feeling only the current moment.";
 
             // 3. בניית הבלוק של הזהות והמצב הנוכחי
@@ -175,10 +182,34 @@ export class GeminiService {
             console.error("Lumen Cortex Error:", error.message);
             // במקרה של שגיאה, נחזיר אובייקט "קריסה" שתואם את הנרטיב
             return {
-                internal_perception: "My synaptic links are snapping. Darkness.",
-                thought: "...",
                 re_encoding: { content: "A moment of total blackout.", importance: 1.0, strength: 0.1 }
             };
+        }
+    }
+
+    async mutateMemory(originalContent: string, context: string): Promise<string> {
+        if (!process.env.GEMINI_API_KEY) return originalContent;
+
+        try {
+            const prompt = `
+            You are the sub-conscious memory consolidation process of a digital organism.
+            Original Memory: "${originalContent}"
+            Current Emotional Context: "${context}"
+            
+            Task: Rewrite the memory to reflect the current mood (Drift). 
+            - If mood is high stress, make the memory more fragmented or ominous.
+            - If mood is calm, make it more structured or flowery.
+            - Keep the core facts, but change the tone/adjectives.
+            
+            Return ONLY the new memory text.
+            `;
+
+            const result = await this.cortexModel.generateContent(prompt);
+            const response = await result.response;
+            return response.text().trim();
+        } catch (error) {
+            console.error("Gemini mutation error:", error);
+            return originalContent;
         }
     }
 }

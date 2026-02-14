@@ -61,40 +61,48 @@ sequenceDiagram
 ```
 
 ## 3. Hybrid Intelligence Architecture
-The dual-loop system handling both immediate reflexes and deep cognition.
+The tri-loop system handling reflexes, deep cognition, and direct interaction.
 
 ```mermaid
 sequenceDiagram
-    participant ServerLoop as Server Loop
+    participant ServerLoop as Server (Loops)
+    participant API as API (/chat)
     participant Gemini as GeminiService
     participant Memory as MemoryService
-    participant DB as Vector DB
-    participant Visuals as Client Visuals
+    participant Client as Frontend
 
     par Reflex Loop (Fast - 5s)
         ServerLoop->>Gemini: Generate Reflex (Color/Mood)
         Gemini-->>ServerLoop: Return Visual Params
-        ServerLoop->>Visuals: Update Colors/Atmosphere
-    and Cortex Loop (Slow - 30s)
-        ServerLoop->>Gemini: Generate Thought (Context: BPM, Stress)
-        Gemini-->>ServerLoop: Return Philosophical Thought
-        
-        ServerLoop->>Memory: Encode & Store Thought
-        Memory->>DB: Save Embedding
-        
-        ServerLoop->>Visuals: Display Quote
+        ServerLoop->>Client: Emit 'lumen-pulse' (Visuals)
+    and Thought Loop (Slow - 30s)
+        ServerLoop->>Memory: Retrieve Memories (Drift)
+        ServerLoop->>Gemini: Generate Internal Thought
+        Gemini-->>ServerLoop: Return Thought
+        ServerLoop->>Memory: Store Thought (Low Importance)
+        ServerLoop->>Client: Emit 'lumen-pulse' (Thought)
+    and Interaction Loop (Event Driven)
+        Client->>API: User Message
+        API->>Memory: Retrieve Memories (High Relevance)
+        API->>Gemini: Generate Cognitive Response
+        Gemini-->>API: Return Response
+        API->>Memory: Store Interaction (High Importance)
+        API->>Client: Update Chat History
     end
 ```
 
-## 4. Memory Formation & Retrieval
-How the organism remembers past states and thoughts.
+## 4. Memory Reconsolidation Cycle
+How the organism remembers and modifies its past (Drift).
 
 ```mermaid
-graph LR
-    Input[New Thought] -->|Embedding| NativeVector[Vector Representation]
-    NativeVector -->|Similarity Search| DB[(pgvector)]
-    DB -->|Retrieve| Context[Relevant Past Memories]
-    Context -->|Augment| Prompt[New Prompt]
+graph TD
+    Trigger[Input/Thought] -->|1. Search| DB[(Vector DB)]
+    DB -->|2. Retrieve| Memory[Old Memory]
+    Memory -->|3. Perceive| Context[Current Emotional State]
+    Context -->|4. Mutate| Gemini[Cortex Mutation]
+    Gemini -->|5. Rewrite| ModifiedMemory[Drifted Memory]
+    ModifiedMemory -->|6. Reinforce| DB
+    style ModifiedMemory fill:#f9f,stroke:#333,stroke-width:2px
 ```
 
 ## 5. Life Cycle & Resurrection

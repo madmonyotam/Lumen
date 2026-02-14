@@ -87,7 +87,7 @@ app.post('/api/genesis', (req, res) => {
         console.log(`[Genesis] Organism reborn as ${name} (${gender}) with ${traits.length} traits.`);
 
         // Reset global messages on rebirth
-        globalMessages = [`I am ${name}. I have just been born.`];
+        globalLatestInteraction = { text: `I am ${name}. I have just been born.`, timestamp: Date.now(), sender: 'lumen' };
 
         // NOTE: Memory wiping is now handled by the death/rebirth transition logic, not automatically here.
         // If a clean slate is desired, /api/death with action='wipe' should have been called prior.
@@ -148,7 +148,11 @@ setInterval(async () => {
             lifeStatus: temporalEngine.getLifeStatus(),
             status: {
                 ...organState.status,
-                messages: globalMessages, // Attached from Cortex Loop
+                ...organState.status,
+                ...organState.status,
+                messages: globalLatestInteraction ? [globalLatestInteraction.text] : [], // Backward compatibility
+                latestInteraction: globalLatestInteraction, // New format
+                thought: globalCurrentThought, // New thought field
                 visualParams: globalVisualParams, // Attached from Reflex Loop
                 subjectiveTime: temporalEngine.getLastSubjectiveTime()
             }
@@ -160,12 +164,17 @@ setInterval(async () => {
 }, 1000);
 
 // State Holders for Asynchronous Intelligence
-let globalMessages: string[] = [];
+let globalLatestInteraction: { text: string; timestamp: number; sender: 'user' | 'lumen' } | null = null;
+let globalCurrentThought: string = "...";
 let globalVisualParams: any = {}; // TODO: Define strict type
 
 // 2. Reflex Loop (Fast - 5s) - Bio-Reactive Visuals
 setInterval(async () => {
     try {
+        // Mortality Guardrail
+        const lifeStatus = temporalEngine.getLifeStatus();
+        if (lifeStatus.age >= lifeStatus.lifespan) return;
+
         const bpm = await garminService.getLastBPM();
         const stress = await garminService.getLastStress();
         const context = `BPM: ${bpm}, Stress: ${stress}`;
@@ -173,95 +182,120 @@ setInterval(async () => {
         const reflexParams = await geminiService.generateReflex(context);
         if (reflexParams) {
             globalVisualParams = reflexParams;
-            // console.log("[Reflex] Updated visual params:", reflexParams);
         }
     } catch (error) {
         console.error("[Reflex] Error:", error);
     }
 }, 5000);
 
-// 3. Cognitive Loop (Slow - 30s or Event Triggered) - The Thought Engine
-let thoughtCooldown = 0;
-const COGNITIVE_INTERVAL = 30000; // 30s base
-let latestUserMessage: string | null = null;
-
-// Endpoint for Neural Uplink (User Messages)
-app.post('/api/chat', (req, res) => {
+// --- INTERACTION FLOW (Event Driven) ---
+app.post('/api/chat', async (req, res) => {
     try {
         const { message } = req.body;
         if (!message) return res.status(400).json({ error: 'Message required' });
 
+        // Mortality Check
+        const lifeStatus = temporalEngine.getLifeStatus();
+        if (lifeStatus.age >= lifeStatus.lifespan) {
+            return res.json({ status: 'ignored', reason: 'Organism is dead.' });
+        }
+
         console.log(`[Neural Uplink] Received: "${message}"`);
-        latestUserMessage = message;
-        // We could trigger immediate processing here, but for now we let the loop pick it up
-        // to maintain the "biological" pacing.
+        // Update global state with user message immediately
+        globalLatestInteraction = { text: message, timestamp: Date.now(), sender: 'user' };
+
+        // Immediate processing for interaction
+        (async () => {
+            try {
+                const bpm = await garminService.getLastBPM();
+                const stress = await garminService.getLastStress();
+                const vitality = 1 - (lifeStatus.age / lifeStatus.lifespan);
+
+                // 1. Retrieve Memories (High context)
+                const retrievalContext = `User says: "${message}". Current State: BPM ${bpm}, Stress ${stress}`;
+                const memories = await memoryService.findSimilarMemories(retrievalContext, 3);
+
+                // 2. Generate Cognitive Response
+                const biometrics = { bpm, stressIndex: stress, vitality };
+                const entityProfile = {
+                    name: lifeStatus.name,
+                    gender: lifeStatus.gender,
+                    traits: lifeStatus.traits
+                };
+
+                const response = await geminiService.generateCognitiveResponse(biometrics, memories, message, entityProfile);
+
+                if (response) {
+                    console.log(`[Interaction] Response: "${response.thought}"`);
+
+                    // Update Global Interaction State with LATEST response
+                    globalLatestInteraction = { text: response.thought, timestamp: Date.now(), sender: 'lumen' };
+
+                    // 3. Re-encode Memory (High Importance)
+                    if (response.re_encoding) {
+                        await memoryService.storeMemory(
+                            response.re_encoding.content,
+                            {
+                                type: 'interaction',
+                                original_trigger: message,
+                                perception: response.internal_perception,
+                                refraction: response.memory_refraction
+                            },
+                            0.8, // Base Importance for Interaction
+                            response.re_encoding.strength
+                        );
+                    }
+                }
+            } catch (err) {
+                console.error("[Interaction] Error:", err);
+            }
+        })();
+
         res.json({ status: 'received' });
     } catch (e) {
         res.status(500).json({ error: String(e) });
     }
 });
 
+// --- THOUGHT LOOP (Internal Monologue) ---
+const THOUGHT_INTERVAL = 30000; // 30s
 setInterval(async () => {
     try {
-        thoughtCooldown += 1000;
+        // Mortality Guardrail
+        const lifeStatus = temporalEngine.getLifeStatus();
+        if (lifeStatus.age >= lifeStatus.lifespan) return;
 
-        // Trigger if: Cooldown met OR User messaged OR High Stress (and some min cooldown)
-        const shouldProcess =
-            (thoughtCooldown >= COGNITIVE_INTERVAL) ||
-            (latestUserMessage !== null && thoughtCooldown > 5000) ||
-            (thoughtCooldown >= 10000 && (await garminService.getLastStress()) > 0.8);
+        const bpm = await garminService.getLastBPM();
+        const stress = await garminService.getLastStress();
+        const vitality = 1 - (lifeStatus.age / lifeStatus.lifespan);
 
-        if (shouldProcess) {
-            const bpm = await garminService.getLastBPM();
-            const stress = await garminService.getLastStress();
-            const vitality = temporalEngine.getLifeStatus().age / temporalEngine.getLifeStatus().lifespan; // Approximate
+        // 1. Retrieve Memories (Drifting thoughts)
+        // Context is internal state + random thought trigger
+        const retrievalContext = `Internal State: BPM ${bpm}, Stress ${stress}, Vitality ${vitality}`;
+        // Lower logical resonance, maybe more random? For now same vector search.
+        const memories = await memoryService.findSimilarMemories(retrievalContext, 2);
 
-            // 1. Retrieve Memories
-            // context for retrieval: current inputs + user message
-            const retrievalContext = `${latestUserMessage || ''} bpm:${bpm} stress:${stress}`;
-            const memories = await memoryService.retrieveMemories(retrievalContext, 3);
+        // 2. Generate Thought
+        const thought = await geminiService.generateThought(retrievalContext, memories);
 
-            // 2. Generate Cognitive Response
-            const biometrics = { bpm, stressIndex: stress, vitality };
-            const lifeStatus = temporalEngine.getLifeStatus();
-            const entityProfile = {
-                name: lifeStatus.name,
-                gender: lifeStatus.gender,
-                traits: lifeStatus.traits
-            };
+        console.log(`[Thought Loop] "${thought}"`);
+        globalCurrentThought = thought;
 
-            const response = await geminiService.generateCognitiveResponse(biometrics, memories, latestUserMessage || "", entityProfile);
+        // 3. Store Memory (Low Importance - Fleeting)
+        await memoryService.storeMemory(
+            thought,
+            {
+                type: 'thought',
+                context: retrievalContext
+            },
+            0.2, // Low importance for internal thoughts
+            0.5  // Initial strength
+        );
 
-            if (response) {
-                console.log(`[Cognitive Loop] Thought: "${response.thought}"`);
-                console.log(`[Cognitive Loop] Perception: "${response.internal_perception}"`);
-
-                // Update Global State
-                globalMessages = [response.thought]; // The UI shows the latest thought
-
-                // 3. Re-encode Memory
-                if (response.re_encoding) {
-                    await memoryService.storeMemory(
-                        response.re_encoding.content,
-                        {
-                            original_trigger: latestUserMessage,
-                            perception: response.internal_perception,
-                            refraction: response.memory_refraction
-                        },
-                        response.re_encoding.importance,
-                        response.re_encoding.strength
-                    );
-                }
-
-                // Reset
-                latestUserMessage = null;
-                thoughtCooldown = 0;
-            }
-        }
     } catch (error) {
-        console.error("[Cognitive Loop] Error:", error);
+        console.error("[Thought Loop] Error:", error);
     }
-}, 1000);
+}, THOUGHT_INTERVAL);
 
 // 4. Memory Decay & Pruning (Every 5 Minutes)
 const DECAY_INTERVAL = 5 * 60 * 1000;
