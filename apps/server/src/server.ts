@@ -74,6 +74,7 @@ app.get('/health', async (_req, res) => {
 });
 
 // Genesis Endpoint - Rebirth the organism
+// Genesis Endpoint - Rebirth the organism
 app.post('/api/genesis', (req, res) => {
     try {
         const { name, gender, traits, lifespan } = req.body;
@@ -88,10 +89,31 @@ app.post('/api/genesis', (req, res) => {
         // Reset global messages on rebirth
         globalMessages = [`I am ${name}. I have just been born.`];
 
-        // Wipe memory for the new life (simple rebirth protocol)
-        memoryService.wipeMemories().catch(console.error);
+        // NOTE: Memory wiping is now handled by the death/rebirth transition logic, not automatically here.
+        // If a clean slate is desired, /api/death with action='wipe' should have been called prior.
 
         res.json({ message: 'Genesis complete', lifeStatus: temporalEngine.getLifeStatus() });
+    } catch (e) {
+        res.status(500).json({ error: String(e) });
+    }
+});
+
+// Death Endpoint - Kill the organism and handle memories
+app.post('/api/death', async (req, res) => {
+    try {
+        const { memoryAction } = req.body; // 'wipe' | 'diminish' | 'keep'
+
+        console.log(`[Death] Organism killed. Memory Action: ${memoryAction}`);
+        temporalEngine.kill();
+
+        if (memoryAction === 'wipe') {
+            await memoryService.wipeMemories();
+        } else if (memoryAction === 'diminish') {
+            await memoryService.diminishMemories(0.1); // Reduce to 10%
+        }
+        // 'keep' does nothing to memories
+
+        res.json({ message: 'Organism has perished.', lifeStatus: temporalEngine.getLifeStatus() });
     } catch (e) {
         res.status(500).json({ error: String(e) });
     }

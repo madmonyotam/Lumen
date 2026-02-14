@@ -404,11 +404,118 @@ const SvgRings = styled(motion.svg)`
   color: ${props => props.theme.colors.teal};
 `;
 
+const KillSwitchContainer = styled.div`
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 50;
+`;
+
+const KillButton = styled.button`
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid ${props => props.theme.colors.red};
+  color: ${props => props.theme.colors.red};
+  padding: 0.5rem 1rem;
+  font-family: ${props => props.theme.fonts.code};
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+
+  &:hover {
+    background: ${props => props.theme.colors.red};
+    color: black;
+    box-shadow: 0 0 15px ${props => props.theme.colors.red};
+  }
+`;
+
+const ModalOverlay = styled(motion.div)`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ModalContent = styled(motion.div)`
+  background: ${props => props.theme.colors.card};
+  border: 1px solid ${props => props.theme.colors.red};
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  box-shadow: 0 0 30px rgba(255, 0, 0, 0.2);
+`;
+
+const ModalTitle = styled.h2`
+  color: ${props => props.theme.colors.red};
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  letter-spacing: 0.1em;
+`;
+
+const ModalText = styled.p`
+  color: ${props => props.theme.colors.textDim};
+  margin-bottom: 2rem;
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.5;
+`;
+
+const OptionButton = styled.button`
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid ${props => props.theme.colors.tealDim};
+  padding: 1rem;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: ${props => props.theme.colors.teal};
+  }
+`;
+
+const OptionTitle = styled.div`
+  color: ${props => props.theme.colors.teal};
+  font-weight: bold;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+  letter-spacing: 0.05em;
+`;
+
+const OptionDesc = styled.div`
+  color: ${props => props.theme.colors.textDim};
+  font-size: 0.75rem;
+`;
+
+const CancelButton = styled.button`
+  margin-top: 1.5rem;
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: ${props => props.theme.colors.textDim};
+  cursor: pointer;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  padding: 0.5rem;
+
+  &:hover {
+    color: white;
+  }
+`;
 const OrganismView: React.FC = () => {
   const { organState, isConnected } = useOrgan();
   const theme = useTheme();
   const [thought, setThought] = React.useState<string>("The organism is silent...");
   const [inputValue, setInputValue] = React.useState("");
+  const [showKillModal, setShowKillModal] = React.useState(false);
 
   React.useEffect(() => {
     if (organState?.status?.messages && organState.status.messages.length > 0) {
@@ -457,6 +564,21 @@ const OrganismView: React.FC = () => {
       });
     } catch (e) {
       console.error("Failed to send message:", e);
+    }
+  };
+
+
+  const handleKill = async (action: 'wipe' | 'diminish') => {
+    try {
+      await fetch('http://localhost:3001/api/death', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memoryAction: action })
+      });
+      setShowKillModal(false);
+      // State update will trigger re-render and show GenesisScreen via useOrgan hook updates
+    } catch (e) {
+      console.error("Failed to terminate:", e);
     }
   };
 
@@ -643,17 +765,53 @@ const OrganismView: React.FC = () => {
 
 
 
-      <StatusBar>
-        <StatusItem>
-          <StatusIndicator $color={theme.colors.teal} />
-          Synaptic Link: Active
-        </StatusItem>
-        <StatusItem>
-          <StatusIndicator $color={theme.colors.purple} />
-          Feedback Loop: Optimized
-        </StatusItem>
-      </StatusBar>
-    </Container>
+
+
+      {/* Kill Switch */}
+      <KillSwitchContainer>
+        <KillButton onClick={() => setShowKillModal(true)}>
+          TERMINATE
+        </KillButton>
+      </KillSwitchContainer>
+
+      {/* Kill Modal */}
+      <AnimatePresence>
+        {showKillModal && (
+          <ModalOverlay
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <ModalContent
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+            >
+              <ModalTitle>TERMINATE ORGANISM?</ModalTitle>
+              <ModalText>
+                This will end the current consciousness. What should happen to the memories?
+              </ModalText>
+
+              <FlexCol $gap="1rem">
+                <OptionButton onClick={() => handleKill('diminish')}>
+                  <OptionTitle>DIMINISH</OptionTitle>
+                  <OptionDesc>Retain faint traces of the past (10% Strength)</OptionDesc>
+                </OptionButton>
+
+                <OptionButton onClick={() => handleKill('wipe')} style={{ borderColor: theme.colors.red }}>
+                  <OptionTitle style={{ color: theme.colors.red }}>ERASE ALL</OptionTitle>
+                  <OptionDesc>Complete memory wipe. Tabula Rasa.</OptionDesc>
+                </OptionButton>
+              </FlexCol>
+
+              <CancelButton onClick={() => setShowKillModal(false)}>
+                CANCEL
+              </CancelButton>
+            </ModalContent>
+          </ModalOverlay>
+        )}
+      </AnimatePresence>
+    </Container >
   );
 };
 

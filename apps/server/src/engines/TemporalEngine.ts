@@ -48,6 +48,10 @@ export class TemporalEngine {
         this.isAlive = true;
     }
 
+    kill() {
+        this.isAlive = false;
+    }
+
     getLifeStatus(): LifeStatus {
         return {
             isAlive: this.isAlive,

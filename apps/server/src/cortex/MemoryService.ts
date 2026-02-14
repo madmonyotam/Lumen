@@ -175,6 +175,29 @@ export class MemoryService {
         }
     }
 
+    async diminishMemories(factor: number) {
+        await this.initializationPromise;
+        try {
+            await this.pool.query(`
+                UPDATE memories
+                SET strength = strength * $1
+            `, [factor]);
+
+            // Prune very weak memories
+            const deleteResult = await this.pool.query(`
+                DELETE FROM memories WHERE strength <= 0.05
+            `);
+
+            if (deleteResult && deleteResult.rowCount != null && deleteResult.rowCount > 0) {
+                console.log(`[MemoryService] Pruned ${deleteResult.rowCount} faded memories after diminishing.`);
+            }
+
+            console.log(`[MemoryService] Memories diminished by factor ${factor}.`);
+        } catch (err) {
+            console.error("[MemoryService] Diminish Error:", err);
+        }
+    }
+
     async checkHealth(): Promise<boolean> {
         try {
             const client = await this.pool.connect();
