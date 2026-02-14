@@ -128,6 +128,9 @@ let lastTick = Date.now();
 // 1. Biological Clock (1Hz) - Basic Life Functions
 setInterval(async () => {
     try {
+        const lifeStatus = temporalEngine.getLifeStatus();
+        if (!lifeStatus.isAlive) return;
+
         const now = Date.now();
         const delta = now - lastTick;
         lastTick = now;
@@ -147,8 +150,6 @@ setInterval(async () => {
             ...organState,
             lifeStatus: temporalEngine.getLifeStatus(),
             status: {
-                ...organState.status,
-                ...organState.status,
                 ...organState.status,
                 messages: globalLatestInteraction ? [globalLatestInteraction.text] : [], // Backward compatibility
                 latestInteraction: globalLatestInteraction, // New format
@@ -173,7 +174,7 @@ setInterval(async () => {
     try {
         // Mortality Guardrail
         const lifeStatus = temporalEngine.getLifeStatus();
-        if (lifeStatus.age >= lifeStatus.lifespan) return;
+        if (!lifeStatus.isAlive || lifeStatus.age >= lifeStatus.lifespan) return;
 
         const bpm = await garminService.getLastBPM();
         const stress = await garminService.getLastStress();
@@ -196,7 +197,7 @@ app.post('/api/chat', async (req, res) => {
 
         // Mortality Check
         const lifeStatus = temporalEngine.getLifeStatus();
-        if (lifeStatus.age >= lifeStatus.lifespan) {
+        if (!lifeStatus.isAlive || lifeStatus.age >= lifeStatus.lifespan) {
             return res.json({ status: 'ignored', reason: 'Organism is dead.' });
         }
 
@@ -263,7 +264,7 @@ setInterval(async () => {
     try {
         // Mortality Guardrail
         const lifeStatus = temporalEngine.getLifeStatus();
-        if (lifeStatus.age >= lifeStatus.lifespan) return;
+        if (!lifeStatus.isAlive || lifeStatus.age >= lifeStatus.lifespan) return;
 
         const bpm = await garminService.getLastBPM();
         const stress = await garminService.getLastStress();
@@ -303,6 +304,8 @@ setInterval(async () => {
     try {
         // Calculate Entropy based on age/lifespan
         const status = temporalEngine.getLifeStatus();
+        if (!status.isAlive) return;
+
         const entropy = status.age / status.lifespan; // 0.0 (Birth) -> 1.0 (Death)
 
         console.log(`[Memory System] Running Entropic Decay (Entropy: ${entropy.toFixed(2)})...`);
