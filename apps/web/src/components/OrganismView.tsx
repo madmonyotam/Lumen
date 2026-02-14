@@ -272,7 +272,7 @@ const CoreSynapseLabel = styled.div`
 `;
 
 const CoreSynapseText = styled(motion.h2)`
-  font-size: 3rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.2em;
   color: white;
@@ -399,16 +399,8 @@ const OrbContainer = styled(Relative)`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 40vh;
-  max-height: 400px;
+  height: 50vh;
   width: 100%;
-`;
-
-
-
-const SvgRings = styled(motion.svg)`
-  opacity: 0.2;
-  color: ${props => props.theme.colors.teal};
 `;
 
 const KillSwitchContainer = styled.div`
@@ -520,10 +512,31 @@ const CancelButton = styled.button`
 const OrganismView: React.FC = () => {
   const { organState, isConnected } = useOrgan();
   const theme = useTheme();
+
+  // Performance Optimization: Pipe biometrics through a ref to avoid re-rendering VisualPhysics
+  const biometricsRef = React.useRef({
+    bpm: organState?.biometrics?.bpm || 70,
+    stress: organState?.biometrics?.stressIndex || 0,
+    vitality: organState?.status?.vitality || 1,
+    ageRatio: organState?.lifeStatus ? (organState.lifeStatus.age / organState.lifeStatus.lifespan) : 0
+  });
+
   const [thought, setThought] = React.useState<string>("The organism is silent...");
   const [inputValue, setInputValue] = React.useState("");
   const [showKillModal, setShowKillModal] = React.useState(false);
   const [currentInteraction, setCurrentInteraction] = React.useState<{ text: string, sender: 'user' | 'lumen', timestamp: number } | null>(null);
+
+  // Sync biometrics ref without triggering re-render of components that use it (like VisualPhysics)
+  React.useEffect(() => {
+    if (organState?.biometrics && organState?.status && organState?.lifeStatus) {
+      biometricsRef.current = {
+        bpm: organState.biometrics.bpm,
+        stress: organState.biometrics.stressIndex,
+        vitality: organState.status.vitality,
+        ageRatio: organState.lifeStatus.age / organState.lifeStatus.lifespan
+      };
+    }
+  }, [organState?.biometrics?.bpm, organState?.biometrics?.stressIndex, organState?.status?.vitality, organState?.lifeStatus?.age, organState?.lifeStatus?.lifespan]);
 
   React.useEffect(() => {
     const latest = organState?.status?.latestInteraction;
@@ -772,24 +785,9 @@ const OrganismView: React.FC = () => {
             </AnimatePresence>
           </ChatContainer>
 
-          {/* SVG Rings */}
-          <AbsoluteFill style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <SvgRings
-              width="600" height="600" viewBox="0 0 600 600" // Reduced size slightly to fit logic
-              animate={{ rotate: 360 }}
-              transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-            >
-              <circle cx="300" cy="300" r="150" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="10 5" />
-              <circle cx="300" cy="300" r="280" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 10" />
-            </SvgRings>
-          </AbsoluteFill>
-
-          {/* Orb */}
           <OrbContainer>
             <VisualPhysics
-              bpm={biometrics.bpm}
-              stress={biometrics.stressIndex}
-              vitality={status.vitality}
+              biometricsRef={biometricsRef}
             />
           </OrbContainer>
 
