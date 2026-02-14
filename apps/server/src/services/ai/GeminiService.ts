@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 import { CORTEX_SYSTEM_PROMPT } from '../../cortex/prompts';
+import { BIO_CONFIG } from '../../config/lumen-bio.config';
 
 export class GeminiService {
     private genAI: GoogleGenerativeAI;
@@ -115,6 +116,11 @@ export class GeminiService {
 
             **User Input (The Stimulus):**
             "${userInput}"
+
+            **Bio-Synchronous Parameters:**
+            - **Negativity Bias Clamp:** ${BIO_CONFIG.emotional_biasing.negativity_bias_clamp} (Limit how dark you get)
+            - **Confabulation Probability:** ${BIO_CONFIG.emotional_biasing.confabulation_probability} (Chance to invent details)
+            - **HR Volatility Impact:** ${BIO_CONFIG.emotional_biasing.hr_volatility}
 
             **Task:**
             Generate a JSON object response with the following structure:

@@ -1,5 +1,6 @@
 import { Pool } from 'pg';
 import { GeminiService } from '../services/ai/GeminiService';
+import { BIO_CONFIG } from '../config/lumen-bio.config';
 
 export interface Memory {
     id: string;
@@ -140,13 +141,15 @@ export class MemoryService {
             // We use a simplified SQL update.
             // Adjust decay based on entropy: higher entropy = faster decay.
             // Minimum decay factor to ensure *some* decay always happens if entropy is low.
+
+            // Usage of Bio-Config for logic
             const effectiveDecay = decayRate * (0.1 + entropy);
 
             await this.pool.query(`
                 UPDATE memories 
                 SET strength = strength * (1 - $1)
-                WHERE strength > 0.05
-            `, [effectiveDecay]);
+                WHERE strength > $2
+            `, [effectiveDecay, BIO_CONFIG.drift_parameters.strength_decay_threshold]);
 
             // Prune dead memories
             const deleteResult = await this.pool.query(`
