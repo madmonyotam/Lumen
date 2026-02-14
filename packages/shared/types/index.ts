@@ -22,7 +22,13 @@ export interface OrganState {
         homeostasisLabel: string; // "STABLE", "AGITATED", etc.
         mode: string;           // "DEEP REFLECTION", "ACTIVE", etc.
         latency: number;        // e.g., 14.02
-        messages?: string[];     // Array of thoughts/logs from the organism
+        messages: string[];     // Array of thoughts/logs from the organism
+        latestInteraction?: {
+            text: string;
+            timestamp: number;
+            sender: 'user' | 'lumen';
+        } | null;
+        thought?: string;
         subjectiveTime?: number; // Internal time perception
         visualParams?: any;      // Reflex visual parameters attached to status for reactivity
     };

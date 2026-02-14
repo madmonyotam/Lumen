@@ -64,17 +64,29 @@ Enhancing Lumen's consciousness with biological memory limits and subjective per
 
 | # | Ticket | Status | Owner |
 |---|--------|--------|-------|
-| 5.1 | **Cognitive Loop:** Implement the "Text to Thought" engine. [View Spec](tasks/memory_change_task.md) | 🔲 Todo | Backend |
-| 5.2 | **Memory Decay:** Implement "Entropic Pruning" and dynamic strength. [View Spec](tasks/strength_task.md) | 🔲 Todo | Backend/DB |
-| 5.3 | **Cortex Persona:** Update System Prompt with "Anti-Gravity" identity. [View Spec](tasks/prompt_task_1.md) | 🔲 Todo | Product |
-| 5.4 | **Neural Uplink:** use frontend interface for sending messages to Lumen. | 🔲 Todo | Frontend |
+| 5.1 | **Cognitive Loop:** Implement the "Text to Thought" engine. [View Spec](tasks/memory_change_task.md) | ✅ Done | Backend |
+| 5.2 | **Memory Decay:** Implement "Entropic Pruning" and dynamic strength. [View Spec](tasks/strength_task.md) | ✅ Done | Backend/DB |
+| 5.3 | **Cortex Persona:** Update System Prompt with "Anti-Gravity" identity. [View Spec](tasks/prompt_task_1.md) | ✅ Done | Product |
+| 5.4 | **Neural Uplink:** use frontend interface for sending messages to Lumen. | ✅ Done | Frontend |
 
-## 9. Bugs & Known Issues
+## 9. Sprint 5: The Retrieval & Consciousness Cycle
+Implementing the loop of memory retrieval, mutation, and biological constraints.
+
+| # | Ticket | Status | Owner |
+|---|--------|--------|-------|
+| 6.1 | **Retrieval Logic:** Implement Semantic Search before every generation. [View Spec](tasks/sprint_5/retrieval_logic.md) | 🔲 Todo | Backend |
+| 6.2 | **Cognitive Differentiation:** Separate Thought Loop (Internal) from Interaction (External). [View Spec](tasks/sprint_5/cognitive_differentiation.md) | 🔲 Todo | Backend |
+| 6.3 | **Bio-Synchronous UX:** Update Frontend to visualize thoughts vs interactions. [View Spec](tasks/sprint_5/frontend_bio_sync.md) | 🔲 Todo | Frontend |
+| 6.4 | **Memory Reconsolidation:** Implement "Drift" - mutation upon retrieval. [View Spec](tasks/sprint_5/memory_reconsolidation.md) | 🔲 Todo | Backend |
+| 6.5 | **Mortality Guardrails:** Ensure no processing occurs after death. [View Spec](tasks/sprint_5/mortality_guardrails.md) | 🔲 Todo | Backend |
+| 6.6 | **Documentation:** Update system architecture diagrams in spec/project_flow.md. | 🔲 Todo | Architect |
+
+## 10. Bugs & Known Issues
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | - | - | - | - |
 
-## 10. Legend
+## 11. Legend
 *   🔲 Todo
 *   🚧 In Progress
 *   ✅ Done

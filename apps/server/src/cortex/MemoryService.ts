@@ -101,7 +101,7 @@ export class MemoryService {
         }
     }
 
-    async retrieveMemories(query: string, limit: number = 5): Promise<Memory[]> {
+    async retrieveMemories(query: string, limit: number = 5, minStrength: number = 0.0): Promise<Memory[]> {
         await this.initializationPromise;
         const embedding = await this.gemini.generateEmbedding(query);
         // Convert embedding array to vector string format for SQL
@@ -112,10 +112,17 @@ export class MemoryService {
                 `SELECT id, content, timestamp, strength, importance, metadata, 
                  embedding <=> $1 as distance 
                  FROM memories 
+                 WHERE strength >= $3
                  ORDER BY distance ASC 
                  LIMIT $2`,
-                [embeddingStr, limit]
+                [embeddingStr, limit, minStrength]
             );
+
+            // Trigger Reconsolidation (Drift) - Fire and forget
+            // The act of remembering changes the memory.
+            result.rows.forEach(row => {
+                this.reconsolidateMemory(row.id, `Triggered by: ${query}`);
+            });
 
             return result.rows.map(row => ({
                 id: row.id.toString(),
@@ -131,6 +138,37 @@ export class MemoryService {
             console.error("[MemoryService] Retrieve Error:", err);
             return [];
         }
+    }
+
+    async reconsolidateMemory(id: string | number, context: string) {
+        try {
+            // Fetch current state
+            const res = await this.pool.query('SELECT content, strength FROM memories WHERE id = $1', [id]);
+            if (res.rows.length === 0) return;
+
+            const oldMemory = res.rows[0];
+
+            // Mutate via Cortex
+            const newContent = await this.gemini.mutateMemory(oldMemory.content, context);
+
+            // Reinforcement Boost (+0.25)
+            let newStrength = parseFloat(oldMemory.strength) + 0.25;
+            if (newStrength > 1.0) newStrength = 1.0;
+
+            await this.pool.query(
+                'UPDATE memories SET content = $1, strength = $2 WHERE id = $3',
+                [newContent, newStrength, id]
+            );
+
+            // console.log(`[MemoryService] Drifted ID ${id}: ${oldMemory.content.substring(0,20)}... -> ${newContent.substring(0,20)}...`);
+        } catch (err) {
+            console.error(`[MemoryService] Reconsolidation failed for ID ${id}`, err);
+        }
+    }
+
+    // Alias for the spec requirement
+    async findSimilarMemories(query: string, limit: number = 5): Promise<Memory[]> {
+        return this.retrieveMemories(query, limit, 0.1); // Default filter for very weak memories
     }
 
     // Decay mechanism - Entropic Pruning
