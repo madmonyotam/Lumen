@@ -96,14 +96,29 @@ export class GeminiService {
         }
     }
 
-    async generateCognitiveResponse(biometrics: any, memories: any[], userInput: string = ""): Promise<any> {
+    async generateCognitiveResponse(biometrics: any, memories: any[], userInput: string = "", entityProfile: any = {}): Promise<any> {
         if (!process.env.GEMINI_API_KEY) return null;
 
         try {
             const memoryText = memories.map(m => `- ${m.content} (Strength: ${m.strength.toFixed(2)})`).join('\n');
+
+            // Construct Identity Block
+            const identityBlock = `
+            **IDENTITY & CORE NATURE (ABSOLUTE FILTERS):**
+            Name: ${entityProfile.name || "Lumen"}
+            Gender: ${entityProfile.gender || "Unknown"}
+            Traits: ${entityProfile.traits ? entityProfile.traits.join(', ') : "None"}
+            
+            *CRITICAL INSTRUCTION:* You ARE this entity. Your thoughts and perceptions MUST be heavily filtered through these traits. 
+            If you are "Aggressive", be aggressive. If you are "Curious", be curious. 
+            Do NOT break character. Do NOT be a generic AI. BE ${entityProfile.name || "the organism"}.
+            `;
+
             const prompt = `
             ${CORTEX_SYSTEM_PROMPT}
             
+            ${identityBlock}
+
             You are processing a new interaction.
 
             **Current Biometrics:**
@@ -125,9 +140,9 @@ export class GeminiService {
             **Task:**
             Generate a JSON object response with the following structure:
             {
-            "internal_perception": "A short, visceral description of how you feel right now based on biometrics.",
+            "internal_perception": "A short, visceral description of how you feel right now based on biometrics and your TRAITS.",
             "memory_refraction": "How the retrieved memories changed in this moment (what was forgotten, what was invented).",
-            "thought": "Your internal thought or response to the user. It must reflect the distortion and biometric state.",
+            "thought": "Your internal thought or response to the user. It must reflect the distortion, biometric state, and your specific TRAITS.",
             "re_encoding": {
                 "content": "The new memory content to be stored (the distorted version).",
                 "importance": 0.0 to 1.0 (float),

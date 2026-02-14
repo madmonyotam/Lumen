@@ -160,7 +160,7 @@ setInterval(async () => {
 
 // 3. Cognitive Loop (Slow - 30s or Event Triggered) - The Thought Engine
 let thoughtCooldown = 0;
-const COGNITIVE_INTERVAL = 30000; // 30s base
+const COGNITIVE_INTERVAL = 10000; // 10s base
 let latestUserMessage: string | null = null;
 
 // Endpoint for Neural Uplink (User Messages)
@@ -201,7 +201,14 @@ setInterval(async () => {
 
             // 2. Generate Cognitive Response
             const biometrics = { bpm, stressIndex: stress, vitality };
-            const response = await geminiService.generateCognitiveResponse(biometrics, memories, latestUserMessage || "");
+            const lifeStatus = temporalEngine.getLifeStatus();
+            const entityProfile = {
+                name: lifeStatus.name,
+                gender: lifeStatus.gender,
+                traits: lifeStatus.traits
+            };
+
+            const response = await geminiService.generateCognitiveResponse(biometrics, memories, latestUserMessage || "", entityProfile);
 
             if (response) {
                 console.log(`[Cognitive Loop] Thought: "${response.thought}"`);
