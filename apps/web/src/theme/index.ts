@@ -12,6 +12,7 @@ export const lumenTheme = {
         gradientStart: '#112233',
         gradientVitalityStart: '#00f2c3',
         gradientVitalityEnd: '#67e8f9',
+        red: '#FF4444',
     },
     fonts: {
         main: "'Rajdhani', sans-serif",

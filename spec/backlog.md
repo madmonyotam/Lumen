@@ -67,6 +67,7 @@ Enhancing Lumen's consciousness with biological memory limits and subjective per
 | 5.1 | **Cognitive Loop:** Implement the "Text to Thought" engine. [View Spec](tasks/memory_change_task.md) | 🔲 Todo | Backend |
 | 5.2 | **Memory Decay:** Implement "Entropic Pruning" and dynamic strength. [View Spec](tasks/strength_task.md) | 🔲 Todo | Backend/DB |
 | 5.3 | **Cortex Persona:** Update System Prompt with "Anti-Gravity" identity. [View Spec](tasks/prompt_task_1.md) | 🔲 Todo | Product |
+| 5.4 | **Neural Uplink:** use frontend interface for sending messages to Lumen. | 🔲 Todo | Frontend |
 
 ## 9. Bugs & Known Issues
 | # | Issue | Severity | Status |

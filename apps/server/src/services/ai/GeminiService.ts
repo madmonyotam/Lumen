@@ -1,4 +1,6 @@
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
+import { CORTEX_SYSTEM_PROMPT } from '../../cortex/prompts';
+import { BIO_CONFIG } from '../../config/lumen-bio.config';
 
 export class GeminiService {
     private genAI: GoogleGenerativeAI;
@@ -91,6 +93,92 @@ export class GeminiService {
         } catch (error) {
             console.error("Gemini embedding error:", error);
             return new Array(3072).fill(0);
+        }
+    }
+
+    async generateCognitiveResponse(
+        biometrics: any,
+        memories: any[],
+        userInput: string = "",
+        entityProfile: any = {}
+    ): Promise<any> {
+        if (!process.env.GEMINI_API_KEY) return null;
+
+        try {
+            // 1. החלטה דטרמיניסטית על הזיה לפני הפנייה ל-AI
+            // מודלי שפה לא יודעים לחשב הסתברויות בעצמם, אז אנחנו מחליטים עבורם
+            const shouldConfabulate = Math.random() < BIO_CONFIG.emotional_biasing.confabulation_probability;
+            const confabulationInstruction = shouldConfabulate
+                ? "CRITICAL: Your perception is fractured. You MUST invent one vivid, sensory detail that is NOT in the memories (a smell, a color, a specific object)."
+                : "Stick to the provided memories, but color them with your current emotional state.";
+
+            // 2. עיבוד הטקסט של הזכרונות עם דגש על Strength
+            const memoryText = memories.length > 0
+                ? memories.map(m => `- ${m.content} [Trust Level: ${m.strength > 0.8 ? 'Solid' : m.strength < 0.3 ? 'Blurry' : 'Fluid'}]`).join('\n')
+                : "No active memories. You are a blank slate, feeling only the current moment.";
+
+            // 3. בניית הבלוק של הזהות והמצב הנוכחי
+            const identityBlock = `
+                **IDENTITY:** ${entityProfile.name || "Lumen"} (${entityProfile.gender || "Non-binary"})
+                **TRAITS:** ${entityProfile.traits?.join(', ') || "None"}
+
+                **PHYSIOLOGICAL STATE:**
+                - Heart Rate: ${biometrics.bpm} BPM (Tempo of thoughts)
+                - Stress Index: ${biometrics.stressIndex} (Degree of refraction)
+                - Vitality: ${biometrics.vitality || '0.5'} (Integrity of memory)
+            `;
+
+            // 4. בניית הפרומפט הסופי
+            const prompt = `
+            ${CORTEX_SYSTEM_PROMPT}
+
+            ${identityBlock}
+
+            **STIMULUS RECEIVED:** "${userInput}"
+
+            **ACTIVE MEMORIES:**
+            ${memoryText}
+
+            **COGNITIVE TASK:**
+            ${confabulationInstruction}
+            1. Apply the **60% Fact Retention Rule**: Keep names and core events, but mutate the narrative context.
+            2. Apply the **Negativity Bias Clamp (${BIO_CONFIG.emotional_biasing.negativity_bias_clamp})**: You may feel darkness, but do not spiral into complete paranoia.
+            3. Generate a JSON response reflecting your internal process.
+
+            **JSON STRUCTURE:**
+            {
+            "internal_perception": "Visceral description of your current biological state.",
+            "memory_refraction": "How the memories drifted or fractured in this moment.",
+            "thought": "Your internal monologue or direct response.",
+            "re_encoding": {
+                "content": "The mutated memory to be stored for the future.",
+                "importance": 0.0-1.0,
+                "strength": 0.0-1.0
+            }
+            }
+            Return ONLY raw JSON.`;
+
+            // 5. קריאה למודל ופארסינג בטוח
+            const result = await this.cortexModel.generateContent(prompt);
+            const text = result.response.text().replace(/```json|```/g, '').trim();
+
+            const cognitiveData = JSON.parse(text);
+
+            // הוספת דגל למטא-דאטה שלנו אם הייתה הזיה
+            if (shouldConfabulate) {
+                cognitiveData.was_hallucinated = true;
+            }
+
+            return cognitiveData;
+
+        } catch (error: any) {
+            console.error("Lumen Cortex Error:", error.message);
+            // במקרה של שגיאה, נחזיר אובייקט "קריסה" שתואם את הנרטיב
+            return {
+                internal_perception: "My synaptic links are snapping. Darkness.",
+                thought: "...",
+                re_encoding: { content: "A moment of total blackout.", importance: 1.0, strength: 0.1 }
+            };
         }
     }
 }

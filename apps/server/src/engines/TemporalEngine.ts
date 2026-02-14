@@ -1,4 +1,5 @@
 import { LifeStatus } from '@lumen/shared/types/index';
+import { BIO_CONFIG } from '../config/lumen-bio.config';
 
 export class TemporalEngine {
     private subjectiveTime: number = Date.now();
@@ -17,8 +18,11 @@ export class TemporalEngine {
     calculateSubjectiveTime(bpm: number, stress: number, deltaRealTimeMs: number): number {
         if (!this.isAlive) return this.subjectiveTime;
 
-        const bpmFactor = Math.max(0.5, bpm / 60);
-        const stressFactor = 1 + (stress * 0.5);
+        // Bio-Config Influence
+        const reactionSpeed = BIO_CONFIG.interaction_rules.stimulus_reaction_speed;
+
+        const bpmFactor = Math.max(0.5, bpm / 60) * (1 + reactionSpeed);
+        const stressFactor = 1 + (stress * 0.5 * (1 + reactionSpeed));
 
         const timeDilation = bpmFactor * stressFactor;
         const deltaSubjective = deltaRealTimeMs * timeDilation;
@@ -42,6 +46,10 @@ export class TemporalEngine {
         this.subjectiveTime = this.birthTime;
         this.generation++;
         this.isAlive = true;
+    }
+
+    kill() {
+        this.isAlive = false;
     }
 
     getLifeStatus(): LifeStatus {
