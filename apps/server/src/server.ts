@@ -182,7 +182,7 @@ setInterval(async () => {
 
 // 3. Cognitive Loop (Slow - 30s or Event Triggered) - The Thought Engine
 let thoughtCooldown = 0;
-const COGNITIVE_INTERVAL = 10000; // 10s base
+const COGNITIVE_INTERVAL = 30000; // 30s base
 let latestUserMessage: string | null = null;
 
 // Endpoint for Neural Uplink (User Messages)
