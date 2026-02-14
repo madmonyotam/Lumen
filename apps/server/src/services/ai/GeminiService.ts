@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
+import { CORTEX_SYSTEM_PROMPT } from '../../cortex/prompts';
 
 export class GeminiService {
     private genAI: GoogleGenerativeAI;
@@ -91,6 +92,53 @@ export class GeminiService {
         } catch (error) {
             console.error("Gemini embedding error:", error);
             return new Array(3072).fill(0);
+        }
+    }
+
+    async generateCognitiveResponse(biometrics: any, memories: any[], userInput: string = ""): Promise<any> {
+        if (!process.env.GEMINI_API_KEY) return null;
+
+        try {
+            const memoryText = memories.map(m => `- ${m.content} (Strength: ${m.strength.toFixed(2)})`).join('\n');
+            const prompt = `
+            ${CORTEX_SYSTEM_PROMPT}
+            
+            You are processing a new interaction.
+
+            **Current Biometrics:**
+            Heart Rate: ${biometrics.bpm} bpm
+            Stress Index: ${biometrics.stressIndex}
+            Vitality: ${biometrics.vitality || '0.5'}
+
+            **Retrieved Memories (Subject to Drift):**
+            ${memoryText}
+
+            **User Input (The Stimulus):**
+            "${userInput}"
+
+            **Task:**
+            Generate a JSON object response with the following structure:
+            {
+            "internal_perception": "A short, visceral description of how you feel right now based on biometrics.",
+            "memory_refraction": "How the retrieved memories changed in this moment (what was forgotten, what was invented).",
+            "thought": "Your internal thought or response to the user. It must reflect the distortion and biometric state.",
+            "re_encoding": {
+                "content": "The new memory content to be stored (the distorted version).",
+                "importance": 0.0 to 1.0 (float),
+                "strength": 0.0 to 1.0 (float, based on impact)
+            }
+            }
+            Return ONLY raw JSON. No markdown.
+            `;
+
+            const result = await this.cortexModel.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text().replace(/```json/g, '').replace(/```/g, '').trim();
+            return JSON.parse(text);
+
+        } catch (error: any) {
+            console.error("Gemini cognitive error:", error.message);
+            return null;
         }
     }
 }

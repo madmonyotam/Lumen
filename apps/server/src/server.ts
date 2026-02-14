@@ -158,36 +158,97 @@ setInterval(async () => {
     }
 }, 5000);
 
-// 3. Cortex Loop (Slow - 30s or Stress Triggered) - Deep Thought
+// 3. Cognitive Loop (Slow - 30s or Event Triggered) - The Thought Engine
 let thoughtCooldown = 0;
-const CORTEX_INTERVAL = 30000; // 30s base
-const STRESS_THRESHOLD = 0.8;
+const COGNITIVE_INTERVAL = 30000; // 30s base
+let latestUserMessage: string | null = null;
+
+// Endpoint for Neural Uplink (User Messages)
+app.post('/api/chat', (req, res) => {
+    try {
+        const { message } = req.body;
+        if (!message) return res.status(400).json({ error: 'Message required' });
+
+        console.log(`[Neural Uplink] Received: "${message}"`);
+        latestUserMessage = message;
+        // We could trigger immediate processing here, but for now we let the loop pick it up
+        // to maintain the "biological" pacing.
+        res.json({ status: 'received' });
+    } catch (e) {
+        res.status(500).json({ error: String(e) });
+    }
+});
 
 setInterval(async () => {
     try {
-        thoughtCooldown += 1000; // Check every second, but only act if cooldown met
-        const stress = await garminService.getLastStress();
+        thoughtCooldown += 1000;
 
-        if (thoughtCooldown >= CORTEX_INTERVAL || (stress > STRESS_THRESHOLD && thoughtCooldown >= 10000)) {
+        // Trigger if: Cooldown met OR User messaged OR High Stress (and some min cooldown)
+        const shouldProcess =
+            (thoughtCooldown >= COGNITIVE_INTERVAL) ||
+            (latestUserMessage !== null && thoughtCooldown > 5000) ||
+            (thoughtCooldown >= 10000 && (await garminService.getLastStress()) > 0.8);
+
+        if (shouldProcess) {
             const bpm = await garminService.getLastBPM();
-            const context = `BPM: ${bpm}, Stress: ${stress}, Mode: Analysis`;
+            const stress = await garminService.getLastStress();
+            const vitality = temporalEngine.getLifeStatus().age / temporalEngine.getLifeStatus().lifespan; // Approximate
 
-            const thought = await geminiService.generateThought(context);
-            if (thought) {
-                console.log(`[Cortex] Thought: ${thought}`);
-                globalMessages = [thought];
-                thoughtCooldown = 0;
+            // 1. Retrieve Memories
+            // context for retrieval: current inputs + user message
+            const retrievalContext = `${latestUserMessage || ''} bpm:${bpm} stress:${stress}`;
+            const memories = await memoryService.retrieveMemories(retrievalContext, 3);
 
-                // Memory formation on deep thoughts
-                if (Math.random() > 0.6) {
-                    await memoryService.storeMemory(thought, { bpm, stress, type: 'thought' });
+            // 2. Generate Cognitive Response
+            const biometrics = { bpm, stressIndex: stress, vitality };
+            const response = await geminiService.generateCognitiveResponse(biometrics, memories, latestUserMessage || "");
+
+            if (response) {
+                console.log(`[Cognitive Loop] Thought: "${response.thought}"`);
+                console.log(`[Cognitive Loop] Perception: "${response.internal_perception}"`);
+
+                // Update Global State
+                globalMessages = [response.thought]; // The UI shows the latest thought
+
+                // 3. Re-encode Memory
+                if (response.re_encoding) {
+                    await memoryService.storeMemory(
+                        response.re_encoding.content,
+                        {
+                            original_trigger: latestUserMessage,
+                            perception: response.internal_perception,
+                            refraction: response.memory_refraction
+                        },
+                        response.re_encoding.importance,
+                        response.re_encoding.strength
+                    );
                 }
+
+                // Reset
+                latestUserMessage = null;
+                thoughtCooldown = 0;
             }
         }
     } catch (error) {
-        console.error("[Cortex] Error:", error);
+        console.error("[Cognitive Loop] Error:", error);
     }
 }, 1000);
+
+// 4. Memory Decay & Pruning (Every 5 Minutes)
+const DECAY_INTERVAL = 5 * 60 * 1000;
+setInterval(async () => {
+    try {
+        // Calculate Entropy based on age/lifespan
+        const status = temporalEngine.getLifeStatus();
+        const entropy = status.age / status.lifespan; // 0.0 (Birth) -> 1.0 (Death)
+
+        console.log(`[Memory System] Running Entropic Decay (Entropy: ${entropy.toFixed(2)})...`);
+        await memoryService.decayMemories(entropy);
+
+    } catch (error) {
+        console.error("[Memory System] Decay Error:", error);
+    }
+}, DECAY_INTERVAL);
 
 httpServer.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

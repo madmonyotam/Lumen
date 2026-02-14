@@ -6,6 +6,7 @@ export interface Memory {
     content: string;
     timestamp: number;
     strength: number; // 0.0 - 1.0
+    importance: number; // 0.0 - 1.0 (Initial impact)
     embedding?: number[];
     metadata?: any;
 }
@@ -36,10 +37,21 @@ export class MemoryService {
                     content TEXT,
                     timestamp BIGINT,
                     strength FLOAT,
+                    importance FLOAT DEFAULT 1.0,
                     metadata JSONB,
                     embedding vector(3072)
                 );
             `);
+            // Attempt to add importance column if it doesn't exist (migration-ish)
+            await client.query(`
+                DO $$ 
+                BEGIN 
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='memories' AND column_name='importance') THEN 
+                        ALTER TABLE memories ADD COLUMN importance FLOAT DEFAULT 1.0; 
+                    END IF; 
+                END $$;
+            `);
+
             console.log("[MemoryService] Schema ensured (pgvector, memories table).");
         } catch (err) {
             console.error("[MemoryService] DB Init Error:", err);
@@ -49,17 +61,17 @@ export class MemoryService {
         }
     }
 
-    async storeMemory(content: string, metadata: any = {}): Promise<Memory> {
+    async storeMemory(content: string, metadata: any = {}, importance: number = 1.0, initialStrength?: number): Promise<Memory> {
         await this.initializationPromise;
         const embedding = await this.gemini.generateEmbedding(content);
         const timestamp = Date.now();
-        const strength = 1.0;
+        const strength = initialStrength !== undefined ? initialStrength : 1.0;
 
         try {
             const result = await this.pool.query(
-                `INSERT INTO memories (content, timestamp, strength, metadata, embedding) 
-                 VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-                [content, timestamp, strength, metadata, JSON.stringify(embedding)] // pg package handles array -> vector string usually, but explicit stringify might be safer if using raw sql
+                `INSERT INTO memories (content, timestamp, strength, importance, metadata, embedding) 
+                 VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+                [content, timestamp, strength, importance, metadata, JSON.stringify(embedding)] // pg package handles array -> vector string usually, but explicit stringify might be safer if using raw sql
                 // Actually node-postgres-vector or standard array string often works. Let's try standard array passing, pg-vector usage suggests simply passing the array if registered or string format.
                 // Standard vector string format is '[1,2,3]'
             );
@@ -71,6 +83,7 @@ export class MemoryService {
                 content,
                 timestamp,
                 strength,
+                importance,
                 metadata,
                 embedding
             };
@@ -81,6 +94,7 @@ export class MemoryService {
                 content,
                 timestamp,
                 strength,
+                importance,
                 metadata
             };
         }
@@ -94,7 +108,7 @@ export class MemoryService {
 
         try {
             const result = await this.pool.query(
-                `SELECT id, content, timestamp, strength, metadata, 
+                `SELECT id, content, timestamp, strength, importance, metadata, 
                  embedding <=> $1 as distance 
                  FROM memories 
                  ORDER BY distance ASC 
@@ -107,7 +121,9 @@ export class MemoryService {
                 content: row.content,
                 timestamp: parseInt(row.timestamp),
                 strength: row.strength,
-                metadata: row.metadata
+                importance: row.importance || 1.0,
+                metadata: row.metadata,
+                embedding: [] // We don't need embedding in retrieval usually, or we can fetch it. Interface says optional?
             }));
 
         } catch (err) {
@@ -116,18 +132,31 @@ export class MemoryService {
         }
     }
 
-    // Decay mechanism placeholder - In SQL this would be an UPDATE query reducing strength
-    async decayMemories() {
+    // Decay mechanism - Entropic Pruning
+    async decayMemories(entropy: number, decayRate: number = 0.05) {
         await this.initializationPromise;
         try {
+            // Formula: new_strength = current_strength * (1 - decay_rate * entropy)
+            // We use a simplified SQL update.
+            // Adjust decay based on entropy: higher entropy = faster decay.
+            // Minimum decay factor to ensure *some* decay always happens if entropy is low.
+            const effectiveDecay = decayRate * (0.1 + entropy);
+
             await this.pool.query(`
                 UPDATE memories 
-                SET strength = strength * 0.99 
-                WHERE strength > 0.1
+                SET strength = strength * (1 - $1)
+                WHERE strength > 0.05
+            `, [effectiveDecay]);
+
+            // Prune dead memories
+            const deleteResult = await this.pool.query(`
+                DELETE FROM memories WHERE strength <= 0.05
             `);
-            await this.pool.query(`
-                DELETE FROM memories WHERE strength <= 0.1
-            `);
+
+            if (deleteResult && deleteResult.rowCount != null && deleteResult.rowCount > 0) {
+                console.log(`[MemoryService] Pruned ${deleteResult.rowCount} faded memories.`);
+            }
+
         } catch (err) {
             console.error("[MemoryService] Decay Error:", err);
         }

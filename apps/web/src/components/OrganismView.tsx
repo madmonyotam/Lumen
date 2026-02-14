@@ -408,6 +408,7 @@ const OrganismView: React.FC = () => {
   const { organState, isConnected } = useOrgan();
   const theme = useTheme();
   const [thought, setThought] = React.useState<string>("The organism is silent...");
+  const [inputValue, setInputValue] = React.useState("");
 
   React.useEffect(() => {
     if (organState?.status?.messages && organState.status.messages.length > 0) {
@@ -440,6 +441,25 @@ const OrganismView: React.FC = () => {
     );
   }
 
+  const handleSend = async () => {
+    if (!inputValue.trim()) return;
+
+    // Optimistic UI update or just clear input? 
+    // For now just clear and let the organism respond in its own time.
+    const message = inputValue;
+    setInputValue("");
+
+    try {
+      await fetch('http://localhost:3001/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message })
+      });
+    } catch (e) {
+      console.error("Failed to send message:", e);
+    }
+  };
+
   return (
     <Container>
       <BackgroundGradient />
@@ -471,8 +491,14 @@ const OrganismView: React.FC = () => {
           </Flex>
         </div>
         <HeaderInputContainer>
-          <Input type="text" placeholder="Speak to the Organism..." />
-          <SendButton>
+          <Input
+            type="text"
+            placeholder="Speak to the Organism..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+          />
+          <SendButton onClick={handleSend}>
             <Send size={20} />
           </SendButton>
         </HeaderInputContainer>
