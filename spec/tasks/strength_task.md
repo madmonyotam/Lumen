@@ -7,7 +7,7 @@ Required Implementation Steps:
 
 Database Schema Update (SQL):
 
-Add an importance column (Float, 0.0-1.0) to the synapses table. This represents the "original imprint" of the memory.
+Add an importance column (Float, 0.0-1.0) to the memories table. This represents the "original imprint" of the memory.
 
 The existing strength column will now be dynamic and updated by a background process.
 

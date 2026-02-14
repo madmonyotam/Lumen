@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+// import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as dotenv from 'dotenv';
 import path from 'path';
 
@@ -12,7 +12,7 @@ async function listModels() {
         return;
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
+    // const genAI = new GoogleGenerativeAI(apiKey);
     // @ts-ignore - modelManager might not be typed in this version or accessed differently, trying standard first
     /* 
        Actually, GoogleGenerativeAI class doesn't have listModels directly in some versions. 

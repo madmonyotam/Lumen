@@ -14,17 +14,21 @@ export class MemoryService {
     private pool: Pool;
     private gemini: GeminiService;
 
+    private initializationPromise: Promise<void>;
+
     constructor() {
         this.pool = new Pool({
             connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/lumen'
         });
         this.gemini = new GeminiService();
-        this.ensureSchema();
+        this.initializationPromise = this.ensureSchema();
     }
 
     private async ensureSchema() {
+        let client;
         try {
-            const client = await this.pool.connect();
+            client = await this.pool.connect();
+            console.log("[MemoryService] Connected to DB, ensuring schema...");
             await client.query('CREATE EXTENSION IF NOT EXISTS vector;');
             await client.query(`
                 CREATE TABLE IF NOT EXISTS memories (
@@ -36,14 +40,17 @@ export class MemoryService {
                     embedding vector(3072)
                 );
             `);
-            client.release();
-            console.log("[MemoryService] Schema ensured (pgvector).");
+            console.log("[MemoryService] Schema ensured (pgvector, memories table).");
         } catch (err) {
             console.error("[MemoryService] DB Init Error:", err);
+            // Retry logic could go here, but for now we just log
+        } finally {
+            if (client) client.release();
         }
     }
 
     async storeMemory(content: string, metadata: any = {}): Promise<Memory> {
+        await this.initializationPromise;
         const embedding = await this.gemini.generateEmbedding(content);
         const timestamp = Date.now();
         const strength = 1.0;
@@ -80,6 +87,7 @@ export class MemoryService {
     }
 
     async retrieveMemories(query: string, limit: number = 5): Promise<Memory[]> {
+        await this.initializationPromise;
         const embedding = await this.gemini.generateEmbedding(query);
         // Convert embedding array to vector string format for SQL
         const embeddingStr = `[${embedding.join(',')}]`;
@@ -110,6 +118,7 @@ export class MemoryService {
 
     // Decay mechanism placeholder - In SQL this would be an UPDATE query reducing strength
     async decayMemories() {
+        await this.initializationPromise;
         try {
             await this.pool.query(`
                 UPDATE memories 
@@ -125,6 +134,7 @@ export class MemoryService {
     }
 
     async wipeMemories() {
+        await this.initializationPromise;
         try {
             await this.pool.query('DELETE FROM memories');
             console.log("[MemoryService] All memories wiped.");
