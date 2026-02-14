@@ -111,12 +111,12 @@ const MainGrid = styled.main`
   flex: 1;
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 1.5rem; /* Reduced gap */
+  gap: 1.5rem;
   z-index: 10;
   position: relative;
   align-items: center;
   min-height: 0;
-  overflow: hidden; /* Prevent scrollbar jumping */
+  overflow: hidden;
 `;
 
 const Card = styled.div<{ $borderColor?: string }>`
@@ -203,11 +203,12 @@ const CenterColumn = styled(FlexCol)`
 `;
 
 const RightColumn = styled(FlexCol)`
-  grid-column: span 1;
-  align-items: center;
-  justify-content: center;
+  grid-column: span 2;
+  align-items: stretch;
+  justify-content: flex-start;
   height: 100%;
-  gap: 1rem;
+  overflow: hidden;
+  padding: 1rem 0;
 `;
 
 const ThoughtBubble = styled(motion.div)`
@@ -226,35 +227,25 @@ const ThoughtBubble = styled(motion.div)`
 `;
 
 const ChatContainer = styled(FlexCol)`
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
   width: 100%;
-  max-width: 600px;
-  height: 40%;
+  height: 100%;
   z-index: 30;
   overflow-y: auto;
   gap: 0.75rem;
-  padding: 1rem;
-  scrollbar-width: none; /* Hide scrollbar */
-  
-  /* Mask for fading top/bottom */
-  mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+  scrollbar-width: none;
 `;
 
 const ChatMessage = styled(motion.div) <{ $sender: 'user' | 'lumen' }>`
   align-self: ${props => props.$sender === 'user' ? 'flex-end' : 'flex-start'};
   background: ${props => props.$sender === 'user' ? 'rgba(255,255,255,0.05)' : 'rgba(0, 242, 195, 0.05)'};
   padding: 0.75rem 1.25rem;
-  border-radius: ${props => props.$sender === 'user' ? '1rem 1rem 0 1rem' : '1rem 1rem 1rem 0'};
+  border-radius: 1rem;
   color: ${props => props.$sender === 'user' ? props.theme.colors.text : props.theme.colors.teal};
   border: 1px solid ${props => props.$sender === 'user' ? 'rgba(255,255,255,0.1)' : props.theme.colors.tealDim};
-  max-width: 80%;
   font-size: 1rem;
   line-height: 1.4;
   backdrop-filter: blur(5px);
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 15px ${props => props.$sender === 'user' ? 'rgba(255,255,255,0.05)' : props.theme.colors.tealDim};
 `;
 
 const CoreSynapseContainer = styled.div`
@@ -333,60 +324,7 @@ const SendButton = styled.button`
 
 
 
-const VitalityGaugeContainer = styled.div`
-  position: relative;
-  width: 3.5rem;
-  height: 50vh;
-  max-height: 450px;
-  background-color: ${props => props.theme.colors.card};
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 9999px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 0.375rem;
-  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-`;
 
-const VitalityFill = styled(motion.div)`
-  width: 100%;
-  background: linear-gradient(to top, ${props => props.theme.colors.gradientVitalityStart}, ${props => props.theme.colors.gradientVitalityEnd});
-  border-radius: 9999px;
-  position: relative;
-  z-index: 10;
-  box-shadow: 0 0 20px ${props => props.theme.colors.tealDim};
-`;
-
-const VitalityValue = styled(Center)`
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 2.5rem;
-  pointer-events: none;
-  z-index: 20;
-`;
-
-const VitalityText = styled.span`
-  font-size: 1.25rem;
-  font-weight: bold;
-  color: black;
-  mix-blend-mode: screen;
-  transform: rotate(-90deg);
-  white-space: nowrap;
-`;
-
-const VerticalLabel = styled(Center)`
-  height: 8rem;
-`;
-
-const VerticalText = styled.span`
-  font-size: 0.625rem;
-  letter-spacing: 0.5em;
-  color: ${props => props.theme.colors.textDim};
-  transform: rotate(-90deg);
-  white-space: nowrap;
-`;
 
 const Particle = styled.div`
   position: absolute;
@@ -686,21 +624,31 @@ const OrganismView: React.FC = () => {
               <BadgeLabel>GEN:</BadgeLabel>
               <BadgeValue $color={theme.colors.teal}>{lifeStatus.generation}</BadgeValue>
             </StatusBadge>
+            <StatusBadge style={{ marginTop: '0.5rem' }}>
+              <BadgeLabel>LATENCY:</BadgeLabel>
+              <BadgeValue $color={theme.colors.teal}>{status.latency.toFixed(0)}ms</BadgeValue>
+            </StatusBadge>
+          </Flex>
+          <Flex $gap="1rem">
+
+
             <StatusBadge>
               <BadgeLabel>AGE:</BadgeLabel>
               <BadgeValue $color={theme.colors.purple}>{Math.round((1 - (lifeStatus.age / lifeStatus.lifespan)) * 100)}%</BadgeValue>
             </StatusBadge>
+            <StatusBadge style={{ marginTop: '0.5rem' }}>
+              <BadgeLabel>HOMEOSTASIS:</BadgeLabel>
+              <BadgeValue $color={status.vitality > 0.6 ? theme.colors.teal : status.vitality > 0.3 ? theme.colors.purple : theme.colors.red}>
+                {Math.round(status.vitality * 100)}%
+              </BadgeValue>
+            </StatusBadge>
           </Flex>
-          <StatusBadge style={{ marginTop: '0.5rem' }}>
-            <BadgeLabel>LATENCY:</BadgeLabel>
-            <BadgeValue $color={theme.colors.teal}>{status.latency.toFixed(0)}ms</BadgeValue>
-          </StatusBadge>
         </FlexCol>
       </Header>
 
       <MainGrid>
         {/* Left Column */}
-        <FlexCol style={{ gridColumn: 'span 3', gap: '1.25rem' }}>
+        <FlexCol style={{ gridColumn: 'span 2', gap: '1.25rem' }}>
 
           {/* Heart Rate */}
           <Card $borderColor={`${theme.colors.teal}80`}>
@@ -768,23 +716,6 @@ const OrganismView: React.FC = () => {
             </ThoughtBubble>
           </AnimatePresence>
 
-          <ChatContainer>
-            <AnimatePresence>
-              {currentInteraction && (
-                <ChatMessage
-                  key={currentInteraction.timestamp}
-                  $sender={currentInteraction.sender}
-                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  {currentInteraction.text}
-                </ChatMessage>
-              )}
-            </AnimatePresence>
-          </ChatContainer>
-
           <OrbContainer>
             <VisualPhysics
               biometricsRef={biometricsRef}
@@ -803,22 +734,24 @@ const OrganismView: React.FC = () => {
           </CoreSynapseContainer>
         </CenterColumn>
 
-        {/* Right Column */}
+        {/* Right Column - Chat History */}
         <RightColumn>
-          <VitalityGaugeContainer>
-            <VitalityFill
-              animate={{ height: `${status.vitality * 100}%` }}
-              transition={{ type: "spring", stiffness: 30, damping: 20 }}
-            />
-            <VitalityValue>
-              <VitalityText>
-                {Math.round(status.vitality * 100)}%
-              </VitalityText>
-            </VitalityValue>
-          </VitalityGaugeContainer>
-          <VerticalLabel>
-            <VerticalText>HOMEOSTASIS</VerticalText>
-          </VerticalLabel>
+          <ChatContainer>
+            <AnimatePresence>
+              {currentInteraction && (
+                <ChatMessage
+                  key={currentInteraction.timestamp}
+                  $sender={currentInteraction.sender}
+                  initial={{ opacity: 0, scale: 0.9, x: 20 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, x: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {currentInteraction.text}
+                </ChatMessage>
+              )}
+            </AnimatePresence>
+          </ChatContainer>
         </RightColumn>
       </MainGrid>
 

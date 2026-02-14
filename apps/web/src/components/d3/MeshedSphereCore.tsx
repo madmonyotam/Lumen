@@ -35,7 +35,7 @@ const MeshedSphereCore = memo(({
     // 1. Organic Color Palette (Cold Loneliness -> Warm Storm)
     const colorScale = d3.scaleLinear<string>()
         .domain([0, 0.5, 1])
-        .range(["#1a2a6c", "#ffffffff", "#ff0000"])
+        .range(["#001e97ff", "#ffffffff", "#ff0000"])
         .interpolate(d3.interpolateHsl);
 
     // 2. Opacity Scale based on Vitality
