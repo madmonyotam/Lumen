@@ -160,9 +160,9 @@ const GenesisScreen: React.FC = () => {
     const [lifespanIndex, setLifespanIndex] = useState(1); // 0=Short, 1=Medium, 2=Long
 
     const lifespans = [
-        { label: 'Ephemeral (10m)', value: 10 * 60 * 1000 },
         { label: 'Transient (4h)', value: 4 * 60 * 60 * 1000 },
         { label: 'Eternal (24h)', value: 24 * 60 * 60 * 1000 },
+        { label: 'Ephemeral (1w)', value: 7 * 24 * 60 * 60 * 1000 },
     ];
 
     const toggleTrait = (trait: string) => {
