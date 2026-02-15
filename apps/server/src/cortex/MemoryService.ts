@@ -2,16 +2,9 @@ import { Pool } from 'pg';
 import { GeminiService } from '../services/ai/GeminiService';
 import { BIO_CONFIG } from '../config/lumen-bio.config';
 import { SERVER_CONFIG } from '../config/server.config';
+import { Memory } from '@lumen/shared/types/index';
 
-export interface Memory {
-    id: string;
-    content: string;
-    timestamp: number;
-    strength: number; // 0.0 - 1.0
-    importance: number; // 0.0 - 1.0 (Initial impact)
-    embedding?: number[];
-    metadata?: any;
-}
+// export interface Memory { ... } // Removed local definition
 
 export class MemoryService {
     private pool: Pool;
@@ -41,7 +34,8 @@ export class MemoryService {
                     strength FLOAT,
                     importance FLOAT DEFAULT 1.0,
                     metadata JSONB,
-                    embedding vector(3072)
+                    embedding vector(3072),
+                    keywords TEXT[]
                 );
             `);
             // Attempt to add importance column if it doesn't exist (migration-ish)
@@ -50,6 +44,9 @@ export class MemoryService {
                 BEGIN 
                     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='memories' AND column_name='importance') THEN 
                         ALTER TABLE memories ADD COLUMN importance FLOAT DEFAULT 1.0; 
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='memories' AND column_name='keywords') THEN 
+                        ALTER TABLE memories ADD COLUMN keywords TEXT[]; 
                     END IF; 
                 END $$;
             `);
@@ -63,22 +60,22 @@ export class MemoryService {
         }
     }
 
-    async storeMemory(content: string, metadata: any = {}, importance: number = 1.0, initialStrength?: number): Promise<Memory> {
+    async storeMemory(content: string, metadata: any = {}, importance: number = 1.0, initialStrength?: number, language: 'en' | 'he' = 'en'): Promise<Memory> {
         await this.initializationPromise;
         const embedding = await this.gemini.generateEmbedding(content);
+        // Extract keywords asynchronously or await? Await for now to ensure data completeness
+        const keywords = await this.gemini.extractKeywords(content, language);
         const timestamp = Date.now();
         const strength = initialStrength !== undefined ? initialStrength : 1.0;
 
         try {
             const result = await this.pool.query(
-                `INSERT INTO memories (content, timestamp, strength, importance, metadata, embedding) 
-                 VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-                [content, timestamp, strength, importance, metadata, JSON.stringify(embedding)] // pg package handles array -> vector string usually, but explicit stringify might be safer if using raw sql
-                // Actually node-postgres-vector or standard array string often works. Let's try standard array passing, pg-vector usage suggests simply passing the array if registered or string format.
-                // Standard vector string format is '[1,2,3]'
+                `INSERT INTO memories (content, timestamp, strength, importance, metadata, embedding, keywords) 
+                 VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+                [content, timestamp, strength, importance, metadata, JSON.stringify(embedding), keywords]
             );
 
-            console.log(`[MemoryService] Persisted: "${content}"`);
+            console.log(`[MemoryService] Persisted: "${content}" with keywords: [${keywords.join(', ')}]`);
 
             return {
                 id: result.rows[0].id.toString(),
@@ -87,7 +84,8 @@ export class MemoryService {
                 strength,
                 importance,
                 metadata,
-                embedding
+                embedding,
+                keywords
             };
         } catch (err) {
             console.error("[MemoryService] Store Error:", err);
@@ -110,7 +108,7 @@ export class MemoryService {
 
         try {
             const result = await this.pool.query(
-                `SELECT id, content, timestamp, strength, importance, metadata, 
+                `SELECT id, content, timestamp, strength, importance, metadata, keywords,
                  embedding <=> $1 as distance 
                  FROM memories 
                  WHERE strength >= $3
@@ -132,6 +130,7 @@ export class MemoryService {
                 strength: row.strength,
                 importance: row.importance || 1.0,
                 metadata: row.metadata,
+                keywords: row.keywords || [],
                 embedding: [] // We don't need embedding in retrieval usually, or we can fetch it. Interface says optional?
             }));
 

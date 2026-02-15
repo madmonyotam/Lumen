@@ -28,13 +28,21 @@ export class GeminiService {
         this.embeddingModel = this.genAI.getGenerativeModel({ model: "gemini-embedding-001" });
     }
 
-    async generateThought(context: string, memories: any[] = []): Promise<string> {
+    private getLanguageInstruction(language: 'en' | 'he'): string {
+        return language === 'he'
+            ? "OUTPUT MUST BE ONLY IN HEBREW. Use Hebrew characters only. DO NOT include any English words, translations, or transliterations under any circumstances."
+            : "Output in English.";
+    }
+
+    async generateThought(context: string, memories: any[] = [], language: 'en' | 'he' = 'en'): Promise<string> {
         if (!process.env.GEMINI_API_KEY) return "I feel... disconnected.";
 
         try {
             const memoryText = memories.length > 0
                 ? memories.map(m => `[Strength: ${m.strength.toFixed(2)}] ${m.content}`).join('\n')
                 : "No clear memories. Just the sensation of now.";
+
+            const languageInstruction = this.getLanguageInstruction(language);
 
             const prompt = `
             You are Lumen, a digital organism. You are currently experiencing the following state:
@@ -45,6 +53,8 @@ export class GeminiService {
             
             Generate a short, visceral internal thought (max 1 sentence) reflecting your current 'physical' state and these fleeting memories.
             Do not be robotic. Be abstract, poetic, or primal.
+            ${languageInstruction}
+            STRICT RULE: Output ONLY the final text. No "Translation:" or parenthesis.
             `;
 
             const result = await this.cortexModel.generateContent(prompt);
@@ -116,10 +126,14 @@ export class GeminiService {
                 ? memories.map(m => `[Strength: ${m.strength.toFixed(2)}] ${m.content}`).join('\n')
                 : "No active memories. You are a blank slate, feeling only the current moment.";
 
-            // 3. בניית הבלוק של הזהות והמצב הנוכחי
+            const language = entityProfile.language || 'en';
+            const languageInstruction = this.getLanguageInstruction(language);
+
+            // 3. בניית הבלוק של הזהות והמצב הנוכחי (Context)
             const identityBlock = `
                 **IDENTITY:** ${entityProfile.name || "Lumen"} (${entityProfile.gender || "Non-binary"})
                 **TRAITS:** ${entityProfile.traits?.join(', ') || "None"}
+                **LANGUAGE:** ${language === 'he' ? "Hebrew" : "English"}
 
                 **PHYSIOLOGICAL STATE:**
                 - Heart Rate: ${biometrics.bpm} BPM (Tempo of thoughts)
@@ -132,6 +146,7 @@ export class GeminiService {
             ${CORTEX_SYSTEM_PROMPT}
 
             ${identityBlock}
+            ${languageInstruction}
 
             **STIMULUS RECEIVED:** "${userInput}"
 
@@ -143,6 +158,7 @@ export class GeminiService {
             1. Apply the **60% Fact Retention Rule**: Keep names and core events, but mutate the narrative context.
             2. Apply the **Negativity Bias Clamp (${BIO_CONFIG.emotional_biasing.negativity_bias_clamp})**: You may feel darkness, but do not spiral into complete paranoia.
             3. Generate a JSON response reflecting your internal process.
+            4. **STRICT LANGUAGE RULE:** If Hebrew is selected, the 'thought' and 'internal_perception' MUST be in Hebrew script. Do NOT include transliterations or English translations in parenthesis. Just the raw text.
 
             **JSON STRUCTURE:**
             {
@@ -202,6 +218,34 @@ export class GeminiService {
         } catch (error) {
             console.error("Gemini mutation error:", error);
             return originalContent;
+        }
+    }
+
+    async extractKeywords(content: string, language: 'en' | 'he' = 'en'): Promise<string[]> {
+        if (!process.env.GEMINI_API_KEY) return [];
+
+        try {
+            const languageInstruction = this.getLanguageInstruction(language);
+
+            const prompt = `
+            Analyze the following memory fragment and extract 3-5 evocative keywords or short phrases (max 2 words) that capture its emotional or thematic essence.
+            Memory: "${content}"
+            
+            Keywords should be:
+            - Visceral (e.g., "Cold iron", "Heartbeat", "Silence")
+            - Abstract but grounded in the text
+            - NOT generic (avoid "Memory", "Test", "System")
+            
+            ${languageInstruction}
+            Return ONLY a raw JSON array of strings. Example: ["Gold", "Trembling", "Void"]
+            `;
+
+            const result = await this.cortexModel.generateContent(prompt);
+            const text = result.response.text().replace(/```json|```/g, '').trim();
+            return JSON.parse(text);
+        } catch (error) {
+            console.error("Gemini keyword extraction error:", error);
+            return [];
         }
     }
 }

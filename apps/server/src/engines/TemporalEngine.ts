@@ -8,6 +8,7 @@ export class TemporalEngine {
     private generation: number = 1;
     private name: string = "Lumen";
     private gender: 'male' | 'female' | 'non-binary' = 'non-binary';
+    private language: 'en' | 'he' = 'en';
     private traits: string[] = ["Curious"];
     private isAlive: boolean = false;
 
@@ -37,9 +38,10 @@ export class TemporalEngine {
         return this.subjectiveTime;
     }
 
-    reborn(payload: { name: string, gender: 'male' | 'female' | 'non-binary', traits: string[], lifespan: number }) {
+    reborn(payload: { name: string, gender: 'male' | 'female' | 'non-binary', traits: string[], lifespan: number, language?: 'en' | 'he' }) {
         this.name = payload.name;
         this.gender = payload.gender;
+        this.language = payload.language || 'en';
         this.traits = payload.traits;
         this.lifespan = payload.lifespan;
         this.birthTime = Date.now();
@@ -61,6 +63,7 @@ export class TemporalEngine {
             generation: this.generation,
             name: this.name,
             gender: this.gender,
+            language: this.language,
             traits: this.traits
         };
     }

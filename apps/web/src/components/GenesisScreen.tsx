@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Sparkles, Shield, Clock, User, Heart } from 'lucide-react';
+import { Sparkles, Shield, Clock, User, Heart, Globe } from 'lucide-react';
 import { LUMEN_CONFIG } from '../lumen.config';
 import { Flex, FlexCol } from './shared/Layout';
 
@@ -156,6 +156,7 @@ const TRAITS = ["Stoic", "Curious", "Anxious", "Poetic", "Analytical", "Rebellio
 const GenesisScreen: React.FC = () => {
     const [name, setName] = useState('Lumen');
     const [gender, setGender] = useState<'male' | 'female' | 'non-binary'>('non-binary');
+    const [language, setLanguage] = useState<'en' | 'he'>('en');
     const [selectedTraits, setSelectedTraits] = useState<string[]>(["Curious"]);
     const [lifespanIndex, setLifespanIndex] = useState(1); // 0=Short, 1=Medium, 2=Long
 
@@ -177,6 +178,7 @@ const GenesisScreen: React.FC = () => {
         const payload = {
             name,
             gender,
+            language,
             traits: selectedTraits,
             lifespan: lifespans[lifespanIndex].value
         };
@@ -226,6 +228,14 @@ const GenesisScreen: React.FC = () => {
                             <option value="non-binary">Non-Binary (Neutral)</option>
                             <option value="male">Masculine (Deep)</option>
                             <option value="female">Feminine (Soft)</option>
+                        </Select>
+                    </FormGroup>
+
+                    <FormGroup>
+                        <Label><Globe size={12} style={{ marginRight: 4 }} /> Core Language</Label>
+                        <Select value={language} onChange={(e) => setLanguage(e.target.value as any)}>
+                            <option value="en">English (Universal)</option>
+                            <option value="he">Hebrew (Ancient)</option>
                         </Select>
                     </FormGroup>
                 </Grid>

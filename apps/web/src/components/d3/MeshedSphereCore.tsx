@@ -183,7 +183,7 @@ const MeshedSphereCore = memo(({
                 .attr('x2', d => projectedPoints[d[1]].x)
                 .attr('y2', d => projectedPoints[d[1]].y)
                 .attr('stroke', strokeColor)
-                .attr('stroke-width', 0.5)
+                .attr('stroke-width', 0.7)
                 .attr('stroke-opacity', d => {
                     const p1 = projectedPoints[d[0]];
                     const p2 = projectedPoints[d[1]];

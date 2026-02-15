@@ -9,6 +9,7 @@ export interface LifeStatus {
     name: string;
     gender: 'male' | 'female' | 'non-binary';
     traits: string[]; // e.g., "Curious", "Stoic", "Anxious"
+    language?: 'en' | 'he'; // e.g., "en", "he"
 }
 
 export interface OrganState {
@@ -31,12 +32,24 @@ export interface OrganState {
         thought?: string;
         subjectiveTime?: number; // Internal time perception
         visualParams?: any;      // Reflex visual parameters attached to status for reactivity
+        activeMemories?: Memory[]; // Memories currently "floating" in consciousness
     };
     lifeStatus: LifeStatus;
     visualParams: {
         coreColor: string;      // e.g., "#00f2c3"
         pulseSpeed: number;     // Multiplier for animation speed
     };
+}
+
+export interface Memory {
+    id: string;
+    content: string;
+    timestamp: number;
+    strength: number; // 0.0 - 1.0
+    importance: number; // 0.0 - 1.0 (Initial impact)
+    embedding?: number[];
+    metadata?: any;
+    keywords?: string[]; // Semantic shards for visualization
 }
 
 export interface BiometricData {

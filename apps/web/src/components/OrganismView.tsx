@@ -12,6 +12,7 @@ import { StatusBadges } from './organism/StatusBadges';
 import { ChatHistory } from './organism/ChatHistory';
 import { useNeuralUplink } from '../hooks/useNeuralUplink';
 import { useBiometricsSync } from '../hooks/useBiometricsSync';
+import { MemoryFog } from './d3/MemoryFog';
 
 // --- Styled Components ---
 
@@ -107,7 +108,7 @@ const OrbContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 50vh;
+  height: 70vh;
   width: 100%;
 `;
 
@@ -277,21 +278,6 @@ const OrganismView: React.FC = () => {
   return (
     <Container>
       <BackgroundGradient />
-      <AbsoluteFill>
-        {[...Array(20)].map((_, i) => (
-          <Particle
-            key={i}
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              width: `${Math.random() * 2 + 1}px`,
-              height: `${Math.random() * 2 + 1}px`,
-              animation: `pulse ${Math.random() * 3 + 2}s infinite`
-            }}
-          />
-        ))}
-      </AbsoluteFill>
-
       <NeuralHeader
         name={lifeStatus.name}
         inputValue={inputValue}
@@ -331,7 +317,7 @@ const OrganismView: React.FC = () => {
             <VisualPhysics biometricsRef={biometricsRef} />
           </OrbContainer>
 
-          <CoreSynapseContainer>
+          {/* <CoreSynapseContainer>
             <CoreSynapseLabel>Core Synapse</CoreSynapseLabel>
             <CoreSynapseText
               key={status.homeostasisLabel}
@@ -340,12 +326,12 @@ const OrganismView: React.FC = () => {
             >
               {status.homeostasisLabel}
             </CoreSynapseText>
-          </CoreSynapseContainer>
+          </CoreSynapseContainer> */}
         </CenterColumn>
 
         <ChatHistory currentInteraction={currentInteraction} />
       </MainGrid>
-
+      <MemoryFog />
       <KillSwitchContainer>
         <KillButton onClick={() => setShowKillModal(true)}>TERMINATE</KillButton>
       </KillSwitchContainer>
