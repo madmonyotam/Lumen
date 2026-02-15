@@ -14,4 +14,5 @@ export const LUMEN_CONFIG = {
     API_URL: 'http://localhost:3001',
     // Identity Defaults
     IS_ALIVE_DEFAULT: false,
+    INTERACTION_EXPIRY_MS: 60000,
 };

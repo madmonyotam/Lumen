@@ -5,6 +5,12 @@ describe('TemporalEngine', () => {
 
     beforeEach(() => {
         engine = new TemporalEngine();
+        engine.reborn({
+            name: "Test",
+            gender: "non-binary",
+            traits: ["Test"],
+            lifespan: 24 * 60 * 60 * 1000
+        });
     });
 
     test('should progress normally at 60 BPM and 0 stress', () => {
