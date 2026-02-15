@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
-import { CORTEX_SYSTEM_PROMPT } from '../../cortex/prompts';
+import { CORTEX_SYSTEM_PROMPT, REFLEX_PROMPT } from '../../cortex/prompts';
 import { BIO_CONFIG } from '../../config/lumen-bio.config';
 
 export class GeminiService {
@@ -64,17 +64,9 @@ export class GeminiService {
 
         try {
             const prompt = `
-            You are the autonomic nervous system of a digital organism.
+            ${REFLEX_PROMPT}
+
             Current State: ${context}
-            
-            Return a JSON object with visual parameters based on this state.
-            JSON Format:
-            {
-                "vitality": number (0.0 to 1.0),
-                "homeostasisLabel": string (max 2 words, e.g. "OPTIMAL FLOW"),
-                "colorShift": string (hex color code for mood)
-            }
-            Return ONLY raw JSON. No markdown.
             `;
 
             const result = await this.reflexModel.generateContent(prompt);

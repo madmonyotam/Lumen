@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import { GeminiService } from '../services/ai/GeminiService';
 import { BIO_CONFIG } from '../config/lumen-bio.config';
+import { SERVER_CONFIG } from '../config/server.config';
 
 export interface Memory {
     id: string;
@@ -168,7 +169,7 @@ export class MemoryService {
 
     // Alias for the spec requirement
     async findSimilarMemories(query: string, limit: number = 5): Promise<Memory[]> {
-        return this.retrieveMemories(query, limit, 0.1); // Default filter for very weak memories
+        return this.retrieveMemories(query, limit, SERVER_CONFIG.RETRIEVAL_FILTER_STRENGTH); // Use standardized filter
     }
 
     // Decay mechanism - Entropic Pruning
