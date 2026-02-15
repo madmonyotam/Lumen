@@ -18,6 +18,7 @@ export class LifeCycleService {
     public globalLatestInteraction: { text: string; timestamp: number; sender: 'user' | 'lumen' } | null = null;
     public globalCurrentThought: string = "...";
     public globalVisualParams: any = {};
+    public globalActiveMemories: any[] = []; // Explicitly any[] to match usage, or better yet Memory[] if imported
 
     constructor(
         io: Server,
@@ -70,7 +71,8 @@ export class LifeCycleService {
                         latestInteraction: this.globalLatestInteraction,
                         thought: this.globalCurrentThought,
                         visualParams: this.globalVisualParams,
-                        subjectiveTime: this.temporal.getLastSubjectiveTime()
+                        subjectiveTime: this.temporal.getLastSubjectiveTime(),
+                        activeMemories: this.globalActiveMemories
                     }
                 });
             } catch (error) {
@@ -111,7 +113,9 @@ export class LifeCycleService {
 
                 const retrievalContext = `Internal State: BPM ${bpm}, Stress ${stress}, Vitality ${vitality}`;
                 const memories = await this.memory.findSimilarMemories(retrievalContext, 2);
-                const thought = await this.gemini.generateThought(retrievalContext, memories);
+                this.globalActiveMemories = memories;
+
+                const thought = await this.gemini.generateThought(retrievalContext, memories, lifeStatus.language);
 
                 console.log(`[Thought Loop] "${thought}"`);
                 this.globalCurrentThought = thought;
@@ -120,7 +124,8 @@ export class LifeCycleService {
                     thought,
                     { type: 'thought', context: retrievalContext },
                     SERVER_CONFIG.BASE_IMPORTANCE_THOUGHT,
-                    SERVER_CONFIG.INITIAL_THOUGHT_STRENGTH
+                    SERVER_CONFIG.INITIAL_THOUGHT_STRENGTH,
+                    lifeStatus.language
                 );
             } catch (error) {
                 console.error("[LifeCycle] Thought Loop Error:", error);

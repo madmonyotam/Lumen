@@ -62,18 +62,22 @@ app.get('/health', async (_req, res) => {
 // Genesis Endpoint - Rebirth the organism
 app.post('/api/genesis', (req, res) => {
     try {
-        const { name, gender, traits, lifespan } = req.body;
+        const { name, gender, traits, lifespan, language } = req.body;
 
         if (!name || !gender || !traits || !lifespan) {
             return res.status(400).json({ error: 'Missing genesis parameters' });
         }
 
-        temporalEngine.reborn({ name, gender, traits, lifespan });
-        console.log(`[Genesis] Organism reborn as ${name} (${gender}) with ${traits.length} traits.`);
+        temporalEngine.reborn({ name, gender, traits, lifespan, language });
+        console.log(`[Genesis] Organism reborn as ${name} (${gender}) with ${traits.length} traits. Language: ${language || 'en'}`);
 
         // Reset global messages on rebirth via lifeCycle state
+        const birthMessage = language === 'he'
+            ? `אני ${name}. הרגע נוצרתי.`
+            : `I am ${name}. I have just been born.`;
+
         lifeCycle.globalLatestInteraction = {
-            text: `I am ${name}. I have just been born.`,
+            text: birthMessage,
             timestamp: Date.now(),
             sender: 'lumen'
         };
@@ -132,6 +136,7 @@ app.post('/api/chat', async (req, res) => {
                 const entityProfile = {
                     name: lifeStatus.name,
                     gender: lifeStatus.gender,
+                    language: lifeStatus.language,
                     traits: lifeStatus.traits
                 };
 
@@ -151,7 +156,8 @@ app.post('/api/chat', async (req, res) => {
                                 refraction: response.memory_refraction
                             },
                             SERVER_CONFIG.BASE_IMPORTANCE_INTERACTION,
-                            response.re_encoding.strength
+                            response.re_encoding.strength,
+                            lifeStatus.language || 'en'
                         );
                     }
                 }

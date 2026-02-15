@@ -12,6 +12,7 @@ import { StatusBadges } from './organism/StatusBadges';
 import { ChatHistory } from './organism/ChatHistory';
 import { useNeuralUplink } from '../hooks/useNeuralUplink';
 import { useBiometricsSync } from '../hooks/useBiometricsSync';
+import { MemoryFog } from './d3/MemoryFog';
 
 // --- Styled Components ---
 
@@ -277,21 +278,6 @@ const OrganismView: React.FC = () => {
   return (
     <Container>
       <BackgroundGradient />
-      <AbsoluteFill>
-        {[...Array(20)].map((_, i) => (
-          <Particle
-            key={i}
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              width: `${Math.random() * 2 + 1}px`,
-              height: `${Math.random() * 2 + 1}px`,
-              animation: `pulse ${Math.random() * 3 + 2}s infinite`
-            }}
-          />
-        ))}
-      </AbsoluteFill>
-
       <NeuralHeader
         name={lifeStatus.name}
         inputValue={inputValue}
@@ -345,7 +331,7 @@ const OrganismView: React.FC = () => {
 
         <ChatHistory currentInteraction={currentInteraction} />
       </MainGrid>
-
+      <MemoryFog />
       <KillSwitchContainer>
         <KillButton onClick={() => setShowKillModal(true)}>TERMINATE</KillButton>
       </KillSwitchContainer>
