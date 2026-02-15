@@ -179,52 +179,24 @@ const LumenMemoryFlowCore = ({
     }, [maxWords]);
 
 
-    // Sync words prop with simulation nodes
+    // Sync words prop with pending queue
     useEffect(() => {
-        if (!simulationRef.current || widthRef.current === 0) return;
-
-        const newNodes: SimulationNode[] = [];
-
         // 1. Identify New Words ONLY
         // We iterate through the incoming words and only process those we haven't seen before.
         const newWordsData = words.filter(w => !prevWordsRef.current.has(w.id));
 
         if (newWordsData.length > 0) {
-            newWordsData.forEach(wordData => {
-                const { word, dust } = createWordNode(wordData, widthRef.current, heightRef.current);
-                newNodes.push(word, ...dust);
-                // Add to tracked set
-                prevWordsRef.current.add(wordData.id);
-            });
+            // Add new words to the pending queue
+            pendingWordsRef.current.push(...newWordsData);
 
-            // 2. Enforce Max Words Limit
-            // If adding new words exceeds the limit, mark oldest ACTIVE words as EXITING
-            const activeWords = nodesRef.current.filter(n => n.type === 'word' && (n as WordNode).state !== 'EXITING') as WordNode[];
-            const totalWords = activeWords.length + newNodes.filter(n => n.type === 'word').length;
+            // Mark them as 'seen' so we don't re-queue them
+            newWordsData.forEach(w => prevWordsRef.current.add(w.id));
 
-            if (totalWords > limitRef.current) {
-                const wordsToRemoveCount = totalWords - limitRef.current;
-                // Sort by creation time (oldest first)
-                activeWords.sort((a, b) => a.createdAt - b.createdAt);
-
-                for (let i = 0; i < wordsToRemoveCount && i < activeWords.length; i++) {
-                    const w = activeWords[i];
-                    w.state = 'EXITING';
-                    shatterWord(w, nodesRef.current); // Add fragments immediately
-                    prevWordsRef.current.delete(w.id); // Allow re-entry
-                    // We don't remove from nodesRef immediately, let 'tick' handle cleanup
-                }
+            // Ensure simulation is running to pick them up
+            if (simulationRef.current) {
+                simulationRef.current.alpha(0.3).restart();
             }
-
-            nodesRef.current.push(...newNodes);
-            simulationRef.current.nodes(nodesRef.current);
-            simulationRef.current.alpha(0.3).restart();
         }
-
-        // Note: We do NOT update existing words properties. 
-        // We strictly follow "use only new data" for creation. 
-        // If updates are needed, we would need to iterate 'activeWords' against 'words'.
-
     }, [words]);
 
     const onReady = useCallback((

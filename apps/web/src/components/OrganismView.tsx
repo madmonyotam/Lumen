@@ -108,7 +108,7 @@ const OrbContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 50vh;
+  height: 70vh;
   width: 100%;
 `;
 
@@ -317,7 +317,7 @@ const OrganismView: React.FC = () => {
             <VisualPhysics biometricsRef={biometricsRef} />
           </OrbContainer>
 
-          <CoreSynapseContainer>
+          {/* <CoreSynapseContainer>
             <CoreSynapseLabel>Core Synapse</CoreSynapseLabel>
             <CoreSynapseText
               key={status.homeostasisLabel}
@@ -326,7 +326,7 @@ const OrganismView: React.FC = () => {
             >
               {status.homeostasisLabel}
             </CoreSynapseText>
-          </CoreSynapseContainer>
+          </CoreSynapseContainer> */}
         </CenterColumn>
 
         <ChatHistory currentInteraction={currentInteraction} />
