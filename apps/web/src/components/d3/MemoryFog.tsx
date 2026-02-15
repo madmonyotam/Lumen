@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import styled from 'styled-components';
 import { useOrgan } from '../../context/OrganContext';
+import LumenMemoryFlowCore, { type MemoryWord } from './LumenMemoryFlowCore';
 
 const Container = styled.div`
   position: absolute;
@@ -14,138 +15,78 @@ const Container = styled.div`
   overflow: hidden;
 `;
 
-interface FogParticle extends d3.SimulationNodeDatum {
-    id: string;
-    text: string;
-    importance: number;
-    createdAt: number;
-    opacity: number;
-    vx: number;
-    vy: number;
-}
-
 export const MemoryFog: React.FC = () => {
     const { organState } = useOrgan();
-    const containerRef = useRef<HTMLDivElement>(null);
-    const svgRef = useRef<SVGSVGElement>(null);
 
-    const particlesRef = useRef<FogParticle[]>([]);
-    const lastProcessedMemoryIds = useRef<Set<string>>(new Set());
+    const activeMemories = organState?.status?.activeMemories || [];
 
-    useEffect(() => {
-        if (!organState?.status?.activeMemories) return;
+    // 1. Color Scale (Cold -> Neutral -> Warm/Alert)
+    const colorScale = d3.scaleLinear<string>()
+        .domain([0, 0.5, 1])
+        .range(["#001e97ff", "#ffffff", "#ff0000"])
+        .interpolate(d3.interpolateHsl);
 
-        const now = Date.now();
-        const activeMemories = organState.status.activeMemories;
+    // 2. Map Active Memories to Visual Words
+    const memoryWords: MemoryWord[] = activeMemories.flatMap((memory) => {
+        // Normalize metrics (assuming 0-1 range, providing defaults)
+        const strength = memory.strength ?? 0.5;
+        const importance = memory.importance ?? 0.5;
 
-        activeMemories.forEach(memory => {
-            if (!lastProcessedMemoryIds.current.has(memory.id)) {
-                lastProcessedMemoryIds.current.add(memory.id);
-
-                if (memory.keywords && memory.keywords.length > 0) {
-                    memory.keywords.forEach((keyword, index) => {
-                        particlesRef.current.push({
-                            id: `${memory.id}-${index}-${now}`,
-                            text: keyword,
-                            importance: memory.importance || 0.5,
-                            createdAt: now,
-                            opacity: 0,
-                            x: Math.random() * (window.innerWidth || 800),
-                            y: Math.random() * (window.innerHeight || 600),
-                            vx: (Math.random() - 0.5) * 0.7, // תנועה ראשונית מעט מהירה יותר
-                            vy: (Math.random() - 0.5) * 0.7
-                        });
-                    });
-
-                    // --- תיקון 1: הגדלת המכסה ל-60 חלקיקים ---
-                    // זה מאפשר לערפל להצטבר לאורך זמן ולא להימחק בפתאומיות
-                    if (particlesRef.current.length > 60) {
-                        particlesRef.current.sort((a, b) => b.createdAt - a.createdAt);
-                        particlesRef.current = particlesRef.current.slice(0, 60);
+        // Metadata color mapping - try to find a normalizeable value
+        // If metadata has sentiment (-1 to 1), map to 0-1. Otherwise use importance.
+        // Extract stress from metadata (handle object or JSON string)
+        let stressVal = 0.5;
+        try {
+            if (typeof memory.metadata === 'object' && memory.metadata !== null) {
+                const meta = memory.metadata as any;
+                // Direct property
+                if (typeof meta.stress === 'number') {
+                    stressVal = meta.stress;
+                }
+                // Embedded in context string e.g. "Internal State: BPM 73..., Stress 0.87..."
+                else if (typeof meta.context === 'string') {
+                    const match = meta.context.match(/Stress\s+([\d.]+)/);
+                    if (match && match[1]) {
+                        stressVal = parseFloat(match[1]);
                     }
                 }
             }
-        });
-    }, [organState?.status?.activeMemories]);
+        } catch (e) {
+            console.warn("Failed to extract stress from metadata", e); // keep console warn but maybe remove console log of memory
+        }
 
-    useEffect(() => {
-        if (!containerRef.current || !svgRef.current) return;
+        const color = colorScale(stressVal);
 
-        const width = containerRef.current.clientWidth;
-        const height = containerRef.current.clientHeight;
-        const svg = d3.select(svgRef.current);
 
-        const simulation = d3.forceSimulation<FogParticle>(particlesRef.current)
-            .force("charge", d3.forceManyBody().strength(-40))
-            // --- תיקון 2: רדיוס התנגשות גדול יותר למניעת חפיפת טקסט בעברית ---
-            .force("collide", d3.forceCollide<FogParticle>().radius(d => 30 + (d.importance * 40)))
-            .alphaDecay(0);
+        // Define base words list from keywords or valid fallback
+        let wordsList: string[] = [];
+        if (memory.keywords && memory.keywords.length > 0) {
+            wordsList = memory.keywords;
+        } else if (memory.content) {
+            wordsList = [memory.content.slice(0, 15)];
+        } else {
+            wordsList = [memory.id.slice(0, 8)];
+        }
 
-        const tick = () => {
-            const now = Date.now();
-            const lifespan = 15000;
-
-            particlesRef.current = particlesRef.current.filter(p => {
-                const age = now - p.createdAt;
-                if (age > lifespan) return false;
-
-                // --- תיקון 3: שיפור ה-Opacity ---
-                if (age < 3000) { // Fade in איטי יותר (3 שניות)
-                    p.opacity = age / 3000;
-                } else if (age > 10000) { // Fade out ב-5 השניות האחרונות
-                    p.opacity = (lifespan - age) / 5000;
-                } else {
-                    // רצפת שקיפות של 0.4 גם לחשיבות נמוכה
-                    p.opacity = 0.4 + (p.importance * 0.6);
-                }
-
-                // תנועה חופשית
-                p.vx! += (Math.random() - 0.5) * 0.08;
-                p.vy! += (Math.random() - 0.5) * 0.08;
-                p.vx! *= 0.98;
-                p.vy! *= 0.98;
-
-                if (p.x! < -100) p.x = width + 100;
-                if (p.x! > width + 100) p.x = -100;
-                if (p.y! < -100) p.y = height + 100;
-                if (p.y! > height + 100) p.y = -100;
-
-                return true;
-            });
-
-            const nodes = svg.selectAll<SVGTextElement, FogParticle>(".fog-word")
-                .data(particlesRef.current, d => d.id);
-
-            const enter = nodes.enter()
-                .append("text")
-                .attr("class", "fog-word")
-                .attr("text-anchor", "middle")
-                .style("fill", "white")
-                .style("font-weight", "300")
-                .style("pointer-events", "auto")
-                .text(d => d.text);
-
-            nodes.merge(enter)
-                .attr("x", d => d.x!)
-                .attr("y", d => d.y!)
-                .style("opacity", d => d.opacity)
-                // --- תיקון 4: פונט קריא יותר וטשטוש מופחת ---
-                .style("font-size", d => `${1.1 + d.importance * 1.8}rem`)
-                .style("filter", d => `blur(${Math.max(0, (0.8 - d.importance) * 2)}px)`);
-
-            nodes.exit().remove();
-            simulation.nodes(particlesRef.current);
-        };
-
-        simulation.on("tick", tick);
-        return () => {
-            simulation.stop();
-        };
-    }, []);
+        // Map each word/keyword to a visual particle
+        return wordsList.map((text, index) => ({
+            id: `${memory.id}-${index}`, // Unique ID per keyword
+            text: text.toUpperCase(),
+            size: 0.1 + importance * 0.9,    // Importance -> Size (0.1 - 1.0)
+            blur: 0.2 + (1 - strength) * 0.5,      // Strength -> Blur (0.3 - 0.8)
+            color: color,                    // Metadata/Sentiment -> Color
+            createdAt: Date.now()            // Unified creation time for the batch
+        }));
+    });
 
     return (
-        <Container ref={containerRef}>
-            <svg ref={svgRef} width="100%" height="100%" style={{ overflow: 'visible' }} />
+        <Container>
+            <LumenMemoryFlowCore
+                words={memoryWords}
+                speed={1}
+                lifeSpan={10000}
+                maxWords={20}
+            />
         </Container>
     );
 };
