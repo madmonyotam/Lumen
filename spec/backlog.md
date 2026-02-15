@@ -86,23 +86,33 @@ Tightening the existing infrastructure, cleaning technical debt, and establishin
 
 | # | Ticket | Status | Owner |
 |---|--------|--------|-------|
-| 7.1 | **Tree Shaking:** Identify and delete all unused code, functions, and components (Dead Code). | 🔲 Todo | DevOps/Fullstack |
-| 7.2 | **Backend - Single Responsibility:** Refactor classes to ensure single responsibility (Bio-data, Memory, LLM). | 🔲 Todo | Backend |
-| 7.3 | **Atomic Functions:** Break complex logic into small, pure, and readable functions. | 🔲 Todo | Backend |
-| 7.4 | **Environment & Config:** Move magic numbers and hard-coded strings to a central config file. | 🔲 Todo | Backend |
-| 7.5 | **Frontend Design System:** Migrate all style values (colors, spacing, typography) to Theme & Tokens. | 🔲 Todo | Frontend |
-| 7.6 | **Frontend Architecture:** Enforce division into UI components, Custom Hooks, and Utils. | 🔲 Todo | Frontend |
-| 7.7 | **Memory Layer Deep Test:** Create comprehensive integration tests for memory storage, retrieval, and isolation. | 🔲 Todo | QA/Backend |
-| 7.8 | **Biometrics Documentation:** Create technical document explaining how biometrics affect Lumen's state. | 🔲 Todo | Product/Backend |
-| 7.9 | **Mermaid Flowchart:** Add diagrams showing data flow from sensor to processing and prompt impact. | 🔲 Todo | Architect |
-| 7.10 | **Prompt Engine:** Document prompt components and roadman for personality development. | 🔲 Todo | Product |
+| 7.1 | **Tree Shaking:** Identify and delete all unused code, functions, and components (Dead Code). | ✅ Done  | DevOps/Fullstack |
+| 7.2 | **Backend - Single Responsibility:** Refactor classes to ensure single responsibility (Bio-data, Memory, LLM). | ✅ Done | Backend |
+| 7.3 | **Atomic Functions:** Break complex logic into small, pure, and readable functions. | ✅ Done | Backend |
+| 7.4 | **Environment & Config:** Move magic numbers and hard-coded strings to a central config file. | ✅ Done | Backend |
+| 7.5 | **Frontend Design System:** Migrate all style values (colors, spacing, typography) to Theme & Tokens. | ✅ Done | Frontend |
+| 7.6 | **Frontend Architecture:** Enforce division into UI components, Custom Hooks, and Utils. | ✅ Done | Frontend |
+| 7.7 | **Memory Layer Deep Test:** Create comprehensive integration tests for memory storage, retrieval, and isolation. | ✅ Done | QA/Backend |
+| 7.8 | **Biometrics Documentation:** Create technical document explaining how biometrics affect Lumen's state. | ✅ Done | Product/Backend |
+| 7.9 | **Mermaid Flowchart:** Add diagrams showing data flow from sensor to processing and prompt impact. | ✅ Done | Architect |
+| 7.10 | **Prompt Engine:** Document prompt components and roadman for personality development. | ✅ Done | Product |
 
-## 10. Bugs & Known Issues
+## 10. Sprint 7: The Semantic Fog
+Visualizing consciousness with a living, breathing memory system.
+
+| # | Ticket | Status | Owner |
+|---|--------|--------|-------|
+| 8.1 | **Keyword Extraction:** Implement logic to extract 3-5 evocative keywords from each memory. [View Spec](tasks/sprint_7/backend_keywords.md) | 🔲 Todo | Backend |
+| 8.2 | **Memory Fog (D3):** Create the "Drift" visualization replacing particles with floating words. [View Spec](tasks/sprint_7/frontend_memory_fog.md) | 🔲 Todo | Frontend |
+| 8.3 | **Language Support:** Add Hebrew/English selection to Genesis screen and System Prompt. [View Spec](tasks/sprint_7/language_support.md) | 🔲 Todo | Fullstack |
+| 8.4 | **Visual Tuning:** Map memory `importance` and `time` to font size, opacity, and blur. | 🔲 Todo | Frontend |
+
+## 11. Bugs & Known Issues
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | - | - | - | - |
 
-## 11. Legend
+## 12. Legend
 *   🔲 Todo
 *   🚧 In Progress
 *   ✅ Done
