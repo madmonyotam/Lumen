@@ -59,7 +59,7 @@ Introducing the concept of finitude and rebirth.
 | 4.3 | **Rebirth Protocol:** Implement "Life Reset" button that wipes active memory but generates a compressed "Echo" (Summary) for the next life. | ✅ Done | Fullstack |
 | 4.4 | **Documentation:** Update system architecture diagrams in `spec/project_flow.md`. | ✅ Done | Architect |
 
-## 8. Sprint 4: Cognitive Awakening (Depth & Decay)
+## 7. Sprint 4: Cognitive Awakening (Depth & Decay)
 Enhancing Lumen's consciousness with biological memory limits and subjective perception.
 
 | # | Ticket | Status | Owner |
@@ -69,17 +69,33 @@ Enhancing Lumen's consciousness with biological memory limits and subjective per
 | 5.3 | **Cortex Persona:** Update System Prompt with "Anti-Gravity" identity. [View Spec](tasks/prompt_task_1.md) | ✅ Done | Product |
 | 5.4 | **Neural Uplink:** use frontend interface for sending messages to Lumen. | ✅ Done | Frontend |
 
-## 9. Sprint 5: The Retrieval & Consciousness Cycle
+## 8. Sprint 5: The Retrieval & Consciousness Cycle
 Implementing the loop of memory retrieval, mutation, and biological constraints.
 
 | # | Ticket | Status | Owner |
 |---|--------|--------|-------|
-| 6.1 | **Retrieval Logic:** Implement Semantic Search before every generation. [View Spec](tasks/sprint_5/retrieval_logic.md) | 🔲 Todo | Backend |
-| 6.2 | **Cognitive Differentiation:** Separate Thought Loop (Internal) from Interaction (External). [View Spec](tasks/sprint_5/cognitive_differentiation.md) | 🔲 Todo | Backend |
-| 6.3 | **Bio-Synchronous UX:** Update Frontend to visualize thoughts vs interactions. [View Spec](tasks/sprint_5/frontend_bio_sync.md) | 🔲 Todo | Frontend |
-| 6.4 | **Memory Reconsolidation:** Implement "Drift" - mutation upon retrieval. [View Spec](tasks/sprint_5/memory_reconsolidation.md) | 🔲 Todo | Backend |
-| 6.5 | **Mortality Guardrails:** Ensure no processing occurs after death. [View Spec](tasks/sprint_5/mortality_guardrails.md) | 🔲 Todo | Backend |
-| 6.6 | **Documentation:** Update system architecture diagrams in spec/project_flow.md. | 🔲 Todo | Architect |
+| 6.1 | **Retrieval Logic:** Implement Semantic Search before every generation. [View Spec](tasks/sprint_5/retrieval_logic.md) | ✅ Done | Backend |
+| 6.2 | **Cognitive Differentiation:** Separate Thought Loop (Internal) from Interaction (External). [View Spec](tasks/sprint_5/cognitive_differentiation.md) | ✅ Done | Backend |
+| 6.3 | **Bio-Synchronous UX:** Update Frontend to visualize thoughts vs interactions. [View Spec](tasks/sprint_5/frontend_bio_sync.md) | ✅ Done | Frontend |
+| 6.4 | **Memory Reconsolidation:** Implement "Drift" - mutation upon retrieval. [View Spec](tasks/sprint_5/memory_reconsolidation.md) | ✅ Done | Backend |
+| 6.5 | **Mortality Guardrails:** Ensure no processing occurs after death. [View Spec](tasks/sprint_5/mortality_guardrails.md) | ✅ Done | Backend |
+| 6.6 | **Documentation:** Update system architecture diagrams in spec/project_flow.md. | ✅ Done | Architect |
+
+## 9. Sprint 6: Lumen Core & Stability
+Tightening the existing infrastructure, cleaning technical debt, and establishing memory and biometrics foundation for scalability.
+
+| # | Ticket | Status | Owner |
+|---|--------|--------|-------|
+| 7.1 | **Tree Shaking:** Identify and delete all unused code, functions, and components (Dead Code). | 🔲 Todo | DevOps/Fullstack |
+| 7.2 | **Backend - Single Responsibility:** Refactor classes to ensure single responsibility (Bio-data, Memory, LLM). | 🔲 Todo | Backend |
+| 7.3 | **Atomic Functions:** Break complex logic into small, pure, and readable functions. | 🔲 Todo | Backend |
+| 7.4 | **Environment & Config:** Move magic numbers and hard-coded strings to a central config file. | 🔲 Todo | Backend |
+| 7.5 | **Frontend Design System:** Migrate all style values (colors, spacing, typography) to Theme & Tokens. | 🔲 Todo | Frontend |
+| 7.6 | **Frontend Architecture:** Enforce division into UI components, Custom Hooks, and Utils. | 🔲 Todo | Frontend |
+| 7.7 | **Memory Layer Deep Test:** Create comprehensive integration tests for memory storage, retrieval, and isolation. | 🔲 Todo | QA/Backend |
+| 7.8 | **Biometrics Documentation:** Create technical document explaining how biometrics affect Lumen's state. | 🔲 Todo | Product/Backend |
+| 7.9 | **Mermaid Flowchart:** Add diagrams showing data flow from sensor to processing and prompt impact. | 🔲 Todo | Architect |
+| 7.10 | **Prompt Engine:** Document prompt components and roadman for personality development. | 🔲 Todo | Product |
 
 ## 10. Bugs & Known Issues
 | # | Issue | Severity | Status |
