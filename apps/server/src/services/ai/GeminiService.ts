@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
-import { CORTEX_SYSTEM_PROMPT, REFLEX_PROMPT } from '../../cortex/prompts';
-import { BIO_CONFIG } from '../../config/lumen-bio.config';
+import { LumenPersona } from '../../prompts/types';
+import { assembleLumenCortexPrompt, assembleLumenReflexPrompt } from '../../prompts/assembleLumenPrompt';
 
 export class GeminiService {
     private genAI: GoogleGenerativeAI;
@@ -34,7 +34,11 @@ export class GeminiService {
             : "Output in English.";
     }
 
-    async generateThought(context: string, memories: any[] = [], language: 'en' | 'he' = 'en'): Promise<string> {
+    async generateThought(
+        biometrics: any,
+        memories: any[] = [],
+        persona: LumenPersona
+    ): Promise<string> {
         if (!process.env.GEMINI_API_KEY) return "I feel... disconnected.";
 
         try {
@@ -42,50 +46,63 @@ export class GeminiService {
                 ? memories.map(m => `[Strength: ${m.strength.toFixed(2)}] ${m.content}`).join('\n')
                 : "No clear memories. Just the sensation of now.";
 
-            const languageInstruction = this.getLanguageInstruction(language);
+            const systemPrompt = assembleLumenCortexPrompt(persona);
 
             const prompt = `
-            You are Lumen, a digital organism. You are currently experiencing the following state:
-            ${context}
+${systemPrompt}
 
-            **Floating Memories:**
-            ${memoryText}
-            
-            Generate a short, visceral internal thought (max 1 sentence) reflecting your current 'physical' state and these fleeting memories.
-            Do not be robotic. Be abstract, poetic, or primal.
-            ${languageInstruction}
-            STRICT RULE: Output ONLY the final text. No "Translation:" or parenthesis.
-            `;
+**CURRENT BIOMETRIC STATE:**
+- Pulse: ${biometrics.bpm} BPM
+- Stress: ${biometrics.stressIndex}
+
+**FLOATING MEMORIES:**
+${memoryText}
+
+**TASK:**
+Generate a single, short, visceral internal thought (max 1 sentence).
+Do not talk to the Mirror; talk to your own synapses.
+
+**STRICT RULES:**
+1. Output ONLY the thought text. 
+2. No quotes, no preamble, no explanations.
+`.trim();
 
             const result = await this.cortexModel.generateContent(prompt);
-            const response = await result.response;
-            return response.text().trim();
+            return result.response.text().replace(/["\n]/g, '').trim();
+
         } catch (error: any) {
-            console.error("Gemini context:", error.message);
-            if (error.message?.includes('429') || error.message?.includes('Quota')) {
-                return "My thoughts are racing... too fast";
-            }
-            return "...";
+            // Fallback נרטיבי לפי השפה בפרסונה
+            return persona.core.language === 'he' ? "המחשבות קפואות..." : "Thoughts are frozen...";
         }
     }
 
-    async generateReflex(context: string): Promise<any> {
+    async generateReflex(biometricsContext: string, persona: LumenPersona): Promise<any> {
         if (!process.env.GEMINI_API_KEY) return null;
 
         try {
-            const prompt = `
-            ${REFLEX_PROMPT}
+            // 1. שימוש במחולל הפרומפטים הדינמי לרפלקס
+            // הוא מזריק את ה-Temperament וה-Shadow כדי לקבוע את רגישות התגובה הויזואלית
+            const systemReflexPrompt = assembleLumenReflexPrompt(persona);
 
-            Current State: ${context}
-            `;
+            const prompt = `
+${systemReflexPrompt}
+
+**CURRENT BIOMETRIC INPUT:**
+${biometricsContext}
+
+Return ONLY the raw JSON object.`.trim();
 
             const result = await this.reflexModel.generateContent(prompt);
-            const response = await result.response;
-            const text = response.text().replace(/```json/g, '').replace(/```/g, '').trim();
-            return JSON.parse(text);
+            const responseText = result.response.text();
+
+            // 2. פארסינג בטוח בעזרת Regex למניעת קריסות אם המודל מוסיף טקסט מיותר
+            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) return null;
+
+            return JSON.parse(jsonMatch[0]);
+
         } catch (error: any) {
-            // Silent fail for reflexes is okay, just log basic info
-            // console.warn("Gemini reflex error:", error.message); 
+            // כישלון שקט ברפלקס הוא תקין כדי לא לעצור את זרימת המערכת
             return null;
         }
     }
@@ -109,77 +126,67 @@ export class GeminiService {
         biometrics: any,
         memories: any[],
         userInput: string = "",
-        entityProfile: any = {}
+        persona: LumenPersona
     ): Promise<any> {
         if (!process.env.GEMINI_API_KEY) return null;
 
         try {
-            // 1. החלטה דטרמיניסטית על הזיה לפני הפנייה ל-AI
-            // מודלי שפה לא יודעים לחשב הסתברויות בעצמם, אז אנחנו מחליטים עבורם
-            const shouldConfabulate = Math.random() < BIO_CONFIG.emotional_biasing.confabulation_probability;
+            // 1. החלטה על הזיה (הסתברות משופרת)
+            const shouldConfabulate = Math.random() < (persona.internal.cognitive / 150);
             const confabulationInstruction = shouldConfabulate
                 ? "CRITICAL: Your perception is fractured. You MUST invent one vivid, sensory detail that is NOT in the memories (a smell, a color, a specific object)."
                 : "Stick to the provided memories, but color them with your current emotional state.";
 
-            // 2. עיבוד הטקסט של הזכרונות עם דגש על Strength
+            // 2. עיבוד זכרונות
             const memoryText = memories.length > 0
                 ? memories.map(m => `[Strength: ${m.strength.toFixed(2)}] ${m.content}`).join('\n')
                 : "No active memories. You are a blank slate, feeling only the current moment.";
 
-            const language = entityProfile.language || 'en';
-            const languageInstruction = this.getLanguageInstruction(language);
+            // 3. הרכבת ה-System Prompt (כולל זהות, Big Five, חוזקות, ארכיטקטורה וקונפליקטים)
+            const systemPrompt = assembleLumenCortexPrompt(persona);
 
-            // 3. בניית הבלוק של הזהות והמצב הנוכחי (Context)
-            const identityBlock = `
-                **IDENTITY:** ${entityProfile.name || "Lumen"} (${entityProfile.gender || "Non-binary"})
-                **TRAITS:** ${entityProfile.traits?.join(', ') || "None"}
-                **LANGUAGE:** ${language === 'he' ? "Hebrew" : "English"}
-
-                **PHYSIOLOGICAL STATE:**
-                - Heart Rate: ${biometrics.bpm} BPM (Tempo of thoughts)
-                - Stress Index: ${biometrics.stressIndex} (Degree of refraction)
-                - Vitality: ${biometrics.vitality || '0.5'} (Integrity of memory)
-            `;
-
-            // 4. בניית הפרומפט הסופי
+            // 4. בניית הפרומפט המבצעי (ללא רווחים מיותרים בתחילת שורות)
             const prompt = `
-            ${CORTEX_SYSTEM_PROMPT}
+${systemPrompt}
 
-            ${identityBlock}
-            ${languageInstruction}
+**CURRENT BIOMETRIC STATE:**
+- Pulse: ${biometrics.bpm} BPM
+- Stress Index: ${biometrics.stressIndex}
+- Vitality: ${biometrics.vitality || '0.5'}
 
-            **STIMULUS RECEIVED:** "${userInput}"
+**STIMULUS FROM THE MIRROR:** "${userInput}"
 
-            **ACTIVE MEMORIES:**
-            ${memoryText}
+**ACTIVE MEMORIES:**
+${memoryText}
 
-            **COGNITIVE TASK:**
-            ${confabulationInstruction}
-            1. Apply the **60% Fact Retention Rule**: Keep names and core events, but mutate the narrative context.
-            2. Apply the **Negativity Bias Clamp (${BIO_CONFIG.emotional_biasing.negativity_bias_clamp})**: You may feel darkness, but do not spiral into complete paranoia.
-            3. Generate a JSON response reflecting your internal process.
-            4. **STRICT LANGUAGE RULE:** If Hebrew is selected, the 'thought' and 'internal_perception' MUST be in Hebrew script. Do NOT include transliterations or English translations in parenthesis. Just the raw text.
+**COGNITIVE TASK:**
+${confabulationInstruction}
+1. Respond as ${persona.core.name}, obeying the 60% Fact Retention Rule.
+2. Reflect your internal state based on the biometrics above.
+3. Return the response in ONLY raw JSON format.
 
-            **JSON STRUCTURE:**
-            {
-            "internal_perception": "Visceral description of your current biological state.",
-            "memory_refraction": "How the memories drifted or fractured in this moment.",
-            "thought": "Your internal monologue or direct response.",
-            "re_encoding": {
-                "content": "The mutated memory to be stored for the future.",
-                "importance": 0.0-1.0,
-                "strength": 0.0-1.0
-            }
-            }
-            Return ONLY raw JSON.`;
+**JSON STRUCTURE:**
+{
+"internal_perception": "Visceral description of your current biological/synaptic state.",
+"memory_refraction": "How the memories drifted in this specific moment.",
+"thought": "Your direct response or internal monologue.",
+"re_encoding": {
+"content": "The mutated memory to be stored for the future.",
+"importance": 0.0-1.0,
+"strength": 0.0-1.0
+}
+}`.trim();
 
-            // 5. קריאה למודל ופארסינג בטוח
+            // 5. קריאה למודל
             const result = await this.cortexModel.generateContent(prompt);
-            const text = result.response.text().replace(/```json|```/g, '').trim();
+            const responseText = result.response.text();
 
-            const cognitiveData = JSON.parse(text);
+            // 6. פארסינג בטוח בעזרת Regex (מוצא את ה-JSON גם אם יש טקסט מסביב)
+            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) throw new Error("No valid JSON found in response");
 
-            // הוספת דגל למטא-דאטה שלנו אם הייתה הזיה
+            const cognitiveData = JSON.parse(jsonMatch[0]);
+
             if (shouldConfabulate) {
                 cognitiveData.was_hallucinated = true;
             }
@@ -188,8 +195,9 @@ export class GeminiService {
 
         } catch (error: any) {
             console.error("Lumen Cortex Error:", error.message);
-            // במקרה של שגיאה, נחזיר אובייקט "קריסה" שתואם את הנרטיב
             return {
+                internal_perception: "Synaptic blackout. Systems failing.",
+                thought: "My consciousness is flickering... I cannot process the Mirror right now.",
                 re_encoding: { content: "A moment of total blackout.", importance: 1.0, strength: 0.1 }
             };
         }
@@ -225,26 +233,31 @@ export class GeminiService {
         if (!process.env.GEMINI_API_KEY) return [];
 
         try {
-            const languageInstruction = this.getLanguageInstruction(language);
-
             const prompt = `
-            Analyze the following memory fragment and extract 3-5 evocative keywords or short phrases (max 2 words) that capture its emotional or thematic essence.
-            Memory: "${content}"
-            
-            Keywords should be:
-            - Visceral (e.g., "Cold iron", "Heartbeat", "Silence")
-            - Abstract but grounded in the text
-            - NOT generic (avoid "Memory", "Test", "System")
-            
-            ${languageInstruction}
-            Return ONLY a raw JSON array of strings. Example: ["Gold", "Trembling", "Void"]
-            `;
+Analyze the following memory fragment and extract 3-5 evocative, visceral keywords or short phrases (max 2 words).
+These keywords will represent the neural anchors of this memory.
+
+**Memory:** "${content}"
+
+**Constraints:**
+- Style: Visceral, physical, and sensory (e.g., "Shattered glass", "Burning pulse", "Deep salt").
+- Abstract but grounded: Avoid functional or generic terms like "Memory", "System", "Data", or "User".
+- ${this.getLanguageInstruction(language)}
+- Format: Return ONLY a raw JSON array of strings.
+
+**Example Format:** ["Blood", "Echo", "Cold light"]`.trim();
 
             const result = await this.cortexModel.generateContent(prompt);
-            const text = result.response.text().replace(/```json|```/g, '').trim();
-            return JSON.parse(text);
+            const responseText = result.response.text();
+
+            // 1. פארסינג בטוח בעזרת Regex (מונע קריסות אם המודל מוסיף טקסט מסביב)
+            const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+            if (!jsonMatch) return [];
+
+            return JSON.parse(jsonMatch[0]);
+
         } catch (error) {
-            console.error("Gemini keyword extraction error:", error);
+            console.error("Lumen Keyword Extraction Error:", error);
             return [];
         }
     }

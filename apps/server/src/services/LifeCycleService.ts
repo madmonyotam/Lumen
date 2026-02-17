@@ -5,6 +5,8 @@ import { MemoryService } from '../cortex/MemoryService';
 import { GeminiService } from './ai/GeminiService';
 import { processBiometrics } from '../ai/brain';
 import { SERVER_CONFIG } from '../config/server.config';
+import { LumenPersona } from '../prompts/types';
+import { mockPersona } from '../prompts/testAssembly';
 
 export class LifeCycleService {
     private io: Server;
@@ -39,6 +41,19 @@ export class LifeCycleService {
         this.initReflexLoop();
         this.initThoughtLoop();
         this.initDecayLoop();
+    }
+
+    private getEntityProfile(): LumenPersona {
+        const lifeStatus = this.temporal.getLifeStatus();
+        return {
+            ...mockPersona,
+            core: {
+                name: lifeStatus.name,
+                gender: lifeStatus.gender,
+                lifespan: lifeStatus.lifespan,
+                language: lifeStatus.language
+            }
+        };
     }
 
     private initBioClock() {
@@ -91,7 +106,7 @@ export class LifeCycleService {
                 const stress = await this.garmin.getLastStress();
                 const context = `BPM: ${bpm}, Stress: ${stress}`;
 
-                const reflexParams = await this.gemini.generateReflex(context);
+                const reflexParams = await this.gemini.generateReflex(context, this.getEntityProfile());
                 if (reflexParams) {
                     this.globalVisualParams = reflexParams;
                 }
@@ -115,7 +130,7 @@ export class LifeCycleService {
                 const memories = await this.memory.findSimilarMemories(retrievalContext, 2);
                 this.globalActiveMemories = memories;
 
-                const thought = await this.gemini.generateThought(retrievalContext, memories, lifeStatus.language);
+                const thought = await this.gemini.generateThought(retrievalContext, memories, this.getEntityProfile());
 
                 console.log(`[Thought Loop] "${thought}"`);
                 this.globalCurrentThought = thought;

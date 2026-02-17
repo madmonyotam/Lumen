@@ -10,7 +10,7 @@ export type TierRange = "1-20" | "21-40" | "41-60" | "61-80" | "81-100";
 export interface CoreIdentity {
     name: string;
     gender: LumenGender;
-    lifespan: Date;
+    lifespan: number;
     language: LumenLanguage;
 }
 export interface LumenProfile {

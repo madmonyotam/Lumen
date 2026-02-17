@@ -13,6 +13,8 @@ import { MemoryService } from './cortex/MemoryService';
 import { GeminiService } from './services/ai/GeminiService';
 import { LifeCycleService } from './services/LifeCycleService';
 import { SERVER_CONFIG } from './config/server.config';
+import { mockPersona } from './prompts/testAssembly';
+import { LumenPersona } from './prompts/types';
 
 const app = express();
 app.use(cors());
@@ -30,6 +32,7 @@ const garminService = new GarminService();
 const temporalEngine = new TemporalEngine();
 const memoryService = new MemoryService();
 const geminiService = new GeminiService();
+
 const lifeCycle = new LifeCycleService(io, garminService, temporalEngine, memoryService, geminiService);
 
 // Health Check Endpoint
@@ -64,7 +67,7 @@ app.post('/api/genesis', (req, res) => {
     try {
         const { name, gender, traits, lifespan, language } = req.body;
 
-        if (!name || !gender || !traits || !lifespan) {
+        if (!name || !gender || !lifespan) {
             return res.status(400).json({ error: 'Missing genesis parameters' });
         }
 
@@ -133,11 +136,14 @@ app.post('/api/chat', async (req, res) => {
                 const memories = await memoryService.findSimilarMemories(retrievalContext, 3);
 
                 const biometrics = { bpm, stressIndex: stress, vitality };
-                const entityProfile = {
-                    name: lifeStatus.name,
-                    gender: lifeStatus.gender,
-                    language: lifeStatus.language,
-                    traits: lifeStatus.traits
+                const entityProfile: LumenPersona = {
+                    ...mockPersona,
+                    core: {
+                        name: lifeStatus.name,
+                        gender: lifeStatus.gender,
+                        lifespan: lifeStatus.lifespan,
+                        language: lifeStatus.language
+                    }
                 };
 
                 const response = await geminiService.generateCognitiveResponse(biometrics, memories, message, entityProfile);

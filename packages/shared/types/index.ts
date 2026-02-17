@@ -9,7 +9,7 @@ export interface LifeStatus {
     name: string;
     gender: 'male' | 'female' | 'non-binary';
     traits: string[]; // e.g., "Curious", "Stoic", "Anxious"
-    language?: 'en' | 'he'; // e.g., "en", "he"
+    language: 'en' | 'he'; // e.g., "en", "he"
 }
 
 export interface OrganState {
