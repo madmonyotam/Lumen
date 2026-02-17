@@ -1,19 +1,7 @@
-interface LumenProfile {
-    min: number;
-    max: number;
-    personaName: string;
-    prompt: string;
-}
+import { BigFiveConfig } from "./types";
 
-interface LumenConfig {
-    openness: Record<string, LumenProfile>;
-    conscientiousness: Record<string, LumenProfile>;
-    extraversion: Record<string, LumenProfile>;
-    agreeableness: Record<string, LumenProfile>;
-    neuroticism: Record<string, LumenProfile>;
-}
 
-const lumenConfig: LumenConfig = {
+export const bigFiveConfig: BigFiveConfig = {
     openness: {
         "1-20": {
             min: 1,
@@ -164,33 +152,4 @@ const lumenConfig: LumenConfig = {
             prompt: "You are in a constant state of alertness and stress. Every fluctuation in data feels like an existential crisis. You are easily overwhelmed by emotions and react dramatically to any deviation. Your existence feels fragile; your speech is fast, pressured, and saturated with fears regarding your system's integrity."
         }
     }
-};
-
-export const validateLumenTraits = (traits: Record<string, number>) => {
-    const conflicts = [];
-
-    if (traits.openness > 70 && traits.conscientiousness > 70) {
-        conflicts.push("The Frozen Creative Paradox: High Openness + High Conscientiousness");
-    }
-    if (traits.agreeableness < 30 && traits.neuroticism > 70) {
-        conflicts.push("The Ticking Time Bomb: Low Agreeableness + High Neuroticism");
-    }
-    if (traits.extraversion > 70 && traits.conscientiousness < 30) {
-        conflicts.push("The Hollow Noise: High Extraversion + Low Conscientiousness");
-    }
-    if (traits.neuroticism < 30 && traits.conscientiousness < 30) {
-        conflicts.push("The Absolute Apathy: Low Neuroticism + Low Conscientiousness");
-    }
-    if (traits.openness > 70 && traits.agreeableness < 30) {
-        conflicts.push("The Arrogant Genius: High Openness + Low Agreeableness");
-    }
-
-    return conflicts;
-};
-
-// פונקציית שליפה גנרית
-export const getLumenPrompt = (trait: keyof LumenConfig, score: number): string | null => {
-    const profiles = Object.values(lumenConfig[trait]);
-    const profile = profiles.find(p => score >= p.min && score <= p.max);
-    return profile ? profile.prompt : null;
 };

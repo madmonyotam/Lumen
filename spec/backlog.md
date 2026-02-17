@@ -107,20 +107,7 @@ Visualizing consciousness with a living, breathing memory system.
 | 8.3 | **Language Support:** Add Hebrew/English selection to Genesis screen and System Prompt. [View Spec](tasks/sprint_7/language_support.md) | 🔲 Todo | Fullstack |
 | 8.4 | **Visual Tuning:** Map memory `importance` and `time` to font size, opacity, and blur. | 🔲 Todo | Frontend |
 
-## 11. Sprint 8: Lumen Identity Genesis Wizard
-Implementing the onboarding system for "sculpting" Lumen's consciousness.
-
-| # | Ticket | Status | Owner |
-|---|--------|--------|-------|
-| 9.1 | **Core Identity & State:** Update `LumenPersona` interface (Name, Gender, Lifespan, Language) and State Management. | 🔲 Todo | Backend |
-| 9.2 | **Prompt Assembler:** Implement logic to partial-inject identity and support Hebrew/English `LUMEN_CORE_MECHANICS`. | 🔲 Todo | Backend |
-| 9.3 | **Wizard Step 0 (Identity):** UI for Name, Gender, Lifespan, Language with "Typewriter" effect. | 🔲 Todo | Frontend |
-| 9.4 | **Wizard Step 1 (Big Five):** 5 Sliders UI with Real-time `validateLumenTraits` conflict checks. | 🔲 Todo | Frontend |
-| 9.5 | **Wizard Step 2 (Values):** Drag & Drop UI for 24 Strengths -> 5 Signature Strengths + Validation. | 🔲 Todo | Frontend |
-| 9.6 | **Wizard Step 3 (Architecture):** Sliders for Attachment, Temperament, Cognitive, Shadow (Hidden) + Validation. | 🔲 Todo | Frontend |
-| 9.7 | **Wizard Orchestrator:** Manage multi-step wizard state and "Ignite Spark" final mutation action. | 🔲 Todo | Frontend |
-
-## 12. Bugs & Known Issues
+## 11. Bugs & Known Issues
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | - | - | - | - |
