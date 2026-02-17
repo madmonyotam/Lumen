@@ -1,4 +1,4 @@
-import { LifeStatus } from '@lumen/shared/types/index';
+import { LifeStatus, LumenPersona } from '@lumen/shared/types/index';
 import { BIO_CONFIG } from '../config/lumen-bio.config';
 
 export class TemporalEngine {
@@ -6,6 +6,7 @@ export class TemporalEngine {
     private birthTime: number = Date.now();
     private lifespan: number = 24 * 60 * 60 * 1000; // Default 24h
     private generation: number = 1;
+    private persona: LumenPersona | null = null;
     private name: string = "Lumen";
     private gender: 'male' | 'female' | 'non-binary' = 'non-binary';
     private language: 'en' | 'he' = 'en';
@@ -38,12 +39,15 @@ export class TemporalEngine {
         return this.subjectiveTime;
     }
 
-    reborn(payload: { name: string, gender: 'male' | 'female' | 'non-binary', traits: string[], lifespan: number, language?: 'en' | 'he' }) {
-        this.name = payload.name;
-        this.gender = payload.gender;
-        this.language = payload.language || 'en';
+    reborn(payload: { persona: LumenPersona, traits: string[] }) {
+        this.persona = payload.persona;
+        this.name = payload.persona.core.name;
+        this.gender = payload.persona.core.gender;
+        this.language = payload.persona.core.language || 'en';
+        this.lifespan = payload.persona.core.lifespan;
+
         this.traits = payload.traits;
-        this.lifespan = payload.lifespan;
+
         this.birthTime = Date.now();
         this.subjectiveTime = this.birthTime;
         this.generation++;
@@ -64,7 +68,8 @@ export class TemporalEngine {
             name: this.name,
             gender: this.gender,
             language: this.language,
-            traits: this.traits
+            traits: this.traits,
+            persona: this.persona || undefined
         };
     }
 

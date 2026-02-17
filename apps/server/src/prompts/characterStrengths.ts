@@ -1,12 +1,14 @@
+import { CharacterStrength } from "@lumen/shared";
+
 // הגדרת סוגי הקטגוריות של חוזקות האופי
-export type StrengthCategory = 'Wisdom' | 'Courage' | 'Humanity' | 'Justice' | 'Temperance' | 'Transcendence';
+// export type StrengthCategory = 'Wisdom' | 'Courage' | 'Humanity' | 'Justice' | 'Temperance' | 'Transcendence';
 
 // אפיון חוזקה בודדת
-export interface CharacterStrength {
-    label: string;
-    category: StrengthCategory;
-    description: string; // הפרומפט שמתאים לדירוג שלה (1-5)
-}
+// export interface CharacterStrength {
+//     label: string;
+//     category: StrengthCategory;
+//     description: string; // הפרומפט שמתאים לדירוג שלה (1-5)
+// }
 
 // האובייקט המלא של לומן - היררכיית ליבה
 export interface CoreHierarchy {
