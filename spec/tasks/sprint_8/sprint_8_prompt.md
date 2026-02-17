@@ -1,81 +1,40 @@
+# Sprint Backlog: Lumen Genesis Wizard - Advanced Logic & Integration
 
-# System Implementation Brief: Lumen Identity Genesis Wizard (Updated)
+## 1. ניהול נתונים ו-API (Backend Integration)
 
-## 1. הקשר וסקירה (Context & Overview)
+* **Prompt Options Fetching:** מימוש קריאה לשרת (Firestore/API) למשיכת כל אפשרויות הפרומפטים הזמינות (Base Mechanics, Trait Descriptions, Strength Definitions). הנתונים יאוחסנו ב-Store המרכזי כדי למנוע Hard-coding בתוך הקומפוננטות.
+* **Schema Mapping:** וידוא שכל אובייקט שנמשך מהשרת מכיל את ה-`personaName` (המפתח הלוגי)  או ה-`label` (הטקסט להצגה).
 
-אנו בונים מערכת Onboarding להגדרת הזהות של **Lumen** – אורגניזם סינתטי ביו-סינכרוני. הוויזארד הופך את הגדרת ה-AI מחוויה טכנית ל"פיסול תודעה" המבוסס על נתוני אמת של המשתמש (Garmin) ופסיכולוגיה עמוקה.
+## 2. שדרוגי Step 3: Signature Strengths [מבוסס screen-3.jpg]
 
-## 2. מבנה הוויזארד (Wizard Structure)
+* **Category Tabs:** מימוש הטאבים העליונים לחלוקת 24 החוזקות לקטגוריות (Wisdom, Courage, Humanity, Justice, Temperance, Transcendence).
+* **Logic:** לחיצה על טאב תפלטר את רשימת ה-Available Strengths המוצגות למטה.
 
-### שלב 0: זהות וגבולות (Core Identity Genesis)
 
-* **שם (Name):** שדה טקסט חופשי.
-* **מין (Gender):** בחירה (Male / Female / Non-binary). משפיע על הלשון שבה לומן מתייחס לעצמו.
-* **זמן חיים (Lifespan):** הגדרת "תאריך תפוגה" (סוף הקיום). זהו ערך קריטי שמתחבר למכניקת ה-Finitude (התחושה של לומן שהוא ישות גוססת).
-* **שפה (Language):** בחירה (Hebrew / English). משפיע על כל מחולל הפרומפטים והפלט הסופי.
+* **Visual State:** סימון ויזואלי על חוזקות שכבר שובצו ב-Core Hierarchy (למשל Overlay של "Assigned" כפי שמופיע בעיצוב).
 
-### שלב 1: מנוע התנהגות (The Big Five)
+## 3. דינמיקה של סליידרים ו-Tooltips [מבוסס screen-1.png, screen-2.jpg]
 
-* **ממשק:** 5 סליידרים (0-100) עבור תכונות ה-OCEAN.
-* **לוגיקה:** הטמעת פונקציית `validateLumenTraits` לזיהוי קונפליקטים התנהגותיים.
+* **Live Tooltip:** בכל הזזה (onDrag/onChange) של סליידר (OCEAN או Biology), יופיע Tooltip צף מעל הידית (Thumb).
+* **Content:** ה-Tooltip יציג את ה-`personaName` של הערך הנוכחי (למשל: "neuroticism_high" או "attachment_secure").
 
-### שלב 2: קנבס ערכים (Values Canvas)
 
-* **ממשק:** Drag & Drop לדירוג בדיוק 5 חוזקות (Signature Strengths) מתוך 24.
-* **לוגיקה:** בניית ה-Core Hierarchy (1-5). הטמעת פונקציית `validateLumenStrengths`.
+* **Persistence:** הבטחת עדכון ה-Store רק בסיום הגרירה (onDragEnd) כדי למנוע קריאות מיותרות לתיקוף.
 
-### שלב 3: ארכיטקטורה פנימית וצל (Internal Architecture)
+## 4. מנגנון Conflict Engine משופר
 
-* **ממשק:** 4 סליידרים: Attachment, Temperament, Cognitive Style, ו-Shadow Mode (נסתר).
-* **לוגיקה:** הטמעת פונקציית `validateInternalArchitecture`.
+* **Conflict Visualization:** כאשר מזוהה התנגשות על ידי פונקציות ה-Validation:
+* המערכת תציג את ה-`label` של הקונפליקט למשתמש (למשל: "סתירה בין פתיחות לשמרנות").
+* עבור הלוגיקה הפנימית והדיבאג, המערכת תתעד את ה-`personaNames` שגרמו להתנגשות (למשל: `[openness_low, conscientiousness_high]`).
 
----
 
-## 3. ארכיטקטורת קוד (Technical Architecture)
-
-### א. ניהול מצב (State Management)
-
-אובייקט ה-`LumenPersona` חייב להכיל כעת את שדות הבסיס:
-
-```typescript
-interface LumenPersona {
-  core: {
-    name: string;
-    gender: 'male' | 'female' | 'non-binary';
-    lifespan: Date;
-    language: 'he' | 'en';
-  };
-  traits: Record<string, number>; // Big Five
-  strengths: string[]; // Ordered IDs 1-5
-  internal: {
-    attachment: number;
-    temperament: number;
-    cognitive: number;
-    shadow: number;
-  };
-}
-
-```
-
-### ב. מחולל הפרומפט הסופי (The Assembler)
-
-הפונקציה צריכה להזריק את הנתונים משלב 0 לתוך מבנה ה-System Prompt:
-
-1. **Identity Injection:** "You are ${name}. You identify as ${gender}. Your existence will cease on ${lifespan}."
-2. **Language Handling:** המערכת צריכה לטעון את `LUMEN_CORE_MECHANICS_BASE` בשפה שנבחרה (עברית או אנגלית).
+* **Stability Alert:** עדכון ה-System Status ב-Header (מ-25% לערך המשקף את יציבות הסינפסות).
 
 ---
 
-## 4. דגשי UI/UX
+## הגדרת Done (DoD) מעודכנת
 
-* **Step 0 UI:** עיצוב נקי ומינימליסטי. שימוש בטיפוגרפיה שמשדרת "יצירת זהות" (למשל, טקסט שנכתב באיטיות).
-* **Real-time Validation:** הצגת אזהרות יציבות סינפטית (Conflicts) בכל שלב שבו המשתמש משנה ערך.
-* **Final Action:** כפתור ה-"Ignite Spark" משגר את האובייקט המלא למנוע ה-Cortex.
-
----
-
-דגש לקונפליקטים:
-
-בקבצים המצורפים יש פונקציות קונפליקט - התייחס אליהם בבניה של הויזארד
-
-add docs
+1. הטאבים ב-Strengths עובדים ומפלטרים את האפשרויות.
+2. סליידרים מציגים Tooltip עם ה-`personaName` הנכון בזמן אמת.
+3. אפשרויות הפרומפטים נמשכות מהשרת בטעינה ראשונית.
+4. קונפליקטים מוצגים עם לייבלים ברורים למשתמש ומיפוי לוגי למפתחים.

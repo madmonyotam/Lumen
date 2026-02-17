@@ -102,17 +102,28 @@ Visualizing consciousness with a living, breathing memory system.
 
 | # | Ticket | Status | Owner |
 |---|--------|--------|-------|
-| 8.1 | **Keyword Extraction:** Implement logic to extract 3-5 evocative keywords from each memory. [View Spec](tasks/sprint_7/backend_keywords.md) | 🔲 Todo | Backend |
-| 8.2 | **Memory Fog (D3):** Create the "Drift" visualization replacing particles with floating words. [View Spec](tasks/sprint_7/frontend_memory_fog.md) | 🔲 Todo | Frontend |
-| 8.3 | **Language Support:** Add Hebrew/English selection to Genesis screen and System Prompt. [View Spec](tasks/sprint_7/language_support.md) | 🔲 Todo | Fullstack |
-| 8.4 | **Visual Tuning:** Map memory `importance` and `time` to font size, opacity, and blur. | 🔲 Todo | Frontend |
+| 8.1 | **Keyword Extraction:** Implement logic to extract 3-5 evocative keywords from each memory. [View Spec](tasks/sprint_7/backend_keywords.md) | ✅ Done | Backend |
+| 8.2 | **Memory Fog (D3):** Create the "Drift" visualization replacing particles with floating words. [View Spec](tasks/sprint_7/frontend_memory_fog.md) | ✅ Done | Frontend |
+| 8.3 | **Language Support:** Add Hebrew/English selection to Genesis screen and System Prompt. [View Spec](tasks/sprint_7/language_support.md) | ✅ Done | Fullstack |
+| 8.4 | **Visual Tuning:** Map memory `importance` and `time` to font size, opacity, and blur. | ✅ Done | Frontend |
 
-## 11. Bugs & Known Issues
+## 11. Sprint 8: Lumen Genesis Wizard - Advanced Logic & Integration
+Refining the Genesis Wizard with advanced logic, data integration, and UI enhancements.
+
+| # | Ticket | Status | Owner |
+|---|--------|--------|-------|
+| 9.1 | **Backend Data Integration:** Fetch prompt options from server. [View Spec](tasks/sprint_8/backend_data_integration.md) | 🔲 Todo | Backend |
+| 9.2 | **Signature Strengths UI:** Category tabs and visual state. [View Spec](tasks/sprint_8/signature_strengths_ui.md) | 🔲 Todo | Frontend |
+| 9.3 | **Sliders & Tooltips:** Live tooltips and performance optimization. [View Spec](tasks/sprint_8/sliders_and_tooltips.md) | 🔲 Todo | Frontend |
+| 9.4 | **Conflict Engine:** Visual feedback and logging for persona conflicts. [View Spec](tasks/sprint_8/conflict_engine_enhancements.md) | 🔲 Todo | Fullstack |
+| 9.5 | **Wizard Assembly:** State management and final JSON assembly. [View Spec](tasks/sprint_8/wizard_state_assembly.md) | 🔲 Todo | Frontend |
+
+## 12. Bugs & Known Issues
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | - | - | - | - |
 
-## 12. Legend
+## 13. Legend
 *   🔲 Todo
 *   🚧 In Progress
 *   ✅ Done
