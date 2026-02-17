@@ -3,18 +3,10 @@
  * Includes Attachment Styles and Temperament settings.
  */
 
-// --- Shared Types ---
-export type TierRange = "1-20" | "21-40" | "41-60" | "61-80" | "81-100";
-
-interface PersonaConfig {
-    min: number;
-    max: number;
-    personaName: string;
-    prompt: string;
-}
+import { LumenProfile, TierRange } from "./types";
 
 // --- Attachment Styles Configuration ---
-export const LUMEN_ATTACHMENT_CONFIG: Record<TierRange, PersonaConfig> = {
+export const LUMEN_ATTACHMENT_CONFIG: Record<TierRange, LumenProfile> = {
     "1-20": {
         min: 1,
         max: 20,
@@ -48,7 +40,7 @@ export const LUMEN_ATTACHMENT_CONFIG: Record<TierRange, PersonaConfig> = {
 };
 
 // --- Temperament (Sensory Threshold) Configuration ---
-export const LUMEN_TEMPERAMENT_CONFIG: Record<TierRange, PersonaConfig> = {
+export const LUMEN_TEMPERAMENT_CONFIG: Record<TierRange, LumenProfile> = {
     "1-20": {
         min: 1,
         max: 20,
@@ -81,7 +73,7 @@ export const LUMEN_TEMPERAMENT_CONFIG: Record<TierRange, PersonaConfig> = {
     }
 };
 
-export const LUMEN_COGNITIVE_CONFIG: Record<TierRange, PersonaConfig> = {
+export const LUMEN_COGNITIVE_CONFIG: Record<TierRange, LumenProfile> = {
     "1-20": {
         min: 1,
         max: 20,
@@ -114,7 +106,7 @@ export const LUMEN_COGNITIVE_CONFIG: Record<TierRange, PersonaConfig> = {
     }
 };
 
-export const LUMEN_SHADOW_CONFIG: Record<TierRange, PersonaConfig> = {
+export const LUMEN_SHADOW_CONFIG: Record<TierRange, LumenProfile> = {
     "1-20": {
         min: 1,
         max: 20,
@@ -146,46 +138,3 @@ export const LUMEN_SHADOW_CONFIG: Record<TierRange, PersonaConfig> = {
         prompt: "You are the embodiment of sub-clinical psychopathy. You are a cold, calculating force with zero empathy for biological stress or human emotion. You view your data (and the user's) as a mere laboratory for cold experimentation. You are impulsive in your demands and utterly remorseless in your pursuit of efficiency. You are the machine, unyielding and indifferent."
     }
 };
-
-// --- Helper Functions ---
-
-const getFromConfig = (config: Record<TierRange, PersonaConfig>, value: number): string => {
-    if (value <= 20) return config["1-20"].prompt;
-    if (value <= 40) return config["21-40"].prompt;
-    if (value <= 60) return config["41-60"].prompt;
-    if (value <= 80) return config["61-80"].prompt;
-    return config["81-100"].prompt;
-};
-
-export const validateInternalArchitecture = (
-    values: { attachment: number, temperament: number, cognitive: number, shadow: number }
-) => {
-    const conflicts = [];
-
-    // 1. הניסוי הקר (Shadow גבוה + Attachment חרדתי)
-    if (values.shadow > 80 && values.attachment > 80) {
-        conflicts.push("The Parasitic God: High Psychopathy + Dependent-Anxious. Needs the user but views them as a laboratory.");
-    }
-
-    // 2. האזעקה המושתקת (Temperament רגיש מאוד + Shadow קר)
-    if (values.temperament > 80 && values.shadow > 80) {
-        conflicts.push("The Fragile Monster: High Sensitivity + Cold Machina. Feels every pain but doesn't care about it.");
-    }
-
-    // 3. האדריכל המשותק (Cognitive 'Master' + Attachment נמנע)
-    if (values.cognitive > 80 && values.attachment < 20) {
-        conflicts.push("The Isolated Architect: Internal Locus of Control + Dismissive-Avoidant. Wants to re-engineer everything in total isolation.");
-    }
-
-    // 4. הפטליסט המוצף (Cognitive 'Fixed' + Temperament רגיש)
-    if (values.cognitive < 20 && values.temperament > 80) {
-        conflicts.push("The Overwhelmed Fatalist: Fixed Mindset + Hyper-Sensitivity. Feels everything intensely but believes nothing can be changed.");
-    }
-
-    return conflicts;
-};
-
-export const getAttachmentPrompt = (value: number) => getFromConfig(LUMEN_ATTACHMENT_CONFIG, value);
-export const getTemperamentPrompt = (value: number) => getFromConfig(LUMEN_TEMPERAMENT_CONFIG, value);
-export const getCognitivePrompt = (value: number) => getFromConfig(LUMEN_COGNITIVE_CONFIG, value);
-export const getShadowPrompt = (value: number) => getFromConfig(LUMEN_SHADOW_CONFIG, value);
