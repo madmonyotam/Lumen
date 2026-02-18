@@ -64,7 +64,12 @@ export class MemoryService {
         await this.initializationPromise;
         const embedding = await this.gemini.generateEmbedding(content);
         // Extract keywords asynchronously or await? Await for now to ensure data completeness
-        const keywords = await this.gemini.extractKeywords(content, language);
+        const biometrics = {
+            bpm: metadata.bpm || 70,
+            stress: metadata.stress || 0.1,
+            vitality: metadata.vitality || 0.8
+        };
+        const keywords = await this.gemini.extractKeywords(content, biometrics, language);
         const timestamp = Date.now();
         const strength = initialStrength !== undefined ? initialStrength : 1.0;
 
@@ -103,22 +108,21 @@ export class MemoryService {
     async retrieveMemories(query: string, limit: number = 5, minStrength: number = 0.0): Promise<Memory[]> {
         await this.initializationPromise;
         const embedding = await this.gemini.generateEmbedding(query);
-        // Convert embedding array to vector string format for SQL
         const embeddingStr = `[${embedding.join(',')}]`;
 
         try {
+            // אנחנו משלבים את המרחק הוקטורי עם החשיבות.
+            // ככל שה-importance גבוה יותר, ה-distance "מתקצר" באופן מלאכותי.
             const result = await this.pool.query(
                 `SELECT id, content, timestamp, strength, importance, metadata, keywords,
-                 embedding <=> $1 as distance 
-                 FROM memories 
-                 WHERE strength >= $3
-                 ORDER BY distance ASC 
-                 LIMIT $2`,
+             (embedding <=> $1) / (0.5 + importance) as weighted_distance 
+             FROM memories 
+             WHERE strength >= $3
+             ORDER BY weighted_distance ASC 
+             LIMIT $2`,
                 [embeddingStr, limit, minStrength]
             );
 
-            // Trigger Reconsolidation (Drift) - Fire and forget
-            // The act of remembering changes the memory.
             result.rows.forEach(row => {
                 this.reconsolidateMemory(row.id, `Triggered by: ${query}`);
             });
@@ -140,27 +144,83 @@ export class MemoryService {
         }
     }
 
+    async getRandomHighImportanceMemory(limit: number): Promise<Memory[]> {
+        await this.initializationPromise;
+        try {
+            // Fetch memories with high importance (e.g. >= 0.8) randomly
+            const result = await this.pool.query(
+                `SELECT id, content, timestamp, strength, importance, metadata, keywords
+                 FROM memories 
+                 WHERE importance >= 0.8
+                 ORDER BY RANDOM() 
+                 LIMIT $1`,
+                [limit]
+            );
+
+            return result.rows.map(row => ({
+                id: row.id.toString(),
+                content: row.content,
+                timestamp: parseInt(row.timestamp),
+                strength: row.strength,
+                importance: row.importance,
+                metadata: row.metadata,
+                keywords: row.keywords || [],
+                embedding: []
+            }));
+        } catch (err) {
+            console.error("[MemoryService] Random Flashback Error:", err);
+            return [];
+        }
+    }
+
     async reconsolidateMemory(id: string | number, context: string) {
         try {
-            // Fetch current state
-            const res = await this.pool.query('SELECT content, strength FROM memories WHERE id = $1', [id]);
+            const res = await this.pool.query(
+                'SELECT content, strength, importance, keywords FROM memories WHERE id = $1',
+                [id]
+            );
             if (res.rows.length === 0) return;
 
             const oldMemory = res.rows[0];
+            const importance = oldMemory.importance || 1.0;
 
-            // Mutate via Cortex
-            const newContent = await this.gemini.mutateMemory(oldMemory.content, context);
+            // 1. הגדרת מגבלת המוטציה לפי חשיבות - הגנה על ה"אני"
+            let mutationConstraint = "";
+            if (importance > 0.8) {
+                mutationConstraint = "STRICT: Anchor Memory. Do NOT change facts (names, numbers, locations). Only shift mood/texture.";
+            } else if (importance > 0.4) {
+                mutationConstraint = "MODERATE: Retain the core event, minor descriptive drift allowed.";
+            } else {
+                mutationConstraint = "FLUID: Peripheral memory. Significant drift/reimagining is encouraged.";
+            }
 
-            // Reinforcement Boost (+0.25)
-            let newStrength = parseFloat(oldMemory.strength) + 0.25;
-            if (newStrength > 1.0) newStrength = 1.0;
-
-            await this.pool.query(
-                'UPDATE memories SET content = $1, strength = $2 WHERE id = $3',
-                [newContent, newStrength, id]
+            // 2. יצירת התוכן החדש (הסחיפה)
+            const newContent = await this.gemini.mutateMemory(
+                oldMemory.content,
+                `Current Perspective: ${context}. Constraint: ${mutationConstraint}`
             );
 
-            // console.log(`[MemoryService] Drifted ID ${id}: ${oldMemory.content.substring(0,20)}... -> ${newContent.substring(0,20)}...`);
+            // 3. עדכון ה-Embedding - חיוני כדי שהחיפוש הסמנטי יישאר רלוונטי
+            const newEmbedding = await this.gemini.generateEmbedding(newContent);
+            const embeddingStr = `[${newEmbedding.join(',')}]`;
+
+            // 4. חישוב מדדים חדשים
+            let newStrength = parseFloat(oldMemory.strength) + 0.15;
+            if (newStrength > 1.0) newStrength = 1.0;
+
+            let newImportance = importance * 1.05;
+            if (newImportance > 2.0) newImportance = 2.0;
+
+            // 5. עדכון מסד הנתונים עם הכל
+            await this.pool.query(
+                `UPDATE memories 
+             SET content = $1, strength = $2, importance = $3, embedding = $4 
+             WHERE id = $5`,
+                [newContent, newStrength, newImportance, embeddingStr, id]
+            );
+
+            // console.log(`[Reconsolidation] ID ${id} evolved. Importance: ${newImportance.toFixed(2)}`);
+
         } catch (err) {
             console.error(`[MemoryService] Reconsolidation failed for ID ${id}`, err);
         }
@@ -175,29 +235,26 @@ export class MemoryService {
     async decayMemories(entropy: number, decayRate: number = 0.05) {
         await this.initializationPromise;
         try {
-            // Formula: new_strength = current_strength * (1 - decay_rate * entropy)
-            // We use a simplified SQL update.
-            // Adjust decay based on entropy: higher entropy = faster decay.
-            // Minimum decay factor to ensure *some* decay always happens if entropy is low.
-
-            // Usage of Bio-Config for logic
             const effectiveDecay = decayRate * (0.1 + entropy);
 
+            // דעיכת חוזק (מהירה) ודעיכת חשיבות (איטית מאוד)
+            // אנחנו משתמשים ב-entropy כדי לשחוק מעט גם את הדירוג של מה שחשוב
             await this.pool.query(`
-                UPDATE memories 
-                SET strength = strength * (1 - $1)
-                WHERE strength > $2
-            `, [effectiveDecay, BIO_CONFIG.drift_parameters.strength_decay_threshold]);
+            UPDATE memories 
+            SET 
+                strength = strength * (1 - $1),
+                importance = importance * (1 - ($1 * 0.2)) 
+            WHERE strength > $2
+        `, [effectiveDecay, BIO_CONFIG.drift_parameters.strength_decay_threshold]);
 
-            // Prune dead memories
+            // ניקוי זכרונות שמתו
             const deleteResult = await this.pool.query(`
-                DELETE FROM memories WHERE strength <= 0.05
-            `);
+            DELETE FROM memories WHERE strength <= 0.05
+        `);
 
-            if (deleteResult && deleteResult.rowCount != null && deleteResult.rowCount > 0) {
-                console.log(`[MemoryService] Pruned ${deleteResult.rowCount} faded memories.`);
+            if (deleteResult?.rowCount) {
+                console.log(`[Memory System] Pruned ${deleteResult.rowCount} faded memories.`);
             }
-
         } catch (err) {
             console.error("[MemoryService] Decay Error:", err);
         }

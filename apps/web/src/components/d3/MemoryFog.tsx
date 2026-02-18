@@ -81,7 +81,7 @@ export const MemoryFog: React.FC = () => {
                 return wordsList.map((text, index) => ({
                     id: `${memory.id}-${index}`,
                     text: text.toUpperCase(),
-                    size: 0.1 + importance * 0.8,
+                    size: importance * 0.3,
                     blur: 0.3 + (1 - strength) * 0.5,
                     color: color,
                     createdAt: Date.now()
