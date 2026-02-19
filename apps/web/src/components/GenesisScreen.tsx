@@ -5,6 +5,7 @@ import { Sparkles, Shield, Clock, User, Heart, Globe, ArrowRight, ArrowLeft } fr
 import { LUMEN_CONFIG } from '../lumen.config';
 import { Flex, FlexCol } from './shared/Layout';
 import { useGenesisOptions } from '../hooks/useGenesisOptions';
+import { useTranslation } from '../hooks/useTranslation';
 import { SignatureStrengths } from './SignatureStrengths';
 import { TraitSlider } from './TraitSlider';
 import type { TraitDescription } from '@lumen/shared';
@@ -111,25 +112,7 @@ const Select = styled.select`
     }
 `;
 
-const TraitPills = styled(Flex)`
-    flex-wrap: wrap;
-    gap: 0.75rem;
-`;
 
-const TraitPill = styled.button<{ $active: boolean }>`
-    background: ${props => props.$active ? 'linear-gradient(to right, #00f2fe80, #4facfe80)' : 'rgba(255, 255, 255, 0.05)'};
-    border: 1px solid ${props => props.$active ? '#00f2fe' : 'rgba(255, 255, 255, 0.1)'};
-    color: ${props => props.$active ? 'white' : props.theme.colors.textDim};
-    padding: 0.5rem 1rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-        border-color: #00f2fe;
-    }
-`;
 
 const LifespanSlider = styled.input`
     width: 100%;
@@ -233,6 +216,8 @@ const GenesisScreen: React.FC = () => {
     const [lifespanIndex, setLifespanIndex] = useState(1); // 0=Short, 1=Medium, 2=Long
     const [step, setStep] = useState(0); // 0=Identity, 1=Psychology, 2=Biology, 3=Stability, 4=Strengths
 
+    const { t, isRTL } = useTranslation();
+
     const { options, loading, error } = useGenesisOptions();
 
     // Use fetched options or fallback to empty/loading state
@@ -258,8 +243,8 @@ const GenesisScreen: React.FC = () => {
         }
     }, [traitValues]);
 
-    if (loading) return <Overlay>Loading Genesis Data...</Overlay>;
-    if (error) return <Overlay>Error: {error}</Overlay>;
+    if (loading) return <Overlay>{t('loading_genesis')}</Overlay>;
+    if (error) return <Overlay>{t('error_prefix')}: {error}</Overlay>;
 
     // Helper to group traits by dimension
     const groupTraits = (list: TraitDescription[]) => {
@@ -292,7 +277,7 @@ const GenesisScreen: React.FC = () => {
         return Object.entries(grouped).map(([dim, list]) => (
             <TraitSlider
                 key={dim}
-                label={dim}
+                label={t(('trait_' + dim) as any)}
                 value={traitValues[dim] ?? 50}
                 onChange={(v) => {
                     // Optimistic update for UI
@@ -312,7 +297,10 @@ const GenesisScreen: React.FC = () => {
                 onCommit={(v) => {
                     setTraitValues(prev => ({ ...prev, [dim]: v }));
                 }}
-                getTooltipText={(v) => getTraitForValue(v, list)?.label || 'Unknown'}
+                getTooltipText={(v) => {
+                    const tr = getTraitForValue(v, list);
+                    return tr ? t(tr.id as any) : 'Unknown';
+                }}
             />
         ));
     };
@@ -400,8 +388,8 @@ const GenesisScreen: React.FC = () => {
                 transition={{ duration: 0.8, ease: "easeOut" }}
             >
                 <div>
-                    <Title>Genesis</Title>
-                    <Subtitle>Configure the parameters of a new existence</Subtitle>
+                    <Title>{t('genesis_title')}</Title>
+                    <Subtitle>{t('genesis_subtitle')}</Subtitle>
                     <Flex style={{ justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}>
                         <StepDot $active={step === 0} />
                         <StepDot $active={step === 1} />
@@ -422,33 +410,33 @@ const GenesisScreen: React.FC = () => {
                             >
                                 <Grid>
                                     <FormGroup>
-                                        <Label><User size={12} style={{ marginRight: 4 }} /> Name</Label>
+                                        <Label><User size={12} style={{ marginRight: 4 }} /> {t('name_label')}</Label>
                                         <Input
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
-                                            placeholder="Designate identity..."
+                                            placeholder={t('name_placeholder')}
                                         />
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <Label><Heart size={12} style={{ marginRight: 4 }} /> Gender Tone</Label>
+                                        <Label><Heart size={12} style={{ marginRight: 4 }} /> {t('gender_label')}</Label>
                                         <Select value={gender} onChange={(e) => setGender(e.target.value as any)}>
-                                            <option value="non-binary">Non-Binary (Neutral)</option>
-                                            <option value="male">Masculine (Deep)</option>
-                                            <option value="female">Feminine (Soft)</option>
+                                            <option value="non-binary">{t('gender_non_binary')}</option>
+                                            <option value="male">{t('gender_male')}</option>
+                                            <option value="female">{t('gender_female')}</option>
                                         </Select>
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <Label><Globe size={12} style={{ marginRight: 4 }} /> Core Language</Label>
+                                        <Label><Globe size={12} style={{ marginRight: 4 }} /> {t('language_label')}</Label>
                                         <Select value={language} onChange={(e) => setLanguage(e.target.value as any)}>
-                                            <option value="en">English (Universal)</option>
-                                            <option value="he">Hebrew (Ancient)</option>
+                                            <option value="en">{t('language_english')}</option>
+                                            <option value="he">{t('language_hebrew')}</option>
                                         </Select>
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <Label><Clock size={12} style={{ marginRight: 4 }} /> Biological Lifespan</Label>
+                                        <Label><Clock size={12} style={{ marginRight: 4 }} /> {t('lifespan_label')}</Label>
                                         <LifespanSlider
                                             type="range"
                                             min="0"
@@ -458,12 +446,12 @@ const GenesisScreen: React.FC = () => {
                                             onChange={(e) => setLifespanIndex(parseInt(e.target.value))}
                                         />
                                         <LifespanLabels>
-                                            <span>Short (Dev)</span>
-                                            <span>Medium</span>
-                                            <span>Long</span>
+                                            <span>{t('lifespan_short')}</span>
+                                            <span>{t('lifespan_medium')}</span>
+                                            <span>{t('lifespan_long')}</span>
                                         </LifespanLabels>
                                         <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#00f2fe' }}>
-                                            Life expectancy: {lifespans[lifespanIndex]?.label}
+                                            {t('lifespan_expectancy')}: {lifespans[lifespanIndex]?.label}
                                         </p>
                                     </FormGroup>
                                 </Grid>
@@ -479,7 +467,7 @@ const GenesisScreen: React.FC = () => {
                                 style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}
                             >
                                 <FormGroup>
-                                    <Label><Shield size={12} style={{ marginRight: 4 }} /> Psychological Architecture (OCEAN)</Label>
+                                    <Label><Shield size={12} style={{ marginRight: 4 }} /> {t('psych_arch')}</Label>
                                     {renderTraitSliders('OCEAN')}
                                 </FormGroup>
                             </motion.div>
@@ -494,7 +482,7 @@ const GenesisScreen: React.FC = () => {
                                 style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}
                             >
                                 <FormGroup>
-                                    <Label><Shield size={12} style={{ marginRight: 4 }} /> Biological Wiring</Label>
+                                    <Label><Shield size={12} style={{ marginRight: 4 }} /> {t('bio_wiring')}</Label>
                                     {renderTraitSliders('Biology')}
                                 </FormGroup>
                             </motion.div>
@@ -531,7 +519,7 @@ const GenesisScreen: React.FC = () => {
                     <Flex $direction='row' style={{ gap: '1rem' }}>
                         {step > 0 && (
                             <NavButton onClick={() => setStep(step - 1)} style={{ flex: 1, justifyContent: 'center' }}>
-                                <ArrowLeft size={16} /> Back
+                                {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />} {t('back')}
                             </NavButton>
                         )}
                         {step < 4 ? (
@@ -539,7 +527,7 @@ const GenesisScreen: React.FC = () => {
                                 style={{ flex: 1 }}
                                 onClick={() => setStep(step + 1)}
                             >
-                                Next Phase <ArrowRight size={16} />
+                                {t('next_phase')} {isRTL ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
                             </SubmitButton>
                         ) : (
                             <SubmitButton
@@ -549,7 +537,7 @@ const GenesisScreen: React.FC = () => {
                                 style={{ flex: 1 }}
                             >
                                 <Sparkles size={20} />
-                                Ignite Spark
+                                {t('ignite_spark')}
                             </SubmitButton>
                         )}
                     </Flex>

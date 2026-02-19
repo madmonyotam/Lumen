@@ -4,6 +4,7 @@ import { motion, Reorder } from 'framer-motion';
 import type { StrengthDefinition, StrengthCategory } from '@lumen/shared';
 import { Flex, FlexCol } from './shared/Layout';
 import { X } from 'lucide-react';
+import { useTranslation } from '../hooks/useTranslation';
 
 const Container = styled(FlexCol)`
     gap: 1.5rem;
@@ -150,6 +151,12 @@ interface Props {
 
 export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, selectedIds, onUpdateSelection }) => {
     const [activeTab, setActiveTab] = useState<StrengthCategory>('Wisdom');
+    const { t } = useTranslation();
+
+    const getTranslatedCategory = (cat: string) => {
+        const key = `strength_${cat.toLowerCase()}` as any;
+        return t(key);
+    };
 
     const handleSelect = (id: string) => {
         if (selectedIds.includes(id)) return;
@@ -174,7 +181,7 @@ export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, select
                         $active={activeTab === cat}
                         onClick={() => setActiveTab(cat)}
                     >
-                        {cat}
+                        {getTranslatedCategory(cat)}
                     </Tab>
                 ))}
             </Tabs>
@@ -194,7 +201,7 @@ export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, select
                                     layoutId={strength.id}
                                     style={{ opacity: isSelected ? 0.5 : 1, cursor: isSelected ? 'default' : 'pointer' }}
                                 >
-                                    {strength.label}
+                                    {t(('strength_' + strength.id.replace(/-/g, '_')) as any)}
                                 </StrengthCard>
                             );
                         })}
@@ -203,7 +210,7 @@ export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, select
                 {/* Right: Ranking Zone */}
                 <RankingZone>
                     <h4 style={{ marginBottom: '1rem', color: '#fff', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                        Core Signature ({selectedIds.length}/5)
+                        {t('core_signature')} ({selectedIds.length}/5)
                     </h4>
 
                     <Reorder.Group axis="y" values={selectedIds} onReorder={handleReorder}>
@@ -214,7 +221,7 @@ export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, select
                                 <RankSlot key={id} value={id}>
                                     <Flex style={{ alignItems: 'center' }}>
                                         <RankNumber>0{index + 1}</RankNumber>
-                                        <span>{strength.label}</span>
+                                        <span>{t(('strength_' + strength.id.replace(/-/g, '_')) as any)}</span>
                                     </Flex>
                                     <RemoveBtn onClick={() => handleRemove(id)}>
                                         <X size={14} />
@@ -227,7 +234,7 @@ export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, select
                     {/* Empty Slots */}
                     {Array.from({ length: 5 - selectedIds.length }).map((_, i) => (
                         <EmptySlot key={`empty-${i}`}>
-                            Empty Slot 0{selectedIds.length + i + 1}
+                            {t('empty_slot')} 0{selectedIds.length + i + 1}
                         </EmptySlot>
                     ))}
                 </RankingZone>

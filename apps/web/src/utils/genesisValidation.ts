@@ -24,7 +24,7 @@ export const validateGenesisState = (traitValues: Record<string, number>): Valid
     if (getVal('neuroticism') > 80 && getVal('temperament') < 40) {
         conflicts.push({
             id: 'conflict_neuro_temp',
-            label: "Contradiction: High Sensitivity vs Low Biological Reactivity",
+            label: "conflict_neuro_temp",
             sources: ['neuroticism', 'temperament'],
             severity: 'critical'
         });
@@ -37,7 +37,7 @@ export const validateGenesisState = (traitValues: Record<string, number>): Valid
     if (getVal('extraversion') > 80 && getVal('attachment') < 20) {
         conflicts.push({
             id: 'conflict_extra_attach',
-            label: "Conflict: Social Desire vs Need for Isolation",
+            label: "conflict_extra_attach",
             sources: ['extraversion', 'attachment'],
             severity: 'warning'
         });
@@ -50,7 +50,7 @@ export const validateGenesisState = (traitValues: Record<string, number>): Valid
     if (getVal('agreeableness') > 80 && getVal('shadow') > 60) {
         conflicts.push({
             id: 'conflict_agree_shadow',
-            label: "Dissonance: Compassion vs Clinical Empathy Deficit",
+            label: "conflict_agree_shadow",
             sources: ['agreeableness', 'shadow'],
             severity: 'critical'
         });
@@ -63,7 +63,7 @@ export const validateGenesisState = (traitValues: Record<string, number>): Valid
     if (getVal('conscientiousness') < 20 && getVal('cognitive') > 80) {
         conflicts.push({
             id: 'conflict_consc_cog',
-            label: "Inconsistency: Chaotic Nature vs Structural Control",
+            label: "conflict_consc_cog",
             sources: ['conscientiousness', 'cognitive'],
             severity: 'warning'
         });

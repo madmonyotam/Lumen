@@ -3,6 +3,7 @@ import styled, { useTheme } from 'styled-components';
 import { motion } from 'framer-motion';
 import { Heart, Activity, Zap } from 'lucide-react';
 import { Flex, FlexCol } from '../shared/Layout';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const Card = styled.div<{ $borderColor?: string }>`
   background-color: ${props => props.theme.colors.card};
@@ -80,66 +81,67 @@ const StressBarFill = styled(motion.div)`
 `;
 
 interface MetricCardProps {
-    bpm: number;
-    stressIndex: number;
-    hrv: number;
+  bpm: number;
+  stressIndex: number;
+  hrv: number;
 }
 
 export const MetricCards: React.FC<MetricCardProps> = ({ bpm, stressIndex, hrv }) => {
-    const theme = useTheme();
+  const theme = useTheme();
+  const { t } = useTranslation();
 
-    return (
-        <FlexCol style={{ gridColumn: 'span 2', gap: '1.25rem' }}>
-            {/* Heart Rate */}
-            <Card $borderColor={`${theme.colors.teal}80`}>
-                <CardHeader>
-                    <Heart size={20} color={theme.colors.teal} />
-                    <CardTitle>HEART RATE</CardTitle>
-                </CardHeader>
-                <MetricContainer>
-                    <MetricValue>{bpm}</MetricValue>
-                    <MetricLabel>BPM</MetricLabel>
-                </MetricContainer>
-                <HeartRateVisual>
-                    {[0.3, 0.5, 0.4, 0.8, 0.6, 0.9, 0.7, 0.4, 0.6, 0.5].map((h, i) => (
-                        <HeartBar
-                            key={i}
-                            animate={{ height: `${(h + Math.random() * 0.2) * 100}%` }}
-                            transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse", delay: i * 0.1 }}
-                        />
-                    ))}
-                </HeartRateVisual>
-            </Card>
+  return (
+    <FlexCol style={{ gridColumn: 'span 2', gap: '1.25rem' }}>
+      {/* Heart Rate */}
+      <Card $borderColor={`${theme.colors.teal}80`}>
+        <CardHeader>
+          <Heart size={20} color={theme.colors.teal} />
+          <CardTitle>{t('heart_rate')}</CardTitle>
+        </CardHeader>
+        <MetricContainer>
+          <MetricValue>{bpm}</MetricValue>
+          <MetricLabel>BPM</MetricLabel>
+        </MetricContainer>
+        <HeartRateVisual>
+          {[0.3, 0.5, 0.4, 0.8, 0.6, 0.9, 0.7, 0.4, 0.6, 0.5].map((h, i) => (
+            <HeartBar
+              key={i}
+              animate={{ height: `${(h + Math.random() * 0.2) * 100}%` }}
+              transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse", delay: i * 0.1 }}
+            />
+          ))}
+        </HeartRateVisual>
+      </Card>
 
-            {/* Stress Index */}
-            <Card $borderColor={`${theme.colors.purple}80`}>
-                <CardHeader>
-                    <Zap size={20} color={theme.colors.purple} />
-                    <CardTitle>STRESS INDEX</CardTitle>
-                </CardHeader>
-                <MetricContainer style={{ marginBottom: '1rem' }}>
-                    <MetricValue>{stressIndex}</MetricValue>
-                    <MetricLabel>µS</MetricLabel>
-                </MetricContainer>
-                <StressBarContainer>
-                    <StressBarFill
-                        animate={{ width: `${stressIndex * 100}%` }}
-                        transition={{ type: "spring", stiffness: 50 }}
-                    />
-                </StressBarContainer>
-            </Card>
+      {/* Stress Index */}
+      <Card $borderColor={`${theme.colors.purple}80`}>
+        <CardHeader>
+          <Zap size={20} color={theme.colors.purple} />
+          <CardTitle>{t('stress_index')}</CardTitle>
+        </CardHeader>
+        <MetricContainer style={{ marginBottom: '1rem' }}>
+          <MetricValue>{stressIndex}</MetricValue>
+          <MetricLabel>µS</MetricLabel>
+        </MetricContainer>
+        <StressBarContainer>
+          <StressBarFill
+            animate={{ width: `${stressIndex * 100}%` }}
+            transition={{ type: "spring", stiffness: 50 }}
+          />
+        </StressBarContainer>
+      </Card>
 
-            {/* HRV */}
-            <Card $borderColor={`${theme.colors.blue}80`}>
-                <CardHeader>
-                    <Activity size={20} color={theme.colors.blue} />
-                    <CardTitle>HRV VARIATION</CardTitle>
-                </CardHeader>
-                <MetricContainer>
-                    <MetricValue>{hrv}</MetricValue>
-                    <MetricLabel>ms</MetricLabel>
-                </MetricContainer>
-            </Card>
-        </FlexCol>
-    );
+      {/* HRV */}
+      <Card $borderColor={`${theme.colors.blue}80`}>
+        <CardHeader>
+          <Activity size={20} color={theme.colors.blue} />
+          <CardTitle>{t('hrv_variation')}</CardTitle>
+        </CardHeader>
+        <MetricContainer>
+          <MetricValue>{hrv}</MetricValue>
+          <MetricLabel>ms</MetricLabel>
+        </MetricContainer>
+      </Card>
+    </FlexCol>
+  );
 };

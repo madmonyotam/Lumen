@@ -13,6 +13,7 @@ import { ChatHistory } from './organism/ChatHistory';
 import { useNeuralUplink } from '../hooks/useNeuralUplink';
 import { useBiometricsSync } from '../hooks/useBiometricsSync';
 import { MemoryFog } from './d3/MemoryFog';
+import { useTranslation } from '../hooks/useTranslation';
 
 // --- Styled Components ---
 
@@ -73,35 +74,7 @@ const ThoughtBubble = styled(motion.div)`
   z-index: 20;
 `;
 
-const CoreSynapseContainer = styled.div`
-  z-index: 10;
-  text-align: center;
-  margin-top: 2rem;
-`;
 
-const CoreSynapseLabel = styled.div`
-  font-size: 0.75rem;
-  letter-spacing: 0.5em;
-  color: ${props => props.theme.colors.textDim};
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-`;
-
-const CoreSynapseText = styled(motion.h2)`
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  color: white;
-  text-transform: uppercase;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-`;
-
-const Particle = styled.div`
-  position: absolute;
-  background-color: white;
-  border-radius: 50%;
-  opacity: 0.2;
-`;
 
 const OrbContainer = styled.div`
   position: relative;
@@ -225,8 +198,9 @@ const OrganismView: React.FC = () => {
     inputValue, setInputValue, showKillModal, setShowKillModal, handleSend, handleKill
   } = useNeuralUplink();
   const { biometricsRef } = useBiometricsSync(organState);
+  const { t } = useTranslation();
 
-  const [thought, setThought] = React.useState<string>("The organism is silent...");
+  const [thought, setThought] = React.useState<string>(t('organism_silent'));
   const [currentInteraction, setCurrentInteraction] = React.useState<{ text: string, sender: 'user' | 'lumen', timestamp: number } | null>(null);
 
   React.useEffect(() => {
@@ -262,7 +236,7 @@ const OrganismView: React.FC = () => {
   if (!isConnected || !organState) {
     return (
       <Container style={{ justifyContent: 'center', alignItems: 'center' }}>
-        <div className="animate-pulse text-2xl tracking-widest">ESTABLISHING NEURAL LINK...</div>
+        <div className="animate-pulse text-2xl tracking-widest">{t('establishing_link')}</div>
       </Container>
     );
   }
@@ -333,29 +307,29 @@ const OrganismView: React.FC = () => {
       </MainGrid>
       <MemoryFog />
       <KillSwitchContainer>
-        <KillButton onClick={() => setShowKillModal(true)}>TERMINATE</KillButton>
+        <KillButton onClick={() => setShowKillModal(true)}>{t('terminate')}</KillButton>
       </KillSwitchContainer>
 
       <AnimatePresence>
         {showKillModal && (
           <ModalOverlay initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <ModalContent initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}>
-              <ModalTitle>TERMINATE ORGANISM?</ModalTitle>
-              <ModalText>This will end the current consciousness. What should happen to the memories?</ModalText>
+              <ModalTitle>{t('terminate_modal_title')}</ModalTitle>
+              <ModalText>{t('terminate_modal_text')}</ModalText>
               <FlexCol style={{ gap: '1rem' }}>
                 <OptionButton onClick={() => handleKill('diminish')}>
-                  <OptionTitle>DIMINISH</OptionTitle>
-                  <OptionDesc>Retain faint traces of the past (10% Strength)</OptionDesc>
+                  <OptionTitle>{t('terminate_diminish')}</OptionTitle>
+                  <OptionDesc>{t('terminate_diminish_desc')}</OptionDesc>
                 </OptionButton>
                 <OptionButton
                   onClick={() => handleKill('wipe')}
                   style={{ borderColor: 'rgba(255, 68, 68, 0.5)' }}
                 >
-                  <OptionTitle style={{ color: '#FF4444' }}>ERASE ALL</OptionTitle>
-                  <OptionDesc>Complete memory wipe. Tabula Rasa.</OptionDesc>
+                  <OptionTitle style={{ color: '#FF4444' }}>{t('terminate_erase')}</OptionTitle>
+                  <OptionDesc>{t('terminate_erase_desc')}</OptionDesc>
                 </OptionButton>
               </FlexCol>
-              <CancelButton onClick={() => setShowKillModal(false)}>CANCEL</CancelButton>
+              <CancelButton onClick={() => setShowKillModal(false)}>{t('cancel')}</CancelButton>
             </ModalContent>
           </ModalOverlay>
         )}

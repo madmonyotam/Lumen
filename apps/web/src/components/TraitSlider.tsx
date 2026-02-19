@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from '../hooks/useTranslation';
 
 const SliderContainer = styled.div`
     display: flex;
@@ -53,6 +54,8 @@ const Fill = styled(motion.div)`
     height: 100%;
     background: linear-gradient(90deg, #00f2fe, #4facfe);
     box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+    position: absolute;
+    top: 0;
 `;
 
 const Thumb = styled(motion.div)`
@@ -117,6 +120,7 @@ export const TraitSlider: React.FC<Props> = ({ label, value, onChange, onCommit,
     const containerRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [localValue, setLocalValue] = useState(value);
+    const { isRTL } = useTranslation();
 
     // Sync local value when prop changes (only if not dragging)
     useEffect(() => {
@@ -130,7 +134,12 @@ export const TraitSlider: React.FC<Props> = ({ label, value, onChange, onCommit,
         const rect = containerRef.current.getBoundingClientRect();
         const x = clientX - rect.left;
         const width = rect.width;
-        const percentage = Math.max(0, Math.min(1, x / width));
+        let percentage = Math.max(0, Math.min(1, x / width));
+
+        if (isRTL) {
+            percentage = 1 - percentage;
+        }
+
         return Math.round(percentage * 100);
     };
 
@@ -178,11 +187,19 @@ export const TraitSlider: React.FC<Props> = ({ label, value, onChange, onCommit,
             </Header>
             <TrackContainer ref={containerRef} onClick={handleTrackClick}>
                 <Track>
-                    <Fill style={{ width: `${localValue}%` }} />
+                    <Fill
+                        style={{
+                            width: `${localValue}%`,
+                            [isRTL ? 'right' : 'left']: 0
+                        }}
+                    />
                 </Track>
                 <Thumb
-                    style={{ left: `${localValue}%` }}
-                    initial={{ x: '-50%', y: '-50%' }}
+                    style={{
+                        [isRTL ? 'right' : 'left']: `${localValue}%`
+                    }}
+                    initial={{ x: isRTL ? '50%' : '-50%', y: '-50%' }}
+                    animate={{ x: isRTL ? '50%' : '-50%', y: '-50%' }}
                     onPointerDown={handlePointerDown}
                     whileHover={{ scale: 1.2 }}
                     whileTap={{ scale: 0.9 }}

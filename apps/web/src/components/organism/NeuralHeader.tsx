@@ -2,6 +2,7 @@ import React from 'react';
 import styled, { useTheme } from 'styled-components';
 import { Send } from 'lucide-react';
 import { Flex, FlexCol, Relative } from '../shared/Layout';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const Header = styled(Flex)`
   justify-content: space-between;
@@ -123,11 +124,12 @@ export const NeuralHeader: React.FC<NeuralHeaderProps> = ({
   rightContent
 }) => {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   return (
     <Header>
       <FlexCol>
-        <NeuralStatus>Neural Connection Established</NeuralStatus>
+        <NeuralStatus>{t('neural_connection_established')}</NeuralStatus>
         <Flex $gap="1rem" $align="center">
           <StatusDotContainer>
             <StatusDotCore $color={theme.colors.teal} />
@@ -140,7 +142,7 @@ export const NeuralHeader: React.FC<NeuralHeaderProps> = ({
       <HeaderInputContainer>
         <Input
           type="text"
-          placeholder={`Speak to ${name}...`}
+          placeholder={`${t('speak_to_placeholder')} ${name}...`}
           value={inputValue}
           onChange={(e) => onInputChange(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && onSend()}
@@ -151,6 +153,6 @@ export const NeuralHeader: React.FC<NeuralHeaderProps> = ({
       </HeaderInputContainer>
 
       {rightContent}
-    </Header>
+    </Header >
   );
 };

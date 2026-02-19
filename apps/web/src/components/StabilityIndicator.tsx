@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Activity } from 'lucide-react';
 import type { Conflict } from '../utils/genesisValidation';
+import { useTranslation } from '../hooks/useTranslation';
 
 const Container = styled(motion.div)`
     background: rgba(0, 0, 0, 0.4);
@@ -69,12 +70,13 @@ interface Props {
 }
 
 export const StabilityIndicator: React.FC<Props> = ({ stability, conflicts }) => {
+    const { t } = useTranslation();
     return (
         <Container initial={false}>
             <Header>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <Activity size={14} color={stability > 50 ? '#00f2c3' : '#ef4444'} />
-                    <span>Neural Stability</span>
+                    <span>{t('neural_stability')}</span>
                 </div>
                 <span style={{ color: stability > 50 ? '#00f2c3' : '#ef4444' }}>{stability}%</span>
             </Header>
@@ -101,7 +103,7 @@ export const StabilityIndicator: React.FC<Props> = ({ stability, conflicts }) =>
                                 animate={{ x: 0, opacity: 1 }}
                             >
                                 <AlertTriangle size={14} />
-                                <span>{conflict.label}</span>
+                                <span>{t(conflict.label as any)}</span>
                             </ConflictItem>
                         ))}
                     </ConflictList>

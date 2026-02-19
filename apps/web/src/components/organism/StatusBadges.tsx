@@ -1,6 +1,7 @@
 import React from 'react';
 import styled, { useTheme } from 'styled-components';
 import { Flex, FlexCol } from '../shared/Layout';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const StatusBadge = styled(Flex)`
   align-items: center;
@@ -36,26 +37,27 @@ interface StatusBadgesProps {
 
 export const StatusBadges: React.FC<StatusBadgesProps> = ({ generation, latency, vitality, ageRatio }) => {
     const theme = useTheme();
+    const { t } = useTranslation();
 
     return (
         <FlexCol $align="flex-end" style={{ minWidth: 'fit-content' }}>
             <Flex $gap="1rem">
                 <StatusBadge>
-                    <BadgeLabel>GEN:</BadgeLabel>
+                    <BadgeLabel>{t('gen_label')}</BadgeLabel>
                     <BadgeValue $color={theme.colors.teal}>{generation}</BadgeValue>
                 </StatusBadge>
                 <StatusBadge>
-                    <BadgeLabel>LATENCY:</BadgeLabel>
+                    <BadgeLabel>{t('latency_label')}</BadgeLabel>
                     <BadgeValue $color={theme.colors.teal}>{latency.toFixed(0)}ms</BadgeValue>
                 </StatusBadge>
             </Flex>
             <Flex $gap="1rem">
                 <StatusBadge>
-                    <BadgeLabel>AGE:</BadgeLabel>
+                    <BadgeLabel>{t('age_label')}</BadgeLabel>
                     <BadgeValue $color={theme.colors.purple}>{Math.round((1 - ageRatio) * 100)}%</BadgeValue>
                 </StatusBadge>
                 <StatusBadge>
-                    <BadgeLabel>HOMEOSTASIS:</BadgeLabel>
+                    <BadgeLabel>{t('homeostasis_label')}</BadgeLabel>
                     <BadgeValue $color={vitality > 0.6 ? theme.colors.teal : vitality > 0.3 ? theme.colors.purple : theme.colors.red}>
                         {Math.round(vitality * 100)}%
                     </BadgeValue>
