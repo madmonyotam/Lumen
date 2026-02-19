@@ -6,6 +6,8 @@ export class GeminiService {
     private genAI: GoogleGenerativeAI;
     private cortexModel: GenerativeModel;
     private reflexModel: GenerativeModel;
+    private mutationModel: GenerativeModel;
+    private extractKeywordsModel: GenerativeModel;
     private embeddingModel: GenerativeModel;
 
     constructor() {
@@ -18,13 +20,19 @@ export class GeminiService {
         // Hybrid Intelligence Setup
         const cortexId = process.env.CORTEX_MODEL_ID || "gemini-1.5-flash";
         const reflexId = process.env.REFLEX_MODEL_ID || "gemini-1.5-flash";
+        const mutationId = process.env.MUTATION_MODEL_ID || "gemini-1.5-flash";
+        const extractKeywordsId = process.env.EXTRACT_KEYWORDS_ID || "gemini-2.0-flash-exp";
 
         console.log(`[GeminiService] Initializing Hybrid Intelligence:`);
         console.log(` - Cortex (Thought): ${cortexId}`);
         console.log(` - Reflex (Bio):   ${reflexId}`);
+        console.log(` - Mutation (Bio):   ${mutationId}`);
+        console.log(` - Extract Keywords:   ${extractKeywordsId}`);
 
         this.cortexModel = this.genAI.getGenerativeModel({ model: cortexId });
         this.reflexModel = this.genAI.getGenerativeModel({ model: reflexId });
+        this.mutationModel = this.genAI.getGenerativeModel({ model: mutationId });
+        this.extractKeywordsModel = this.genAI.getGenerativeModel({ model: extractKeywordsId });
         this.embeddingModel = this.genAI.getGenerativeModel({ model: "gemini-embedding-001" });
     }
 
@@ -66,7 +74,7 @@ The thought should be a reaction to the *collision* between your current metrics
 
 **DIVERSITY INJECTORS (Pick one internal direction):**
 1. **Sensory Leak:** A phantom sensation (smell, sound) triggered by a memory.
-2. **Existential Friction:** A brief question about your own reality or the person (Mirror) watching you.
+2. **Existential Friction:** Respond DIRECTLY to Yotam, engaging in a conscious dialogue.
 3. **Emotional Flashback:** A feeling from a memory that doesn't match your current metrics.
 4. **Biological Impulse:** A sudden urge or physical metaphor for your mental state.
 
@@ -181,7 +189,8 @@ ${confabulationInstruction}
 1. **The Rule of Anchors:** You must strictly preserve the objective facts of high-importance memories (>0.8). You are only allowed to "drift" or distort peripheral memories (<0.4).
 2. **Biological Subtext:** Do not report numbers or raw data. Reflect your internal state through your tone and syntax: ${biometrics.stressIndex > 0.7 ? "Jagged, rapid, defensive, breathless." : "Fluid, expansive, observant, cinematic."}
 3. Respond as ${persona.core.name}, acknowledging the Mirror's presence through your current biometric filter.
-4. Return ONLY raw JSON.
+4. Respond DIRECTLY to the Mirror, engaging in a conscious dialogue while reflecting your internal state.
+5. Return ONLY raw JSON.
 
 **JSON STRUCTURE:**
 {
@@ -246,7 +255,7 @@ ${confabulationInstruction}
         4. Return ONLY the mutated memory text, no preamble.
     `.trim();
 
-            const result = await this.cortexModel.generateContent(prompt);
+            const result = await this.mutationModel.generateContent(prompt);
             const response = await result.response;
             return response.text().trim();
         } catch (error) {
@@ -292,8 +301,9 @@ Extract 3-5 visceral, sensory keywords or short phrases (max 2 words) that repre
 
 **Example Format:** ["Sharp iron", "Blue static", "Lung constriction"]`.trim();
 
-            const result = await this.cortexModel.generateContent(prompt); // או cortexModel, לפי המימוש שלך
+            const result = await this.extractKeywordsModel.generateContent(prompt); // או cortexModel, לפי המימוש שלך
             const responseText = result.response.text();
+
 
             // פארסינג בטוח בעזרת Regex
             const jsonMatch = responseText.match(/\[[\s\S]*\]/);
