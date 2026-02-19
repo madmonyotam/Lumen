@@ -1,6 +1,13 @@
 import 'styled-components';
+import { LUMEN_CONFIG } from '../lumen.config';
+
+const isHebrew = LUMEN_CONFIG.LANGUAGE === 'he';
+const direction = isHebrew ? 'rtl' : 'ltr';
+const mainFont = isHebrew ? "'Rubik', 'Heebo', sans-serif" : "'Rajdhani', sans-serif";
+
 
 export const lumenTheme = {
+    direction,
     colors: {
         bg: '#020405',
         card: 'rgba(10, 20, 25, 0.6)',
@@ -35,7 +42,7 @@ export const lumenTheme = {
         slow: '1.5s ease-in-out',
     },
     fonts: {
-        main: "'Rajdhani', sans-serif",
+        main: mainFont,
         code: "'Rajdhani', monospace",
     }
 };

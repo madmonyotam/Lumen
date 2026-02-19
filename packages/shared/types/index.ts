@@ -1,6 +1,8 @@
 export * from './Genesis';
 import { LumenPersona } from './Genesis';
 
+export type Language = 'en' | 'he';
+
 export interface LifeStatus {
     isAlive: boolean;
     birthTime: number;
@@ -12,7 +14,7 @@ export interface LifeStatus {
     name: string;
     gender: 'male' | 'female' | 'non-binary';
     traits: string[]; // e.g., "Curious", "Stoic", "Anxious"
-    language: 'en' | 'he'; // e.g., "en", "he"
+    language: Language; // e.g., "en", "he"
     persona?: LumenPersona;
 }
 

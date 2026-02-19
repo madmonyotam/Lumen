@@ -1,4 +1,9 @@
+import type { Language } from '@lumen/shared/types';
+
 export const LUMEN_CONFIG = {
+    // Language
+    LANGUAGE: 'he' as Language, // Change to 'en' for English
+
     // Pulse Settings
     MIN_PULSE_BPM: 40,
     MAX_PULSE_BPM: 180,

@@ -3,7 +3,7 @@ export const SERVER_CONFIG = {
 
     // Intervals (ms)
     BIO_CLOCK_INTERVAL: 3000,
-    REFLEX_INTERVAL: 5000,
+    REFLEX_INTERVAL: 60000, // temporary
     THOUGHT_INTERVAL: 30000,
     DECAY_EVENTS_PER_LIFETIME: 200, // Number of decay events over the full lifespan
 
