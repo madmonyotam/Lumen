@@ -85,10 +85,10 @@ const OrbContainer = styled.div`
   width: 100%;
 `;
 
-const KillSwitchContainer = styled.div`
+const KillSwitchContainer = styled.div<{ $isRTL?: boolean }>`
   position: absolute;
   bottom: 2rem;
-  right: 2rem;
+  ${props => props.$isRTL ? 'left' : 'right'}: 2rem;
   z-index: 50;
 `;
 
@@ -198,7 +198,7 @@ const OrganismView: React.FC = () => {
     inputValue, setInputValue, showKillModal, setShowKillModal, handleSend, handleKill
   } = useNeuralUplink();
   const { biometricsRef } = useBiometricsSync(organState);
-  const { t } = useTranslation();
+  const { t, isRTL } = useTranslation();
 
   const [thought, setThought] = React.useState<string>(t('organism_silent'));
   const [currentInteraction, setCurrentInteraction] = React.useState<{ text: string, sender: 'user' | 'lumen', timestamp: number } | null>(null);
@@ -306,7 +306,7 @@ const OrganismView: React.FC = () => {
         <ChatHistory currentInteraction={currentInteraction} />
       </MainGrid>
       <MemoryFog />
-      <KillSwitchContainer>
+      <KillSwitchContainer $isRTL={isRTL}>
         <KillButton onClick={() => setShowKillModal(true)}>{t('terminate')}</KillButton>
       </KillSwitchContainer>
 

@@ -110,11 +110,12 @@ const RankSlot = styled(Reorder.Item)`
     }
 `;
 
-const RankNumber = styled.span`
+const RankNumber = styled.span<{ $isRTL?: boolean }>`
     font-family: ${props => props.theme.fonts.code || props.theme.fonts.main};
     color: #00f2fe;
     font-size: 0.75rem;
-    margin-right: 1rem;
+    margin-right: ${props => props.$isRTL ? '0' : '1rem'};
+    margin-left: ${props => props.$isRTL ? '1rem' : '0'};
     opacity: 0.7;
 `;
 
@@ -151,7 +152,7 @@ interface Props {
 
 export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, selectedIds, onUpdateSelection }) => {
     const [activeTab, setActiveTab] = useState<StrengthCategory>('Wisdom');
-    const { t } = useTranslation();
+    const { t, isRTL } = useTranslation();
 
     const getTranslatedCategory = (cat: string) => {
         const key = `strength_${cat.toLowerCase()}` as any;
@@ -220,7 +221,7 @@ export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, select
                             return (
                                 <RankSlot key={id} value={id}>
                                     <Flex style={{ alignItems: 'center' }}>
-                                        <RankNumber>0{index + 1}</RankNumber>
+                                        <RankNumber $isRTL={isRTL}>0{index + 1}</RankNumber>
                                         <span>{t(('strength_' + strength.id.replace(/-/g, '_')) as any)}</span>
                                     </Flex>
                                     <RemoveBtn onClick={() => handleRemove(id)}>
