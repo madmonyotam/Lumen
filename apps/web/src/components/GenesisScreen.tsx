@@ -13,6 +13,7 @@ import { validateGenesisState } from '../utils/genesisValidation';
 import type { ValidationResult } from '../utils/genesisValidation';
 import { StabilityIndicator } from './StabilityIndicator';
 import type { LumenPersona, BigFiveScores, InternalScores } from '@lumen/shared/types/index';
+import { Select } from './atoms/Select';
 
 const Overlay = styled(motion.div)`
     display: flex;
@@ -96,21 +97,7 @@ const Grid = styled.div`
     gap: 1.5rem;
 `;
 
-const Select = styled.select`
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 0.75rem;
-    padding: 1rem 1.5rem;
-    color: white;
-    font-size: 1rem;
-    width: 100%;
-    appearance: none;
 
-    &:focus {
-        outline: none;
-        border-color: #00f2fe;
-    }
-`;
 
 
 
@@ -420,19 +407,27 @@ const GenesisScreen: React.FC = () => {
 
                                     <FormGroup>
                                         <Label><Heart size={12} style={{ marginRight: 4 }} /> {t('gender_label')}</Label>
-                                        <Select value={gender} onChange={(e) => setGender(e.target.value as any)}>
-                                            <option value="non-binary">{t('gender_non_binary')}</option>
-                                            <option value="male">{t('gender_male')}</option>
-                                            <option value="female">{t('gender_female')}</option>
-                                        </Select>
+                                        <Select
+                                            value={gender}
+                                            onChange={(val) => setGender(val as any)}
+                                            options={[
+                                                { value: "non-binary", label: t('gender_non_binary') },
+                                                { value: "male", label: t('gender_male') },
+                                                { value: "female", label: t('gender_female') }
+                                            ]}
+                                        />
                                     </FormGroup>
 
                                     <FormGroup>
                                         <Label><Globe size={12} style={{ marginRight: 4 }} /> {t('language_label')}</Label>
-                                        <Select value={language} onChange={(e) => setLanguage(e.target.value as any)}>
-                                            <option value="en">{t('language_english')}</option>
-                                            <option value="he">{t('language_hebrew')}</option>
-                                        </Select>
+                                        <Select
+                                            value={language}
+                                            onChange={(val) => setLanguage(val as any)}
+                                            options={[
+                                                { value: "en", label: t('language_english') },
+                                                { value: "he", label: t('language_hebrew') }
+                                            ]}
+                                        />
                                     </FormGroup>
 
                                     <FormGroup>

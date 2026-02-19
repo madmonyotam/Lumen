@@ -29,7 +29,9 @@ export function processBiometrics(bpm: number, stress: number, hrv: number): Org
             vitality: parseFloat(vitality.toFixed(2)),
             homeostasisLabel,
             mode,
-            latency: parseFloat((10 + Math.random() * 5).toFixed(2))
+            latency: parseFloat((10 + Math.random() * 5).toFixed(2)),
+            messages: [],
+            latestInteraction: null
         },
         lifeStatus: {
             isAlive: false,
@@ -39,6 +41,7 @@ export function processBiometrics(bpm: number, stress: number, hrv: number): Org
             generation: 1,
             name: "Lumen",
             gender: "non-binary",
+            language: "en",
             traits: ["Curious", "Stoic"]
         },
         visualParams: {

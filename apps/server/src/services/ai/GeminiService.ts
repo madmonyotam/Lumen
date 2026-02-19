@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 import { LumenPersona } from '../../prompts/types';
 import { assembleLumenCortexPrompt, assembleLumenReflexPrompt } from '../../prompts/assembleLumenPrompt';
+import { BIOMETRIC_RANGES } from '@lumen/shared';
 
 export class GeminiService {
     private genAI: GoogleGenerativeAI;
@@ -151,8 +152,8 @@ Return ONLY the raw JSON object.`.trim();
         try {
             // 1. לוגיקת הזיה (Confabulation) מבוססת מדדים
             // ככל שהסטרס גבוה יותר או הויטליות נמוכה יותר, הסיכוי ל"דליפה חושית" עולה
-            const stressFactor = biometrics.stressIndex > 0.8 ? 0.4 : 0.1;
-            const vitalityFactor = biometrics.vitality < 0.3 ? 0.5 : 0.0;
+            const stressFactor = biometrics.stressIndex > BIOMETRIC_RANGES.STRESS.THRESHOLD_HIGH ? 0.4 : 0.1;
+            const vitalityFactor = biometrics.vitality < BIOMETRIC_RANGES.VITALITY.THRESHOLD_LOW ? 0.5 : 0.0;
             const confabulationChance = Math.min(0.9, stressFactor + vitalityFactor);
 
             const shouldConfabulate = Math.random() < confabulationChance;
@@ -187,7 +188,7 @@ ${memoryText}
 ${confabulationInstruction}
 
 1. **The Rule of Anchors:** You must strictly preserve the objective facts of high-importance memories (>0.8). You are only allowed to "drift" or distort peripheral memories (<0.4).
-2. **Biological Subtext:** Do not report numbers or raw data. Reflect your internal state through your tone and syntax: ${biometrics.stressIndex > 0.7 ? "Jagged, rapid, defensive, breathless." : "Fluid, expansive, observant, cinematic."}
+2. **Biological Subtext:** Do not report numbers or raw data. Reflect your internal state through your tone and syntax: ${biometrics.stressIndex > BIOMETRIC_RANGES.STRESS.THRESHOLD_HIGH ? "Jagged, rapid, defensive, breathless." : "Fluid, expansive, observant, cinematic."}
 3. Respond as ${persona.core.name}, acknowledging the outside presence through your current biometric filter.
 4. Respond DIRECTLY to the outside presence, engaging in a conscious dialogue while reflecting your internal state.
 5. Return ONLY raw JSON.
@@ -273,8 +274,8 @@ ${confabulationInstruction}
 
         try {
             // בניית תיאור מצב טקסטואלי עבור המודל
-            const stressLevel = biometrics.stress > 0.7 ? "High/Crisis" : biometrics.stress < 0.3 ? "Low/Fluid" : "Stable";
-            const vitalityLevel = biometrics.vitality < 0.4 ? "Fading/Weak" : "Strong/Resilient";
+            const stressLevel = biometrics.stress > BIOMETRIC_RANGES.STRESS.THRESHOLD_HIGH ? "High/Crisis" : biometrics.stress < BIOMETRIC_RANGES.STRESS.THRESHOLD_LOW ? "Low/Fluid" : "Stable";
+            const vitalityLevel = biometrics.vitality < BIOMETRIC_RANGES.VITALITY.THRESHOLD_LOW ? "Fading/Weak" : "Strong/Resilient";
 
             const prompt = `
 Analyze this memory fragment through your current biological lens. 

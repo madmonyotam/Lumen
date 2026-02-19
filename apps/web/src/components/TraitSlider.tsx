@@ -82,30 +82,19 @@ const Tooltip = styled(motion.div)`
     position: absolute;
     bottom: 24px;
     left: 50%;
-    transform: translateX(-50%);
     background: rgba(10, 15, 20, 0.95);
     border: 1px solid rgba(0, 242, 254, 0.4);
     padding: 0.5rem 0.75rem;
     border-radius: 0.5rem;
     white-space: nowrap;
     color: #00f2fe;
-    font-size: 0.75rem;
+    font-size: 1rem;
     font-family: ${props => props.theme.fonts.code || 'monospace'};
     pointer-events: none;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(8px);
     z-index: 20;
-
-    &::after {
-        content: '';
-        position: absolute;
-        top: 100%;
-        left: 50%;
-        margin-left: -4px;
-        border-width: 4px;
-        border-style: solid;
-        border-color: rgba(0, 242, 254, 0.4) transparent transparent transparent;
-    }
+    transition: all 0.5s ease-out;
 `;
 
 interface Props {
@@ -207,9 +196,10 @@ export const TraitSlider: React.FC<Props> = ({ label, value, onChange, onCommit,
                     <AnimatePresence>
                         {isDragging && (
                             <Tooltip
-                                initial={{ opacity: 0, y: 10, x: '-50%' }}
-                                animate={{ opacity: 1, y: 0, x: '-50%' }}
-                                exit={{ opacity: 0, y: 10, x: '-50%' }}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                style={{ x: `-${isRTL ? 100 - localValue : localValue}%` }}
                             >
                                 {getTooltipText(localValue)}
                             </Tooltip>

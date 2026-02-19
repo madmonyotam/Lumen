@@ -87,11 +87,11 @@ const Input = styled.input`
   }
 `;
 
-const SendButton = styled.button`
+const SendButton = styled.button<{ $isRTL?: boolean }>`
   position: absolute;
-  right: 0.75rem;
+  ${props => props.$isRTL ? 'left' : 'right'}: 0.75rem;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-50%) ${props => props.$isRTL ? 'rotate(-90deg)' : 'rotate(90deg)'};
   padding: 0.5rem;
   border-radius: 50%;
   border: none;
@@ -101,10 +101,11 @@ const SendButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background ${props => props.theme.animations.fast};
+  transition: all ${props => props.theme.animations.fast};
   
   &:hover {
     background: ${props => props.theme.colors.tealDim};
+    transform: translateY(-50%) ${props => props.$isRTL ? 'rotate(-90deg) scale(1.1)' : 'rotate(90deg) scale(1.1)'};
   }
 `;
 
@@ -124,7 +125,7 @@ export const NeuralHeader: React.FC<NeuralHeaderProps> = ({
   rightContent
 }) => {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, isRTL } = useTranslation();
 
   return (
     <Header>
@@ -146,8 +147,9 @@ export const NeuralHeader: React.FC<NeuralHeaderProps> = ({
           value={inputValue}
           onChange={(e) => onInputChange(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && onSend()}
+          $isRTL={isRTL}
         />
-        <SendButton onClick={onSend}>
+        <SendButton onClick={onSend} $isRTL={isRTL}>
           <Send size={18} />
         </SendButton>
       </HeaderInputContainer>

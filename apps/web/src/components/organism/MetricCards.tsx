@@ -71,7 +71,7 @@ const StressBarContainer = styled.div`
   background-color: rgba(0,0,0,0.5);
   border-radius: 9999px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid ${props => props.theme.colors.ui.borderDim};
 `;
 
 const StressBarFill = styled(motion.div)`
@@ -86,7 +86,7 @@ interface MetricCardProps {
   hrv: number;
 }
 
-export const MetricCards: React.FC<MetricCardProps> = ({ bpm, stressIndex, hrv }) => {
+export const MetricCards: React.FC<MetricCardProps> = React.memo(({ bpm, stressIndex, hrv }) => {
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -144,4 +144,6 @@ export const MetricCards: React.FC<MetricCardProps> = ({ bpm, stressIndex, hrv }
       </Card>
     </FlexCol>
   );
-};
+});
+
+MetricCards.displayName = 'MetricCards';

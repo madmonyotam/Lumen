@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TemporalEngine = void 0;
+const lumen_bio_config_1 = require("../config/lumen-bio.config");
 class TemporalEngine {
     constructor() {
         Object.defineProperty(this, "subjectiveTime", {
@@ -27,6 +28,12 @@ class TemporalEngine {
             writable: true,
             value: 1
         });
+        Object.defineProperty(this, "persona", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: null
+        });
         Object.defineProperty(this, "name", {
             enumerable: true,
             configurable: true,
@@ -39,6 +46,12 @@ class TemporalEngine {
             writable: true,
             value: 'non-binary'
         });
+        Object.defineProperty(this, "language", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 'en'
+        });
         Object.defineProperty(this, "traits", {
             enumerable: true,
             configurable: true,
@@ -49,7 +62,7 @@ class TemporalEngine {
             enumerable: true,
             configurable: true,
             writable: true,
-            value: true
+            value: false
         });
     }
     /**
@@ -59,8 +72,10 @@ class TemporalEngine {
     calculateSubjectiveTime(bpm, stress, deltaRealTimeMs) {
         if (!this.isAlive)
             return this.subjectiveTime;
-        const bpmFactor = Math.max(0.5, bpm / 60);
-        const stressFactor = 1 + (stress * 0.5);
+        // Bio-Config Influence
+        const reactionSpeed = lumen_bio_config_1.BIO_CONFIG.interaction_rules.stimulus_reaction_speed;
+        const bpmFactor = Math.max(0.5, bpm / 60) * (1 + reactionSpeed);
+        const stressFactor = 1 + (stress * 0.5 * (1 + reactionSpeed));
         const timeDilation = bpmFactor * stressFactor;
         const deltaSubjective = deltaRealTimeMs * timeDilation;
         this.subjectiveTime += deltaSubjective;
@@ -71,14 +86,19 @@ class TemporalEngine {
         return this.subjectiveTime;
     }
     reborn(payload) {
-        this.name = payload.name;
-        this.gender = payload.gender;
+        this.persona = payload.persona;
+        this.name = payload.persona.core.name;
+        this.gender = payload.persona.core.gender;
+        this.language = payload.persona.core.language || 'en';
+        this.lifespan = payload.persona.core.lifespan;
         this.traits = payload.traits;
-        this.lifespan = payload.lifespan;
         this.birthTime = Date.now();
         this.subjectiveTime = this.birthTime;
         this.generation++;
         this.isAlive = true;
+    }
+    kill() {
+        this.isAlive = false;
     }
     getLifeStatus() {
         return {
@@ -89,7 +109,9 @@ class TemporalEngine {
             generation: this.generation,
             name: this.name,
             gender: this.gender,
-            traits: this.traits
+            language: this.language,
+            traits: this.traits,
+            persona: this.persona || undefined
         };
     }
     getSubjectiveTime() {

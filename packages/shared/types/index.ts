@@ -1,5 +1,5 @@
 export * from './Genesis';
-import { LumenPersona } from './Genesis';
+import type { LumenPersona } from './Genesis';
 
 export type Language = 'en' | 'he';
 

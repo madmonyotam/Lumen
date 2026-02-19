@@ -28,16 +28,19 @@ function processBiometrics(bpm, stress, hrv) {
             vitality: parseFloat(vitality.toFixed(2)),
             homeostasisLabel,
             mode,
-            latency: parseFloat((10 + Math.random() * 5).toFixed(2))
+            latency: parseFloat((10 + Math.random() * 5).toFixed(2)),
+            messages: [],
+            latestInteraction: null
         },
         lifeStatus: {
-            isAlive: true,
+            isAlive: false,
             birthTime: Date.now(),
             age: 0,
             lifespan: 1000 * 60 * 60 * 24, // 24 hours
             generation: 1,
             name: "Lumen",
             gender: "non-binary",
+            language: "en",
             traits: ["Curious", "Stoic"]
         },
         visualParams: {

@@ -3,7 +3,7 @@ import { LUMEN_CONFIG } from '../lumen.config';
 
 const isHebrew = LUMEN_CONFIG.LANGUAGE === 'he';
 const direction = isHebrew ? 'rtl' : 'ltr';
-const mainFont = isHebrew ? "'Rubik', 'Heebo', sans-serif" : "'Rajdhani', sans-serif";
+const mainFont = isHebrew ? "'Fredoka', sans-serif" : "'Rajdhani', sans-serif";
 
 
 export const lumenTheme = {
@@ -24,6 +24,19 @@ export const lumenTheme = {
         redDim: 'rgba(255, 68, 68, 0.1)',
         blue: '#60a5fa',
         blueDim: 'rgba(96, 165, 250, 0.1)',
+
+        // Semantic Tokens
+        action: {
+            hover: 'rgba(255, 255, 255, 0.1)',
+            active: 'rgba(255, 255, 255, 0.2)',
+            border: 'rgba(255, 255, 255, 0.1)',
+            borderFocus: '#00f2c3',
+        },
+        ui: {
+            border: 'rgba(255, 255, 255, 0.1)',
+            borderDim: 'rgba(255, 255, 255, 0.05)',
+            bgOverlay: 'rgba(0, 0, 0, 0.85)',
+        }
     },
     glass: {
         blur: '20px',
@@ -44,6 +57,28 @@ export const lumenTheme = {
     fonts: {
         main: mainFont,
         code: "'Rajdhani', monospace",
+    },
+    typography: {
+        h1: {
+            size: '2rem',
+            weight: 700,
+            spacing: '0.2em',
+        },
+        h2: {
+            size: '1.5rem',
+            weight: 600,
+            spacing: '0.1em',
+        },
+        body: {
+            size: '0.875rem',
+            weight: 400,
+            spacing: '0.05em',
+        },
+        label: {
+            size: '0.625rem',
+            weight: 700,
+            spacing: '0.2em',
+        }
     }
 };
 

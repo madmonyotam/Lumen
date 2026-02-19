@@ -5,6 +5,21 @@ describe('TemporalEngine', () => {
     let engine;
     beforeEach(() => {
         engine = new TemporalEngine_1.TemporalEngine();
+        const mockPersona = {
+            core: {
+                name: "Test",
+                gender: "non-binary",
+                language: "en",
+                lifespan: 24 * 60 * 60 * 1000
+            },
+            traits: {},
+            internal: {},
+            strengths: []
+        };
+        engine.reborn({
+            persona: mockPersona,
+            traits: ["Test"]
+        });
     });
     test('should progress normally at 60 BPM and 0 stress', () => {
         const start = engine.getSubjectiveTime();
