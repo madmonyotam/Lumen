@@ -3,7 +3,7 @@ import { BIOMETRIC_RANGES } from '@lumen/shared';
 
 export const LUMEN_CONFIG = {
     // Language
-    LANGUAGE: 'he' as Language, // Change to 'en' for English
+    LANGUAGE: 'en' as Language, // Change to 'en' for English
 
     // Pulse Settings
     MIN_PULSE_BPM: BIOMETRIC_RANGES.HEART_RATE.MIN,

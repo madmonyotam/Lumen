@@ -91,7 +91,7 @@ const SendButton = styled.button<{ $isRTL?: boolean }>`
   position: absolute;
   ${props => props.$isRTL ? 'left' : 'right'}: 0.75rem;
   top: 50%;
-  transform: translateY(-50%) ${props => props.$isRTL ? 'rotate(-90deg)' : 'rotate(90deg)'};
+  transform: translateY(-50%) ${props => props.$isRTL ? 'rotate(-90deg)' : 'rotate(0deg)'};
   padding: 0.5rem;
   border-radius: 50%;
   border: none;
@@ -147,7 +147,6 @@ export const NeuralHeader: React.FC<NeuralHeaderProps> = ({
           value={inputValue}
           onChange={(e) => onInputChange(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && onSend()}
-          $isRTL={isRTL}
         />
         <SendButton onClick={onSend} $isRTL={isRTL}>
           <Send size={18} />

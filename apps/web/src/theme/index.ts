@@ -3,7 +3,7 @@ import { LUMEN_CONFIG } from '../lumen.config';
 
 const isHebrew = LUMEN_CONFIG.LANGUAGE === 'he';
 const direction = isHebrew ? 'rtl' : 'ltr';
-const mainFont = isHebrew ? "'Fredoka', sans-serif" : "'Rajdhani', sans-serif";
+const mainFont = "'Fredoka', sans-serif";
 
 
 export const lumenTheme = {

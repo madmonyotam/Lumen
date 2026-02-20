@@ -123,9 +123,9 @@ Enabling the system to speak the user's native language, bridging the gap betwee
 
 | # | Ticket | Status | Owner |
 |---|--------|--------|-------|
-| 10.1 | **Deep Localization:** Create a central dictionary for all static texts in the software. | 🔲 Todo | Frontend |
-| 10.2 | **RTL Architecture:** Implement Right-to-Left layout logic for Hebrew mode. | 🔲 Todo | Frontend |
-| 10.3 | **Language Helix:** Add configuration flag for language selection (Hebrew/English). | 🔲 Todo | Backend |
+| 10.1 | **Deep Localization:** Create a central dictionary for all static texts in the software. | ✅ Done | Frontend |
+| 10.2 | **RTL Architecture:** Implement Right-to-Left layout logic for Hebrew mode. | ✅ Done | Frontend |
+| 10.3 | **Language Helix:** Add configuration flag for language selection (Hebrew/English). | ✅ Done | Backend |
 
 ## 13. Bugs & Known Issues
 | # | Issue | Severity | Status |
