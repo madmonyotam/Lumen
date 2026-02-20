@@ -16,6 +16,8 @@ import { SERVER_CONFIG } from './config/server.config';
 import { mockPersona } from './prompts/testAssembly';
 import { LumenPersona } from './prompts/types';
 import { getAllGenesisOptions } from './prompts/promptUtils';
+import { verifyToken, AuthenticatedRequest } from './middleware/auth';
+import { UserService } from './services/UserService';
 
 const app = express();
 app.use(cors());
@@ -34,8 +36,35 @@ const temporalEngine = new TemporalEngine();
 temporalEngine.loadState();
 const memoryService = new MemoryService();
 const geminiService = new GeminiService();
+const userService = new UserService();
 
 const lifeCycle = new LifeCycleService(io, garminService, temporalEngine, memoryService, geminiService);
+
+// Auth Provisioning Endpoint
+app.post('/api/auth/sync', verifyToken, async (req: AuthenticatedRequest, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ error: 'User not found in token' });
+        }
+
+        const { uid, email, name, picture } = req.user;
+
+        // 1. Upsert User in Postgres
+        await userService.syncUser(uid, email, name, picture);
+
+        // 2. Ensure Lumen exists for this user
+        const lumenData = await userService.ensureLumen(uid);
+
+        res.json({
+            message: 'User synced successfully',
+            user: req.user,
+            lumen: lumenData
+        });
+    } catch (e) {
+        console.error('[Auth Sync] Error:', e);
+        res.status(500).json({ error: 'Failed to sync user' });
+    }
+});
 
 // Health Check Endpoint
 app.get('/health', async (_req, res) => {
