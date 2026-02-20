@@ -112,9 +112,9 @@ app.post('/api/death', async (req, res) => {
         temporalEngine.kill();
 
         if (memoryAction === 'wipe') {
-            await memoryService.wipeMemories();
+            await memoryService.wipeMemories('local_user');
         } else if (memoryAction === 'diminish') {
-            await memoryService.diminishMemories(0.1); // Reduce to 10%
+            await memoryService.diminishMemories('local_user', 0.1); // Reduce to 10%
         }
 
         res.json({ message: 'Organism has perished.', lifeStatus: temporalEngine.getLifeStatus() });
@@ -145,7 +145,7 @@ app.post('/api/chat', async (req, res) => {
                 const vitality = 1 - (lifeStatus.age / lifeStatus.lifespan);
 
                 const retrievalContext = `User says: "${message}". Current State: BPM ${bpm}, Stress ${stress}`;
-                const memories = await memoryService.findSimilarMemories(retrievalContext, 3);
+                const memories = await memoryService.findSimilarMemories('local_user', retrievalContext, 3);
 
                 const biometrics = { bpm, stressIndex: stress, vitality };
                 const entityProfile: LumenPersona = lifeStatus.persona || {
@@ -166,6 +166,8 @@ app.post('/api/chat', async (req, res) => {
 
                     if (response.re_encoding) {
                         await memoryService.storeMemory(
+                            'local_user',
+                            null,
                             response.re_encoding.content,
                             {
                                 type: 'interaction',

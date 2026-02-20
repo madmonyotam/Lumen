@@ -60,7 +60,7 @@ export class MemoryService {
         }
     }
 
-    async storeMemory(content: string, metadata: any = {}, importance: number = 1.0, initialStrength?: number, language: 'en' | 'he' = 'en'): Promise<Memory> {
+    async storeMemory(userId: string, lumenId: string | null, content: string, metadata: any = {}, importance: number = 1.0, initialStrength?: number, language: 'en' | 'he' = 'en'): Promise<Memory> {
         await this.initializationPromise;
         const embedding = await this.gemini.generateEmbedding(content);
         // Extract keywords asynchronously or await? Await for now to ensure data completeness
@@ -75,9 +75,9 @@ export class MemoryService {
 
         try {
             const result = await this.pool.query(
-                `INSERT INTO memories (content, timestamp, strength, importance, metadata, embedding, keywords) 
-                 VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-                [content, timestamp, strength, importance, metadata, JSON.stringify(embedding), keywords]
+                `INSERT INTO memories (user_id, lumen_id, content, timestamp, strength, importance, metadata, embedding, keywords) 
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
+                [userId, lumenId, content, timestamp, strength, importance, metadata, JSON.stringify(embedding), keywords]
             );
 
             console.log(`[MemoryService] Persisted: "${content}" with keywords: [${keywords.join(', ')}]`);
@@ -105,7 +105,7 @@ export class MemoryService {
         }
     }
 
-    async retrieveMemories(query: string, limit: number = 5, minStrength: number = 0.0): Promise<Memory[]> {
+    async retrieveMemories(userId: string, query: string, limit: number = 5, minStrength: number = 0.0): Promise<Memory[]> {
         await this.initializationPromise;
         const embedding = await this.gemini.generateEmbedding(query);
         const embeddingStr = `[${embedding.join(',')}]`;
@@ -117,10 +117,10 @@ export class MemoryService {
                 `SELECT id, content, timestamp, strength, importance, metadata, keywords,
              (embedding <=> $1) / (0.5 + importance) as weighted_distance 
              FROM memories 
-             WHERE strength >= $3
+             WHERE strength >= $3 AND user_id = $4
              ORDER BY weighted_distance ASC 
              LIMIT $2`,
-                [embeddingStr, limit, minStrength]
+                [embeddingStr, limit, minStrength, userId]
             );
 
             result.rows.forEach(row => {
@@ -144,17 +144,17 @@ export class MemoryService {
         }
     }
 
-    async getRandomHighImportanceMemory(limit: number): Promise<Memory[]> {
+    async getRandomHighImportanceMemory(userId: string, limit: number): Promise<Memory[]> {
         await this.initializationPromise;
         try {
             // Fetch memories with high importance (e.g. >= 0.8) randomly
             const result = await this.pool.query(
                 `SELECT id, content, timestamp, strength, importance, metadata, keywords
                  FROM memories 
-                 WHERE importance >= 0.8
+                 WHERE importance >= 0.8 AND user_id = $2
                  ORDER BY RANDOM() 
                  LIMIT $1`,
-                [limit]
+                [limit, userId]
             );
 
             return result.rows.map(row => ({
@@ -227,12 +227,12 @@ export class MemoryService {
     }
 
     // Alias for the spec requirement
-    async findSimilarMemories(query: string, limit: number = 5): Promise<Memory[]> {
-        return this.retrieveMemories(query, limit, SERVER_CONFIG.RETRIEVAL_FILTER_STRENGTH); // Use standardized filter
+    async findSimilarMemories(userId: string, query: string, limit: number = 5): Promise<Memory[]> {
+        return this.retrieveMemories(userId, query, limit, SERVER_CONFIG.RETRIEVAL_FILTER_STRENGTH); // Use standardized filter
     }
 
     // Decay mechanism - Entropic Pruning
-    async decayMemories(entropy: number, decayRate: number = 0.05) {
+    async decayMemories(userId: string, entropy: number, decayRate: number = 0.05) {
         await this.initializationPromise;
         try {
             const effectiveDecay = decayRate * (0.1 + entropy);
@@ -244,13 +244,13 @@ export class MemoryService {
             SET 
                 strength = strength * (1 - $1),
                 importance = importance * (1 - ($1 * 0.2)) 
-            WHERE strength > $2
-        `, [effectiveDecay, BIO_CONFIG.drift_parameters.strength_decay_threshold]);
+            WHERE strength > $2 AND user_id = $3
+        `, [effectiveDecay, BIO_CONFIG.drift_parameters.strength_decay_threshold, userId]);
 
             // ניקוי זכרונות שמתו
             const deleteResult = await this.pool.query(`
-            DELETE FROM memories WHERE strength <= 0.05
-        `);
+            DELETE FROM memories WHERE strength <= 0.05 AND user_id = $1
+        `, [userId]);
 
             if (deleteResult?.rowCount) {
                 console.log(`[Memory System] Pruned ${deleteResult.rowCount} faded memories.`);
@@ -260,28 +260,29 @@ export class MemoryService {
         }
     }
 
-    async wipeMemories() {
+    async wipeMemories(userId: string) {
         await this.initializationPromise;
         try {
-            await this.pool.query('DELETE FROM memories');
+            await this.pool.query('DELETE FROM memories WHERE user_id = $1', [userId]);
             console.log("[MemoryService] All memories wiped.");
         } catch (err) {
             console.error("[MemoryService] Wipe Error:", err);
         }
     }
 
-    async diminishMemories(factor: number) {
+    async diminishMemories(userId: string, factor: number) {
         await this.initializationPromise;
         try {
             await this.pool.query(`
                 UPDATE memories
                 SET strength = strength * $1
-            `, [factor]);
+                WHERE user_id = $2
+            `, [factor, userId]);
 
             // Prune very weak memories
             const deleteResult = await this.pool.query(`
-                DELETE FROM memories WHERE strength <= 0.05
-            `);
+                DELETE FROM memories WHERE strength <= 0.05 AND user_id = $1
+            `, [userId]);
 
             if (deleteResult && deleteResult.rowCount != null && deleteResult.rowCount > 0) {
                 console.log(`[MemoryService] Pruned ${deleteResult.rowCount} faded memories after diminishing.`);

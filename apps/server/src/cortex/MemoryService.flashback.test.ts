@@ -43,7 +43,7 @@ describe('MemoryService Flashback Unit Test', () => {
 
         pool.query.mockResolvedValueOnce({ rows: mockMemories });
 
-        const memories = await service.getRandomHighImportanceMemory(2);
+        const memories = await service.getRandomHighImportanceMemory('test_user', 2);
 
         expect(pool.query).toHaveBeenCalledWith(
             expect.stringContaining('SELECT id, content, timestamp, strength, importance, metadata, keywords'),
@@ -54,8 +54,8 @@ describe('MemoryService Flashback Unit Test', () => {
             [2]
         );
         expect(pool.query).toHaveBeenCalledWith(
-            expect.stringContaining('WHERE importance >= 0.8'),
-            [2]
+            expect.stringContaining('WHERE importance >= 0.8 AND user_id = $2'),
+            [2, 'test_user']
         );
         expect(pool.query).toHaveBeenCalledWith(
             expect.stringContaining('ORDER BY RANDOM()'),

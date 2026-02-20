@@ -4,7 +4,8 @@
     "scripts": {
         "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
         "build": "tsc",
-        "test": "jest"
+        "test": "jest",
+        "db:migrate": "ts-node scripts/migrate.ts"
     },
     "dependencies": {
         "@google/generative-ai": "^0.24.1",

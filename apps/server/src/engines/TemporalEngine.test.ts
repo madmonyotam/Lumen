@@ -18,8 +18,7 @@ describe('TemporalEngine', () => {
             strengths: []
         };
         engine.reborn({
-            persona: mockPersona,
-            traits: ["Test"]
+            persona: mockPersona
         });
     });
 

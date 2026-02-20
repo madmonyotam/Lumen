@@ -163,10 +163,10 @@ export class LifeCycleService {
                 const finalQuery = `The subjective internal feeling of: ${cognitiveTexture}. Context: ${currentInteraction}`.trim();
                 // 3. שליפת זכרונות משולבת
                 // שולפים 2 זכרונות רלוונטיים להקשר הנוכחי
-                const semanticMemories = await this.memory.findSimilarMemories(finalQuery, 2);
+                const semanticMemories = await this.memory.findSimilarMemories('local_user', finalQuery, 2);
 
                 // שולפים זיכרון אחד אקראי לחלוטין בעל חשיבות גבוהה (הבזק לא צפוי)
-                const randomFlashback = await this.memory.getRandomHighImportanceMemory(1);
+                const randomFlashback = await this.memory.getRandomHighImportanceMemory('local_user', 1);
 
                 const combinedMemories = [...semanticMemories, ...randomFlashback];
                 this.globalActiveMemories = combinedMemories;
@@ -182,6 +182,8 @@ export class LifeCycleService {
 
                 // 5. אחסון עם מטא-דאטה נקי (בלי המילה BPM בתוכן הזיכרון)
                 await this.memory.storeMemory(
+                    'local_user',
+                    null,
                     thought,
                     {
                         type: 'thought',
@@ -217,7 +219,7 @@ export class LifeCycleService {
 
                     console.log(`[Memory System] Running Exponential Decay (Progress: ${(progress * 100).toFixed(1)}%, Effective Entropy: ${effectiveEntropy.toFixed(2)})...`);
 
-                    await this.memory.decayMemories(effectiveEntropy);
+                    await this.memory.decayMemories('local_user', effectiveEntropy);
                 } else {
                     // Log only occasionally if needed, or just keep silent to avoid clutter
                     // console.log("[LifeCycle] Decay Loop: Organism not alive, waiting...");
