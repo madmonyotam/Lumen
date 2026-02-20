@@ -28,7 +28,7 @@ describe('MemoryService Integration', () => {
 
     it('should handle memory decay', async () => {
         const content = "Fading trace of a past life.";
-        const stored = await memoryService.storeMemory(content, {}, 0.5, 0.5);
+        await memoryService.storeMemory(content, {}, 0.5, 0.5);
 
         // Run decay with high entropy
         await memoryService.decayMemories(1.0, 0.5); // 50% decay

@@ -15,6 +15,7 @@ import { LifeCycleService } from './services/LifeCycleService';
 import { SERVER_CONFIG } from './config/server.config';
 import { mockPersona } from './prompts/testAssembly';
 import { LumenPersona } from './prompts/types';
+import { getAllGenesisOptions } from './prompts/promptUtils';
 
 const app = express();
 app.use(cors());
@@ -62,22 +63,32 @@ app.get('/health', async (_req, res) => {
     }
 });
 
+// Genesis Options Endpoint
+app.get('/api/genesis/options', (_req, res) => {
+    try {
+        const options = getAllGenesisOptions();
+        res.json(options);
+    } catch (e) {
+        res.status(500).json({ error: String(e) });
+    }
+});
+
 // Genesis Endpoint - Rebirth the organism
 app.post('/api/genesis', (req, res) => {
     try {
-        const { name, gender, traits, lifespan, language } = req.body;
+        const { persona, traitLabels } = req.body;
 
-        if (!name || !gender || !lifespan) {
+        if (!persona || !persona.core || !traitLabels) {
             return res.status(400).json({ error: 'Missing genesis parameters' });
         }
 
-        temporalEngine.reborn({ name, gender, traits, lifespan, language });
-        console.log(`[Genesis] Organism reborn as ${name} (${gender}) with ${traits.length} traits. Language: ${language || 'en'}`);
+        temporalEngine.reborn({ persona, traits: traitLabels });
+        console.log(`[Genesis] Organism reborn as ${persona.core.name} (${persona.core.gender}). Language: ${persona.core.language || 'en'}`);
 
         // Reset global messages on rebirth via lifeCycle state
-        const birthMessage = language === 'he'
-            ? `אני ${name}. הרגע נוצרתי.`
-            : `I am ${name}. I have just been born.`;
+        const birthMessage = persona.core.language === 'he'
+            ? `אני ${persona.core.name}. הרגע נוצרתי.`
+            : `I am ${persona.core.name}. I have just been born.`;
 
         lifeCycle.globalLatestInteraction = {
             text: birthMessage,
@@ -136,7 +147,7 @@ app.post('/api/chat', async (req, res) => {
                 const memories = await memoryService.findSimilarMemories(retrievalContext, 3);
 
                 const biometrics = { bpm, stressIndex: stress, vitality };
-                const entityProfile: LumenPersona = {
+                const entityProfile: LumenPersona = lifeStatus.persona || {
                     ...mockPersona,
                     core: {
                         name: lifeStatus.name,

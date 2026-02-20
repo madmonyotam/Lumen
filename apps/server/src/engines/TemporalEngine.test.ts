@@ -1,15 +1,25 @@
 import { TemporalEngine } from './TemporalEngine';
+import { LumenPersona } from '@lumen/shared/types/index';
 
 describe('TemporalEngine', () => {
     let engine: TemporalEngine;
 
     beforeEach(() => {
         engine = new TemporalEngine();
+        const mockPersona: LumenPersona = {
+            core: {
+                name: "Test",
+                gender: "non-binary",
+                language: "en",
+                lifespan: 24 * 60 * 60 * 1000
+            },
+            traits: {} as any,
+            internal: {} as any,
+            strengths: []
+        };
         engine.reborn({
-            name: "Test",
-            gender: "non-binary",
-            traits: ["Test"],
-            lifespan: 24 * 60 * 60 * 1000
+            persona: mockPersona,
+            traits: ["Test"]
         });
     });
 

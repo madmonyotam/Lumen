@@ -3,7 +3,7 @@
  * Includes Attachment Styles and Temperament settings.
  */
 
-import { LumenProfile, TierRange } from "./types";
+import { LumenProfile, TierRange } from "@lumen/shared";
 
 // --- Attachment Styles Configuration ---
 export const LUMEN_ATTACHMENT_CONFIG: Record<TierRange, LumenProfile> = {

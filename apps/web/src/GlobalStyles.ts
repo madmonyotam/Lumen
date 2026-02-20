@@ -14,6 +14,7 @@ export const GlobalStyles = createGlobalStyle`
     margin: 0;
     padding: 0;
     overflow: hidden;
+    direction: ${props => props.theme.direction};
   }
 
   body {

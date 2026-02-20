@@ -2,6 +2,7 @@ import React from 'react';
 import styled, { useTheme } from 'styled-components';
 import { Send } from 'lucide-react';
 import { Flex, FlexCol, Relative } from '../shared/Layout';
+import { useTranslation } from '../../hooks/useTranslation';
 
 const Header = styled(Flex)`
   justify-content: space-between;
@@ -86,11 +87,11 @@ const Input = styled.input`
   }
 `;
 
-const SendButton = styled.button`
+const SendButton = styled.button<{ $isRTL?: boolean }>`
   position: absolute;
-  right: 0.75rem;
+  ${props => props.$isRTL ? 'left' : 'right'}: 0.75rem;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-50%) ${props => props.$isRTL ? 'rotate(-90deg)' : 'rotate(0deg)'};
   padding: 0.5rem;
   border-radius: 50%;
   border: none;
@@ -100,10 +101,11 @@ const SendButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background ${props => props.theme.animations.fast};
+  transition: all ${props => props.theme.animations.fast};
   
   &:hover {
     background: ${props => props.theme.colors.tealDim};
+    transform: translateY(-50%) ${props => props.$isRTL ? 'rotate(-90deg) scale(1.1)' : 'rotate(90deg) scale(1.1)'};
   }
 `;
 
@@ -123,11 +125,12 @@ export const NeuralHeader: React.FC<NeuralHeaderProps> = ({
   rightContent
 }) => {
   const theme = useTheme();
+  const { t, isRTL } = useTranslation();
 
   return (
     <Header>
       <FlexCol>
-        <NeuralStatus>Neural Connection Established</NeuralStatus>
+        <NeuralStatus>{t('neural_connection_established')}</NeuralStatus>
         <Flex $gap="1rem" $align="center">
           <StatusDotContainer>
             <StatusDotCore $color={theme.colors.teal} />
@@ -140,17 +143,17 @@ export const NeuralHeader: React.FC<NeuralHeaderProps> = ({
       <HeaderInputContainer>
         <Input
           type="text"
-          placeholder={`Speak to ${name}...`}
+          placeholder={`${t('speak_to_placeholder')} ${name}...`}
           value={inputValue}
           onChange={(e) => onInputChange(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && onSend()}
         />
-        <SendButton onClick={onSend}>
+        <SendButton onClick={onSend} $isRTL={isRTL}>
           <Send size={18} />
         </SendButton>
       </HeaderInputContainer>
 
       {rightContent}
-    </Header>
+    </Header >
   );
 };

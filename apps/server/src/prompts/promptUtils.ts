@@ -6,11 +6,18 @@ import {
     forgivenessOptions, gratitudeOptions, honestyOptions, hopeOptions, humilityOptions, humorOptions,
     judgmentOptions, kindnessOptions, leadershipOptions, loveOfLearningOptions, loveOptions,
     perseveranceOptions, perspectiveOptions, prudenceOptions, selfRegulationOptions,
-    socialIntelligenceOptions, spiritualityOptions, teamworkOptions, zestOptions,
-    CharacterStrength
+    socialIntelligenceOptions, spiritualityOptions, teamworkOptions, zestOptions
 } from "./characterStrengths";
 import { bigFiveConfig } from "./theBigFive";
-import { BigFiveConfig, LumenProfile, TierRange } from "./types";
+import { BigFiveConfig, LumenProfile, TierRange, GenesisOptions, BaseMechanic, TraitDescription, StrengthDefinition, CharacterStrength } from "@lumen/shared";
+
+// Lifespan Mechanics
+const LIFESPAN_MECHANICS: BaseMechanic[] = [
+    { id: 'lifespan_short', label: 'Transient (4h)', value: 4 * 60 * 60 * 1000, description: 'A brief spark of existence.' },
+    { id: 'lifespan_medium', label: 'Eternal (24h)', value: 24 * 60 * 60 * 1000, description: 'A full cycle of day and night.' },
+    { id: 'lifespan_long', label: 'Ephemeral (1w)', value: 7 * 24 * 60 * 60 * 1000, description: 'A prolonged journey.' }
+];
+
 
 const strengthMap: Record<string, Record<number, CharacterStrength>> = {
     // Wisdom
@@ -84,4 +91,66 @@ export const getStrengthPrompt = (strengthId: string, rank: number): string | nu
     // Safety check if rank is out of bounds, default to 1
     const safeRank = (rank >= 1 && rank <= 5) ? rank : 1;
     return options[safeRank]?.description || null;
+};
+
+export const getAllGenesisOptions = (): GenesisOptions => {
+    // 1. Mechanics
+    const mechanics = LIFESPAN_MECHANICS;
+
+    // 2. Traits (OCEAN + Biology)
+    const traits: TraitDescription[] = [];
+
+    // Helper to process config
+    const processConfig = (config: Record<string, Record<TierRange, LumenProfile>>, category: 'OCEAN' | 'Biology' | 'Internal') => {
+        Object.entries(config).forEach(([key, profiles]) => {
+            // For each tier, add as a trait option? 
+            // Or is the "Trait" the dimension (e.g. Openness)?
+            // The frontend needs "Description" for the tooltip.
+            // If we want sliders, we need the *Dimension* and its *Steps*.
+            // But the current `TraitDescription` is flat.
+            // Let's verify what the frontend expects.
+            // "Live Tooltip: ... show the `personaName` of the current value".
+            // This implies the frontend has the full map of ranges -> personaNames?
+            // Or it receives a list and maps sliding values to it?
+            // Let's separate each *Tier* as a discrete "Trait Option" for now, or just send the full Dimension structure?
+            // Since `TraitDescription` is simple, let's treat every *Tier* as a selectable "Trait" logic-wise,
+            // BUT for the slider UI, maybe we need the structure.
+            // The prompt task said: "fetch... Base Mechanics, Trait Descriptions, Strength Definitions".
+            // Let's flatten all profiles.
+            Object.values(profiles).forEach(profile => {
+                traits.push({
+                    id: `${key}_${profile.min}_${profile.max}`, // Unique ID
+                    label: profile.personaName,
+                    description: profile.prompt.substring(0, 100) + "...",
+                    category
+                });
+            });
+        });
+    };
+
+    processConfig(bigFiveConfig as unknown as Record<string, Record<TierRange, LumenProfile>>, 'OCEAN');
+    processConfig({
+        attachment: LUMEN_ATTACHMENT_CONFIG,
+        temperament: LUMEN_TEMPERAMENT_CONFIG,
+        cognitive: LUMEN_COGNITIVE_CONFIG,
+        shadow: LUMEN_SHADOW_CONFIG
+    }, 'Biology');
+
+    // 3. Strengths
+    const strengths: StrengthDefinition[] = [];
+    Object.entries(strengthMap).forEach(([id, options]) => {
+        // Use the first option to get category/label base
+        const first = options[1];
+        if (first) {
+            strengths.push({
+                id,
+                label: id.charAt(0).toUpperCase() + id.slice(1).replace(/-/g, ' '),
+                description: first.description, // Default description
+                category: first.category,
+                options: options // Pass full options for details if needed
+            });
+        }
+    });
+
+    return { mechanics, traits, strengths };
 };

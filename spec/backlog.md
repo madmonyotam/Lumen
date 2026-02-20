@@ -112,18 +112,27 @@ Refining the Genesis Wizard with advanced logic, data integration, and UI enhanc
 
 | # | Ticket | Status | Owner |
 |---|--------|--------|-------|
-| 9.1 | **Backend Data Integration:** Fetch prompt options from server. [View Spec](tasks/sprint_8/backend_data_integration.md) | 🔲 Todo | Backend |
-| 9.2 | **Signature Strengths UI:** Category tabs and visual state. [View Spec](tasks/sprint_8/signature_strengths_ui.md) | 🔲 Todo | Frontend |
-| 9.3 | **Sliders & Tooltips:** Live tooltips and performance optimization. [View Spec](tasks/sprint_8/sliders_and_tooltips.md) | 🔲 Todo | Frontend |
-| 9.4 | **Conflict Engine:** Visual feedback and logging for persona conflicts. [View Spec](tasks/sprint_8/conflict_engine_enhancements.md) | 🔲 Todo | Fullstack |
-| 9.5 | **Wizard Assembly:** State management and final JSON assembly. [View Spec](tasks/sprint_8/wizard_state_assembly.md) | 🔲 Todo | Frontend |
+| 9.1 | **Backend Data Integration:** Fetch prompt options from server. [View Spec](tasks/sprint_8/backend_data_integration.md) | ✅ Done | Backend |
+| 9.2 | **Signature Strengths UI:** Category tabs and visual state. [View Spec](tasks/sprint_8/signature_strengths_ui.md) | ✅ Done | Frontend |
+| 9.3 | **Sliders & Tooltips:** Live tooltips and performance optimization. [View Spec](tasks/sprint_8/sliders_and_tooltips.md) | ✅ Done | Frontend |
+| 9.4 | **Conflict Engine:** Visual feedback and logging for persona conflicts. [View Spec](tasks/sprint_8/conflict_engine_enhancements.md) | ✅ Done | Fullstack |
+| 9.5 | **Wizard Assembly:** State management and final JSON assembly. [View Spec](tasks/sprint_8/wizard_state_assembly.md) | ✅ Done | Frontend |
 
-## 12. Bugs & Known Issues
+## 12. Sprint 9: Localization & Hebrew Interface
+Enabling the system to speak the user's native language, bridging the gap between machine and culture.
+
+| # | Ticket | Status | Owner |
+|---|--------|--------|-------|
+| 10.1 | **Deep Localization:** Create a central dictionary for all static texts in the software. | ✅ Done | Frontend |
+| 10.2 | **RTL Architecture:** Implement Right-to-Left layout logic for Hebrew mode. | ✅ Done | Frontend |
+| 10.3 | **Language Helix:** Add configuration flag for language selection (Hebrew/English). | ✅ Done | Backend |
+
+## 13. Bugs & Known Issues
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | - | - | - | - |
 
-## 13. Legend
+## 14. Legend
 *   🔲 Todo
 *   🚧 In Progress
 *   ✅ Done
