@@ -127,12 +127,23 @@ Enabling the system to speak the user's native language, bridging the gap betwee
 | 10.2 | **RTL Architecture:** Implement Right-to-Left layout logic for Hebrew mode. | ✅ Done | Frontend |
 | 10.3 | **Language Helix:** Add configuration flag for language selection (Hebrew/English). | ✅ Done | Backend |
 
-## 13. Bugs & Known Issues
+## 13. Sprint 10: Multi-Tenancy & Authentication
+Transitioning from local state to multi-tenant architecture with Firebase Auth and Postgres user isolation.
+
+| # | Ticket | Status | Owner |
+|---|--------|--------|-------|
+| 11.1 | **Backend/DB:** Schema migration for `pgvector` and RLS policies (Users, Lumens, Memories tables). [View Spec](tasks/sprint_9/task_9_1_schema_migration.md) | 🔲 Todo | DB Arch / Backend |
+| 11.2 | **Auth Service:** Firebase Google Sign-In on frontend and token validation on the backend. [View Spec](tasks/sprint_9/task_9_2_auth_service.md) | 🔲 Todo | Backend / Soft Arch |
+| 11.3 | **State Sync:** Logic to persist the existing JSON state to Postgres on changes. [View Spec](tasks/sprint_9/task_9_3_state_sync.md) | 🔲 Todo | Fullstack |
+| 11.4 | **Frontend Components:** Persistent Header, UserAvatar, Logout dropdown, and Auth Guard HOC. [View Spec](tasks/sprint_9/task_9_4_frontend_components.md) | 🔲 Todo | Frontend |
+| 11.5 | **API/DAO:** Functions for saving/retrieving embeddings filtered by `user_id`. [View Spec](tasks/sprint_9/task_9_5_api_dao.md) | 🔲 Todo | Backend |
+
+## 14. Bugs & Known Issues
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
 | - | - | - | - |
 
-## 14. Legend
+## 15. Legend
 *   🔲 Todo
 *   🚧 In Progress
 *   ✅ Done

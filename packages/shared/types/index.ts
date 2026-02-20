@@ -13,7 +13,6 @@ export interface LifeStatus {
     // Identity
     name: string;
     gender: 'male' | 'female' | 'non-binary';
-    traits: string[]; // e.g., "Curious", "Stoic", "Anxious"
     language: Language; // e.g., "en", "he"
     persona?: LumenPersona;
 }

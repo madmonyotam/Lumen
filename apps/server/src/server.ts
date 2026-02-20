@@ -77,13 +77,13 @@ app.get('/api/genesis/options', (_req, res) => {
 // Genesis Endpoint - Rebirth the organism
 app.post('/api/genesis', (req, res) => {
     try {
-        const { persona, traitLabels } = req.body;
+        const { persona } = req.body;
 
-        if (!persona || !persona.core || !traitLabels) {
+        if (!persona || !persona.core) {
             return res.status(400).json({ error: 'Missing genesis parameters' });
         }
 
-        temporalEngine.reborn({ persona, traits: traitLabels });
+        temporalEngine.reborn({ persona });
         console.log(`[Genesis] Organism reborn as ${persona.core.name} (${persona.core.gender}). Language: ${persona.core.language || 'en'}`);
 
         // Reset global messages on rebirth via lifeCycle state

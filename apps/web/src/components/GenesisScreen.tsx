@@ -292,26 +292,6 @@ const GenesisScreen: React.FC = () => {
         ));
     };
 
-    const getSelectedTraitsList = () => {
-        const list: string[] = [];
-        // Map traitValues to trait Labels/IDs
-        // We need to group dimensions first
-        if (!options) return [];
-
-        const categories = ['OCEAN', 'Biology'];
-        categories.forEach(cat => {
-            const catTraits = options.traits.filter(t => t.category === cat);
-            // Group by dimension key
-            const grouped = groupTraits(catTraits);
-            Object.keys(grouped).forEach(dim => {
-                const val = traitValues[dim] ?? 50; // Default 50
-                const trait = getTraitForValue(val, grouped[dim]);
-                if (trait) list.push(trait.label);
-            });
-        });
-        return list;
-    };
-
     const handleGenesis = async () => {
         // Assemble LumenPersona
         const ocean: Partial<BigFiveScores> = {};
@@ -346,8 +326,7 @@ const GenesisScreen: React.FC = () => {
         };
 
         const payload = {
-            persona,
-            traitLabels: getSelectedTraitsList()
+            persona
         };
 
         try {

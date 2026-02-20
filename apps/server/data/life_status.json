@@ -1,44 +1,39 @@
 {
-  "subjectiveTime": 1771585105050,
-  "birthTime": 1771585105050,
+  "subjectiveTime": 1771590779835,
+  "birthTime": 1771590779835,
   "lifespan": 86400000,
-  "generation": 2,
+  "generation": 4,
   "persona": {
     "core": {
-      "name": "Lumen",
-      "gender": "non-binary",
-      "language": "en",
+      "name": "ארי",
+      "gender": "male",
+      "language": "he",
       "lifespan": 86400000
     },
     "traits": {
-      "openness": 50,
-      "conscientiousness": 50,
-      "extraversion": 50,
+      "openness": 66,
+      "conscientiousness": 24,
+      "extraversion": 52,
       "agreeableness": 50,
-      "neuroticism": 50
+      "neuroticism": 73
     },
     "internal": {
-      "attachment": 50,
-      "temperament": 50,
+      "attachment": 24,
+      "temperament": 75,
       "cognitive": 50,
-      "shadow": 50
+      "shadow": 37
     },
-    "strengths": [],
+    "strengths": [
+      "spirituality",
+      "creativity",
+      "love-of-learning",
+      "humility",
+      "humor"
+    ],
     "conflicts": []
   },
-  "name": "Lumen",
-  "gender": "non-binary",
-  "language": "en",
-  "traits": [
-    "The Balanced Observer",
-    "The Balanced Responsible",
-    "The Balanced Vitalist",
-    "The Balanced Socialite",
-    "The Balanced Reactor",
-    "The Secure",
-    "The Responsive",
-    "The Balanced Processor",
-    "The Superior"
-  ],
+  "name": "ארי",
+  "gender": "male",
+  "language": "he",
   "isAlive": true
 }

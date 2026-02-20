@@ -12,7 +12,6 @@ export class TemporalEngine {
     private name: string = "Lumen";
     private gender: 'male' | 'female' | 'non-binary' = 'non-binary';
     private language: 'en' | 'he' = 'en';
-    private traits: string[] = ["Curious"];
     private isAlive: boolean = false;
 
     private readonly PERSISTENCE_PATH = path.join(process.cwd(), 'data', 'life_status.json');
@@ -44,14 +43,12 @@ export class TemporalEngine {
         return this.subjectiveTime;
     }
 
-    reborn(payload: { persona: LumenPersona, traits: string[] }) {
+    reborn(payload: { persona: LumenPersona }) {
         this.persona = payload.persona;
         this.name = payload.persona.core.name;
         this.gender = payload.persona.core.gender;
         this.language = payload.persona.core.language || 'en';
         this.lifespan = payload.persona.core.lifespan;
-
-        this.traits = payload.traits;
 
         this.birthTime = Date.now();
         this.subjectiveTime = this.birthTime;
@@ -76,7 +73,6 @@ export class TemporalEngine {
             name: this.name,
             gender: this.gender,
             language: this.language,
-            traits: this.traits,
             persona: this.persona || undefined
         };
     }
@@ -100,7 +96,6 @@ export class TemporalEngine {
                 name: this.name,
                 gender: this.gender,
                 language: this.language,
-                traits: this.traits,
                 isAlive: this.isAlive
             };
 
@@ -130,7 +125,6 @@ export class TemporalEngine {
                 this.name = data.name || this.name;
                 this.gender = data.gender || this.gender;
                 this.language = data.language || this.language;
-                this.traits = data.traits || this.traits;
                 this.isAlive = data.isAlive || false;
 
                 console.log(`[TemporalEngine] State restored from ${this.PERSISTENCE_PATH}. Organism is ${this.isAlive ? 'ALIVE' : 'DEAD'}.`);

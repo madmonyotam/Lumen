@@ -41,8 +41,7 @@ export function processBiometrics(bpm: number, stress: number, hrv: number): Org
             generation: 1,
             name: "Lumen",
             gender: "non-binary",
-            language: "en",
-            traits: ["Curious", "Stoic"]
+            language: "en"
         },
         visualParams: {
             coreColor,
