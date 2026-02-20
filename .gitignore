@@ -1,5 +1,5 @@
 
 node_modules
 .env
-./apps/server/dist
-./apps/server/service-account-key.json
+apps/server/dist
+apps/server/service-account-key.json
