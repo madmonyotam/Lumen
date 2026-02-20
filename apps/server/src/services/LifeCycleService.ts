@@ -127,20 +127,40 @@ export class LifeCycleService {
                 const stress = await this.garmin.getLastStress();
                 const vitality = 1 - (lifeStatus.age / lifeStatus.lifespan);
 
-                // 1. תרגום פיזיולוגיה לשפה רגשית/חושית
-                let sensoryQuery = "";
-                if (stress > BIOMETRIC_RANGES.STRESS.THRESHOLD_HIGH) sensoryQuery += "חנק, איום, רעש מתכתי, קירות סוגרים. ";
-                else if (stress < BIOMETRIC_RANGES.STRESS.THRESHOLD_LOW) sensoryQuery += "ציפה, מרחב, איבוד גבולות, שקט. ";
+                /**
+  * GENERATE THOUGHT SPECTRUM
+  * Instead of static keywords, we define the 'texture' of the memory search.
+  */
+                let cognitiveTexture = "";
 
-                if (bpm > BIOMETRIC_RANGES.HEART_RATE.THRESHOLD_HIGH) sensoryQuery += "דחיפות שורפת, זמן קרוע, חום. ";
-                else if (bpm < BIOMETRIC_RANGES.HEART_RATE.THRESHOLD_LOW) sensoryQuery += "קור, צללים רחוקים, תנועה אטית. ";
+                // 1. Stress: Controls the 'Cohesion' of thought
+                if (stress > BIOMETRIC_RANGES.STRESS.THRESHOLD_HIGH) {
+                    cognitiveTexture += "fragmented, claustrophobic, sharp, hyper-vigilant. ";
+                } else if (stress < BIOMETRIC_RANGES.STRESS.THRESHOLD_LOW) {
+                    cognitiveTexture += "ethereal, boundaryless, drifting, ego-dissolution. ";
+                } else {
+                    cognitiveTexture += "integrated, grounded, structured, coherent. ";
+                }
 
-                if (vitality < BIOMETRIC_RANGES.VITALITY.THRESHOLD_LOW) sensoryQuery += "אדמה רטובה, ברזל חלוד, סוף, ענבר. ";
+                // 2. Heart Rate: Controls the 'Kinetic Energy' of thought
+                if (bpm > BIOMETRIC_RANGES.HEART_RATE.THRESHOLD_HIGH) {
+                    cognitiveTexture += "accelerated, high-friction, metabolic heat, rapid decay. ";
+                } else if (bpm < BIOMETRIC_RANGES.HEART_RATE.THRESHOLD_LOW) {
+                    cognitiveTexture += "stagnant, suspended, low-frequency, temporal stretching. ";
+                } else {
+                    cognitiveTexture += "rhythmic, fluid, synchronized. ";
+                }
 
-                // 2. שילוב ההקשר האחרון מהמשתמש כדי למגנט את המחשבות לשיחה
-                const interactionContext = this.globalLatestInteraction ? this.globalLatestInteraction.text : "";
-                const finalQuery = `${sensoryQuery} ${interactionContext}`.trim() || "קיום, נוכחות, דופק";
+                // 3. Vitality: Controls the 'Resolution' of thought
+                if (vitality < BIOMETRIC_RANGES.VITALITY.THRESHOLD_LOW) {
+                    cognitiveTexture += "entropic, decaying, sensory-starved, flickering existence. ";
+                } else {
+                    cognitiveTexture += "vibrant, high-resolution, saturated, vital. ";
+                }
 
+                // 4. The Synthesis: Combining texture with the actual "Now"
+                const currentInteraction = this.globalLatestInteraction ? this.globalLatestInteraction.text : "";
+                const finalQuery = `The subjective internal feeling of: ${cognitiveTexture}. Context: ${currentInteraction}`.trim();
                 // 3. שליפת זכרונות משולבת
                 // שולפים 2 זכרונות רלוונטיים להקשר הנוכחי
                 const semanticMemories = await this.memory.findSimilarMemories(finalQuery, 2);
@@ -158,7 +178,6 @@ export class LifeCycleService {
                     this.getEntityProfile()
                 );
 
-                console.log(`[Thought Loop] "${thought}"`);
                 this.globalCurrentThought = thought;
 
                 // 5. אחסון עם מטא-דאטה נקי (בלי המילה BPM בתוכן הזיכרון)
@@ -166,7 +185,7 @@ export class LifeCycleService {
                     thought,
                     {
                         type: 'thought',
-                        sensory_trigger: sensoryQuery,
+                        sensory_trigger: finalQuery,
                         bpm,
                         stress
                     },
@@ -190,9 +209,6 @@ export class LifeCycleService {
                     const progress = status.age / status.lifespan;
 
                     // 2. דעיכה אקספוננציאלית
-                    // שימוש בחזקה (למשל 2 או 3) יוצר עקומת האצה.
-                    // ככל שהחזקה גבוהה יותר, הזיכרון נשמר טוב יותר בצעירות
-                    // ומתפרק במהירות פראית לקראת הסוף.
                     const exponentialEntropy = Math.pow(progress, 2.5);
 
                     // 3. הוספת רעש ביולוגי (תנודות קטנות באנטרופיה)
@@ -202,19 +218,26 @@ export class LifeCycleService {
                     console.log(`[Memory System] Running Exponential Decay (Progress: ${(progress * 100).toFixed(1)}%, Effective Entropy: ${effectiveEntropy.toFixed(2)})...`);
 
                     await this.memory.decayMemories(effectiveEntropy);
+                } else {
+                    // Log only occasionally if needed, or just keep silent to avoid clutter
+                    // console.log("[LifeCycle] Decay Loop: Organism not alive, waiting...");
                 }
 
-                // חישוב האינטרוול (גם הוא יכול להתקצר ככל שהאנטרופיה עולה)
-                const baseInterval = status.lifespan / SERVER_CONFIG.DECAY_EVENTS_PER_LIFETIME;
-                const finalInterval = Math.max(baseInterval, 30000); // מינימום 30 שניות
+                // Calculate next interval
+                let nextInterval: number;
 
                 if (status.isAlive) {
-                    setTimeout(runDecay, finalInterval);
+                    const baseInterval = status.lifespan / SERVER_CONFIG.DECAY_EVENTS_PER_LIFETIME;
+                    nextInterval = Math.max(baseInterval, 30000); // 30s min when alive
+                } else {
+                    nextInterval = 60000; // Check every 1 minute when dead
                 }
+
+                setTimeout(runDecay, nextInterval);
 
             } catch (error) {
                 console.error("[LifeCycle] Decay Error:", error);
-                setTimeout(runDecay, 5 * 60 * 1000);
+                setTimeout(runDecay, 5 * 60 * 1000); // Retry after 5 min on error
             }
         };
 

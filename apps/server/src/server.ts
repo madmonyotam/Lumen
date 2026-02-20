@@ -31,6 +31,7 @@ const io = new Server(httpServer, {
 
 const garminService = new GarminService();
 const temporalEngine = new TemporalEngine();
+temporalEngine.loadState();
 const memoryService = new MemoryService();
 const geminiService = new GeminiService();
 
