@@ -11,6 +11,8 @@ interface VisualPhysicsProps {
         vitality: number;
         ageRatio: number;
     }>;
+    thought: string | null;
+    currentInteraction: { text: string, sender: 'user' | 'lumen', timestamp: number } | null;
 }
 
 const OrganContainer = styled.div`
@@ -25,8 +27,36 @@ const OrganContainer = styled.div`
             drop-shadow(0 0 60px ${props => props.theme.colors.purple}22);
 `;
 
-export const VisualPhysics: React.FC<VisualPhysicsProps> = memo(({ biometricsRef }) => {
-    console.log('[VisualPhysics] Initial Mount');
+export const VisualPhysics: React.FC<VisualPhysicsProps> = memo(({ biometricsRef, thought, currentInteraction }) => {
+    console.log('[VisualPhysics] Mount/Update');
+
+    const [maxThoughts, setMaxThoughts] = React.useState(0);
+    const lastThoughtRef = React.useRef(thought);
+    const lastInteractionRef = React.useRef(currentInteraction?.timestamp);
+
+    React.useEffect(() => {
+        let isBursting = false;
+
+        // Check for new interaction
+        if (currentInteraction && currentInteraction.timestamp !== lastInteractionRef.current) {
+            setMaxThoughts(50);
+            lastInteractionRef.current = currentInteraction.timestamp;
+            isBursting = true;
+        }
+        // Check for new thought (only if not already bursting from interaction)
+        else if (!isBursting && thought && thought !== lastThoughtRef.current) {
+            setMaxThoughts(5);
+            lastThoughtRef.current = thought;
+            isBursting = true;
+        }
+
+        if (isBursting) {
+            const timer = setTimeout(() => {
+                setMaxThoughts(0);
+            }, 1500);
+            return () => clearTimeout(timer);
+        }
+    }, [thought, currentInteraction]);
 
     const colorScale = d3.scaleLinear<string>()
         .domain([0, 0.5, 1])
@@ -46,7 +76,7 @@ export const VisualPhysics: React.FC<VisualPhysicsProps> = memo(({ biometricsRef
 
                 <RadiatingThoughtsCore
                     colors={[strokeColor]}
-                    maxThoughts={0}
+                    maxThoughts={maxThoughts}
                     speed={2}
                     // thickness={thickness}
                     // distance={distance}
@@ -59,6 +89,11 @@ export const VisualPhysics: React.FC<VisualPhysicsProps> = memo(({ biometricsRef
             </div >
         </OrganContainer>
     );
-}, () => true); // Render once
+}, (prevProps, nextProps) => {
+    // Custom compare function since we want to trigger re-renders on thought/interaction changes
+    return prevProps.biometricsRef === nextProps.biometricsRef &&
+        prevProps.thought === nextProps.thought &&
+        prevProps.currentInteraction?.timestamp === nextProps.currentInteraction?.timestamp;
+}); // Render on changes
 
 VisualPhysics.displayName = 'VisualPhysics';

@@ -93,7 +93,7 @@ export const MemoryFog: React.FC = () => {
                     id: `${memory.id}-${index}-${Date.now()}`, // Ensure unique ID even if memory re-enters
                     text: text.toUpperCase(),
                     size: importance * 0.3,
-                    blur: 0.1 + (1 - strength) * 0.5,
+                    blur: 0.3 + (1 - strength) * 0.5,
                     color: color,
                     createdAt: Date.now()
                 }));

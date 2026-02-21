@@ -288,7 +288,11 @@ const OrganismView: React.FC = () => {
           </AnimatePresence>
 
           <OrbContainer>
-            <VisualPhysics biometricsRef={biometricsRef} />
+            <VisualPhysics
+              biometricsRef={biometricsRef}
+              thought={thought}
+              currentInteraction={currentInteraction}
+            />
           </OrbContainer>
 
           {/* <CoreSynapseContainer>
