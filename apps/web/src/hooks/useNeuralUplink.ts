@@ -1,19 +1,26 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+
+const SERVER_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export const useNeuralUplink = () => {
+    const { token } = useAuth();
     const [inputValue, setInputValue] = useState("");
     const [showKillModal, setShowKillModal] = useState(false);
 
     const handleSend = async () => {
-        if (!inputValue.trim()) return;
+        if (!inputValue.trim() || !token) return;
 
         const message = inputValue;
         setInputValue("");
 
         try {
-            await fetch('http://localhost:3001/api/chat', {
+            await fetch(`${SERVER_URL}/api/chat`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ message })
             });
         } catch (e) {
@@ -22,10 +29,15 @@ export const useNeuralUplink = () => {
     };
 
     const handleKill = async (action: 'wipe' | 'diminish') => {
+        if (!token) return;
+
         try {
-            await fetch('http://localhost:3001/api/death', {
+            await fetch(`${SERVER_URL}/api/death`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ memoryAction: action })
             });
             setShowKillModal(false);

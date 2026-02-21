@@ -12,12 +12,14 @@ import { TemporalEngine } from './engines/TemporalEngine';
 import { MemoryService } from './cortex/MemoryService';
 import { GeminiService } from './services/ai/GeminiService';
 import { LifeCycleService } from './services/LifeCycleService';
+import { StateSyncService } from './services/StateSyncService';
 import { SERVER_CONFIG } from './config/server.config';
 import { mockPersona } from './prompts/testAssembly';
 import { LumenPersona } from './prompts/types';
 import { getAllGenesisOptions } from './prompts/promptUtils';
 import { verifyToken, AuthenticatedRequest } from './middleware/auth';
 import { UserService } from './services/UserService';
+import { firebaseAdmin } from './config/firebase.config';
 
 const app = express();
 app.use(cors());
@@ -33,12 +35,45 @@ const io = new Server(httpServer, {
 
 const garminService = new GarminService();
 const temporalEngine = new TemporalEngine();
-temporalEngine.loadState();
 const memoryService = new MemoryService();
 const geminiService = new GeminiService();
 const userService = new UserService();
+const stateSync = new StateSyncService();
 
-const lifeCycle = new LifeCycleService(io, garminService, temporalEngine, memoryService, geminiService);
+const lifeCycle = new LifeCycleService(io, garminService, temporalEngine, memoryService, geminiService, stateSync);
+
+// Socket.io Authentication Middleware
+io.use(async (socket, next) => {
+    try {
+        const token = socket.handshake.auth.token;
+        if (!token) {
+            return next(new Error('Authentication error: Token missing'));
+        }
+        const decodedToken = await firebaseAdmin.auth().verifyIdToken(token);
+        socket.data.user = decodedToken;
+        next();
+    } catch (err) {
+        next(new Error('Authentication error: Invalid token'));
+    }
+});
+
+io.on('connection', async (socket) => {
+    const userId = socket.data.user.uid;
+    console.log(`[Socket] User ${userId} connected`);
+
+    // Ensure state is loaded into memory before joining lifecycle loop
+    await stateSync.loadUserState(userId);
+
+    socket.join(`user_${userId}`);
+    lifeCycle.addUser(userId);
+
+    socket.on('disconnect', async () => {
+        console.log(`[Socket] User ${userId} disconnected`);
+        lifeCycle.removeUser(userId);
+        await stateSync.unloadUser(userId);
+    });
+});
+
 
 // Auth Provisioning Endpoint
 app.post('/api/auth/sync', verifyToken, async (req: AuthenticatedRequest, res) => {
@@ -104,67 +139,85 @@ app.get('/api/genesis/options', (_req, res) => {
 });
 
 // Genesis Endpoint - Rebirth the organism
-app.post('/api/genesis', (req, res) => {
+app.post('/api/genesis', verifyToken, async (req: AuthenticatedRequest, res) => {
     try {
+        const userId = req.user!.uid;
         const { persona } = req.body;
 
         if (!persona || !persona.core) {
             return res.status(400).json({ error: 'Missing genesis parameters' });
         }
 
-        temporalEngine.reborn({ persona });
-        console.log(`[Genesis] Organism reborn as ${persona.core.name} (${persona.core.gender}). Language: ${persona.core.language || 'en'}`);
+        let lifeStatus = await stateSync.loadUserState(userId);
+        lifeStatus = temporalEngine.reborn(lifeStatus, { persona });
+        stateSync.saveUserState(userId, lifeStatus);
 
-        // Reset global messages on rebirth via lifeCycle state
+        console.log(`[Genesis] Organism reborn for ${userId} as ${persona.core.name}.`);
+
+        // Reset user's latest interaction
         const birthMessage = persona.core.language === 'he'
             ? `אני ${persona.core.name}. הרגע נוצרתי.`
             : `I am ${persona.core.name}. I have just been born.`;
 
-        lifeCycle.globalLatestInteraction = {
+        lifeCycle.setLatestInteraction(userId, {
             text: birthMessage,
             timestamp: Date.now(),
             sender: 'lumen'
-        };
+        });
 
-        res.json({ message: 'Genesis complete', lifeStatus: temporalEngine.getLifeStatus() });
+        // Force immediate DB flush for major lifecycle event
+        await stateSync.flushState(userId);
+
+        res.json({ message: 'Genesis complete', lifeStatus: lifeStatus });
     } catch (e) {
         res.status(500).json({ error: String(e) });
     }
 });
 
 // Death Endpoint - Kill the organism and handle memories
-app.post('/api/death', async (req, res) => {
+app.post('/api/death', verifyToken, async (req: AuthenticatedRequest, res) => {
     try {
+        const userId = req.user!.uid;
         const { memoryAction } = req.body; // 'wipe' | 'diminish' | 'keep'
 
-        console.log(`[Death] Organism killed. Memory Action: ${memoryAction}`);
-        temporalEngine.kill();
+        let lifeStatus = await stateSync.loadUserState(userId);
+        lifeStatus = temporalEngine.kill(lifeStatus);
+        stateSync.saveUserState(userId, lifeStatus);
+
+        console.log(`[Death] Organism killed for ${userId}. Memory Action: ${memoryAction}`);
 
         if (memoryAction === 'wipe') {
-            await memoryService.wipeMemories('local_user');
+            await memoryService.wipeMemories(userId);
         } else if (memoryAction === 'diminish') {
-            await memoryService.diminishMemories('local_user', 0.1); // Reduce to 10%
+            await memoryService.diminishMemories(userId, 0.1);
         }
 
-        res.json({ message: 'Organism has perished.', lifeStatus: temporalEngine.getLifeStatus() });
+        await stateSync.flushState(userId);
+
+        res.json({ message: 'Organism has perished.', lifeStatus: lifeStatus });
     } catch (e) {
         res.status(500).json({ error: String(e) });
     }
 });
 
 // --- INTERACTION FLOW (Event Driven) ---
-app.post('/api/chat', async (req, res) => {
+app.post('/api/chat', verifyToken, async (req: AuthenticatedRequest, res) => {
     try {
+        const userId = req.user!.uid;
         const { message } = req.body;
         if (!message) return res.status(400).json({ error: 'Message required' });
 
-        const lifeStatus = temporalEngine.getLifeStatus();
+        const lifeStatus = stateSync.getStateFromCache(userId);
+        if (!lifeStatus) {
+            return res.status(400).json({ error: 'Lumen state not loaded. Ensure Socket is connected.' });
+        }
+
         if (!lifeStatus.isAlive || lifeStatus.age >= lifeStatus.lifespan) {
             return res.json({ status: 'ignored', reason: 'Organism is dead.' });
         }
 
-        console.log(`[Neural Uplink] Received: "${message}"`);
-        lifeCycle.globalLatestInteraction = { text: message, timestamp: Date.now(), sender: 'user' };
+        console.log(`[Neural Uplink] Received from ${userId}: "${message}"`);
+        lifeCycle.setLatestInteraction(userId, { text: message, timestamp: Date.now(), sender: 'user' });
 
         // Process interaction contextually
         (async () => {
@@ -174,7 +227,7 @@ app.post('/api/chat', async (req, res) => {
                 const vitality = 1 - (lifeStatus.age / lifeStatus.lifespan);
 
                 const retrievalContext = `User says: "${message}". Current State: BPM ${bpm}, Stress ${stress}`;
-                const memories = await memoryService.findSimilarMemories('local_user', retrievalContext, 3);
+                const memories = await memoryService.findSimilarMemories(userId, retrievalContext, 3);
 
                 const biometrics = { bpm, stressIndex: stress, vitality };
                 const entityProfile: LumenPersona = lifeStatus.persona || {
@@ -190,13 +243,13 @@ app.post('/api/chat', async (req, res) => {
                 const response = await geminiService.generateCognitiveResponse(biometrics, memories, message, entityProfile);
 
                 if (response) {
-                    console.log(`[Interaction] Response: "${response.thought}"`);
-                    lifeCycle.globalLatestInteraction = { text: response.thought, timestamp: Date.now(), sender: 'lumen' };
+                    console.log(`[Interaction] Response for ${userId}: "${response.thought}"`);
+                    lifeCycle.setLatestInteraction(userId, { text: response.thought, timestamp: Date.now(), sender: 'lumen' });
 
                     if (response.re_encoding) {
                         await memoryService.storeMemory(
-                            'local_user',
-                            null,
+                            userId,
+                            lifeStatus.id || null,
                             response.re_encoding.content,
                             {
                                 type: 'interaction',
@@ -211,7 +264,7 @@ app.post('/api/chat', async (req, res) => {
                     }
                 }
             } catch (err) {
-                console.error("[Interaction] Error:", err);
+                console.error(`[Interaction] Error processing for ${userId}:`, err);
             }
         })();
 
@@ -223,7 +276,6 @@ app.post('/api/chat', async (req, res) => {
 
 // Start Background Operations
 garminService.connect().catch(console.error);
-lifeCycle.start();
 
 httpServer.listen(SERVER_CONFIG.PORT, () => {
     console.log(`Server running on http://localhost:${SERVER_CONFIG.PORT}`);

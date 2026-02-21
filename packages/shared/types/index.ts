@@ -4,6 +4,7 @@ import type { LumenPersona } from './Genesis';
 export type Language = 'en' | 'he';
 
 export interface LifeStatus {
+    id?: string;
     isAlive: boolean;
     birthTime: number;
     age: number;      // Current subjective age in ms

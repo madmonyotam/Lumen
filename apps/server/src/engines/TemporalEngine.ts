@@ -1,27 +1,14 @@
-import { LifeStatus, LumenPersona } from '@lumen/shared/types/index';
+import { LifeStatus, LumenPersona } from '@lumen/shared';
 import { BIO_CONFIG } from '../config/lumen-bio.config';
-import * as fs from 'fs';
-import * as path from 'path';
 
 export class TemporalEngine {
-    private subjectiveTime: number = Date.now();
-    private birthTime: number = Date.now();
-    private lifespan: number = 24 * 60 * 60 * 1000; // Default 24h
-    private generation: number = 1;
-    private persona: LumenPersona | null = null;
-    private name: string = "Lumen";
-    private gender: 'male' | 'female' | 'non-binary' = 'non-binary';
-    private language: 'en' | 'he' = 'en';
-    private isAlive: boolean = false;
-
-    private readonly PERSISTENCE_PATH = path.join(process.cwd(), 'data', 'life_status.json');
-
     /**
      * Calculates the new subjective time based on the organism's state.
      * Higher BPM and Stress accelerate subjective time perception.
+     * Modifies and returns the state object.
      */
-    calculateSubjectiveTime(bpm: number, stress: number, deltaRealTimeMs: number): number {
-        if (!this.isAlive) return this.subjectiveTime;
+    calculateSubjectiveTime(state: LifeStatus, bpm: number, stress: number, deltaRealTimeMs: number): LifeStatus {
+        if (!state.isAlive) return state;
 
         // Bio-Config Influence
         const reactionSpeed = BIO_CONFIG.interaction_rules.stimulus_reaction_speed;
@@ -32,107 +19,38 @@ export class TemporalEngine {
         const timeDilation = bpmFactor * stressFactor;
         const deltaSubjective = deltaRealTimeMs * timeDilation;
 
-        this.subjectiveTime += deltaSubjective;
+        state.age += deltaSubjective;
 
         // Check for mortality
-        if (this.subjectiveTime - this.birthTime > this.lifespan) {
-            this.isAlive = false;
-            this.saveState();
+        if (state.age > state.lifespan) {
+            state.isAlive = false;
         }
 
-        return this.subjectiveTime;
+        return state;
     }
 
-    reborn(payload: { persona: LumenPersona }) {
-        this.persona = payload.persona;
-        this.name = payload.persona.core.name;
-        this.gender = payload.persona.core.gender;
-        this.language = payload.persona.core.language || 'en';
-        this.lifespan = payload.persona.core.lifespan;
+    reborn(state: LifeStatus, payload: { persona: LumenPersona }): LifeStatus {
+        const persona = payload.persona;
+        state.persona = persona;
+        state.name = persona.core.name;
+        state.gender = persona.core.gender;
+        state.language = persona.core.language || 'en';
+        state.lifespan = persona.core.lifespan;
 
-        this.birthTime = Date.now();
-        this.subjectiveTime = this.birthTime;
-        this.generation++;
-        this.isAlive = true;
+        state.birthTime = Date.now();
+        state.age = 0;
+        state.generation++;
+        state.isAlive = true;
 
-        this.saveState();
+        return state;
     }
 
-    kill() {
-        this.isAlive = false;
-        this.saveState();
+    kill(state: LifeStatus): LifeStatus {
+        state.isAlive = false;
+        return state;
     }
 
-    getLifeStatus(): LifeStatus {
-        return {
-            isAlive: this.isAlive,
-            birthTime: this.birthTime,
-            age: this.subjectiveTime - this.birthTime,
-            lifespan: this.lifespan,
-            generation: this.generation,
-            name: this.name,
-            gender: this.gender,
-            language: this.language,
-            persona: this.persona || undefined
-        };
-    }
-
-    getSubjectiveTime(): number {
-        return this.subjectiveTime;
-    }
-
-    getLastSubjectiveTime(): number {
-        return this.subjectiveTime;
-    }
-
-    private saveState() {
-        try {
-            const data = {
-                subjectiveTime: this.subjectiveTime,
-                birthTime: this.birthTime,
-                lifespan: this.lifespan,
-                generation: this.generation,
-                persona: this.persona,
-                name: this.name,
-                gender: this.gender,
-                language: this.language,
-                isAlive: this.isAlive
-            };
-
-            const dir = path.dirname(this.PERSISTENCE_PATH);
-            if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir, { recursive: true });
-            }
-
-            fs.writeFileSync(this.PERSISTENCE_PATH, JSON.stringify(data, null, 2));
-            console.log(`[TemporalEngine] State persisted to ${this.PERSISTENCE_PATH}`);
-        } catch (error) {
-            console.error("[TemporalEngine] Persistence Error:", error);
-        }
-    }
-
-    public loadState() {
-        try {
-            if (fs.existsSync(this.PERSISTENCE_PATH)) {
-                const raw = fs.readFileSync(this.PERSISTENCE_PATH, 'utf-8');
-                const data = JSON.parse(raw);
-
-                this.subjectiveTime = data.subjectiveTime || this.subjectiveTime;
-                this.birthTime = data.birthTime || this.birthTime;
-                this.lifespan = data.lifespan || this.lifespan;
-                this.generation = data.generation || this.generation;
-                this.persona = data.persona || this.persona;
-                this.name = data.name || this.name;
-                this.gender = data.gender || this.gender;
-                this.language = data.language || this.language;
-                this.isAlive = data.isAlive || false;
-
-                console.log(`[TemporalEngine] State restored from ${this.PERSISTENCE_PATH}. Organism is ${this.isAlive ? 'ALIVE' : 'DEAD'}.`);
-            } else {
-                console.log("[TemporalEngine] No persistence file found, starting fresh");
-            }
-        } catch (error) {
-            console.error("[TemporalEngine] Load Error:", error);
-        }
+    getSubjectiveTime(state: LifeStatus): number {
+        return state.birthTime + state.age;
     }
 }
