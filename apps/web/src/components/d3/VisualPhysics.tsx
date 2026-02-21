@@ -18,6 +18,8 @@ const OrganContainer = styled.div`
     justify-content: center;
     align-items: center;
     background: transparent;
+    filter: drop-shadow(0 0 30px ${props => props.theme.colors.teal}33) 
+            drop-shadow(0 0 60px ${props => props.theme.colors.purple}22);
 `;
 
 export const VisualPhysics: React.FC<VisualPhysicsProps> = memo(({ biometricsRef }) => {

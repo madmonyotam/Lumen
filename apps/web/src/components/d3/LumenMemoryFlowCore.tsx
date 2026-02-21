@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, memo } from 'react';
 import * as d3 from 'd3';
 import BaseChart from './BaseChart';
 
@@ -75,7 +75,7 @@ interface LumenMemoryFlowCoreProps {
 
 // --- Component ---
 
-const LumenMemoryFlowCore = ({
+const LumenMemoryFlowCore = memo(({
     words,
     speed = 1,
     lifeSpan = 5000,
@@ -431,6 +431,8 @@ const LumenMemoryFlowCore = ({
     return (
         <BaseChart onReady={onReady} />
     );
-};
+});
+
+LumenMemoryFlowCore.displayName = 'LumenMemoryFlowCore';
 
 export default LumenMemoryFlowCore;

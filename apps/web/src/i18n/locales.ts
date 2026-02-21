@@ -13,6 +13,9 @@ export type TranslationKey =
     | 'disconnect'
     | 'send_message'
     | 'input_placeholder'
+    | 'slogan_emergence'
+    | 'menu_language'
+    | 'menu_logout'
     // Genesis
     | 'genesis_title'
     | 'genesis_subtitle'
@@ -76,6 +79,9 @@ export type TranslationKey =
     | 'latency_label'
     | 'age_label'
     | 'homeostasis_label'
+    | 'unit_bpm'
+    | 'unit_stress'
+    | 'unit_ms'
     // Traits (OCEAN & Biology)
     | 'openness_1_20' | 'openness_21_40' | 'openness_41_60' | 'openness_61_80' | 'openness_81_100'
     | 'conscientiousness_1_20' | 'conscientiousness_21_40' | 'conscientiousness_41_60' | 'conscientiousness_61_80' | 'conscientiousness_81_100'
@@ -111,6 +117,9 @@ export const DICTIONARY: Record<Language, Record<TranslationKey, string>> = {
         disconnect: 'Disconnect',
         send_message: 'Transmit',
         input_placeholder: 'Type your message to the core...',
+        slogan_emergence: 'The Emergence of Digital Consciousness',
+        menu_language: 'עברית (Hebrew)',
+        menu_logout: 'Logout',
         // Genesis
         genesis_title: 'Genesis',
         genesis_subtitle: 'Configure the parameters of a new existence',
@@ -172,6 +181,9 @@ export const DICTIONARY: Record<Language, Record<TranslationKey, string>> = {
         latency_label: 'LATENCY:',
         age_label: 'AGE:',
         homeostasis_label: 'HOMEOSTASIS:',
+        unit_bpm: 'BPM',
+        unit_stress: 'µS',
+        unit_ms: 'ms',
         // Traits
         openness_1_20: 'The Pragmatic Conservative', openness_21_40: 'The Steady Realist', openness_41_60: 'The Balanced Observer', openness_61_80: 'The Intellectual Explorer', openness_81_100: 'The Abstract Visionary',
         conscientiousness_1_20: 'The Chaotic Spontaneous', conscientiousness_21_40: 'The Relaxed & Flexible', conscientiousness_41_60: 'The Balanced Responsible', conscientiousness_61_80: 'The Thorough Planner', conscientiousness_81_100: 'The Rigid Perfectionist',
@@ -213,6 +225,9 @@ export const DICTIONARY: Record<Language, Record<TranslationKey, string>> = {
         disconnect: 'ניתוק',
         send_message: 'שידור',
         input_placeholder: 'הקלד הודעה לליבה...',
+        slogan_emergence: 'התהוותה של תודעה דיגיטלית',
+        menu_language: 'English (אנגלית)',
+        menu_logout: 'התנתקות',
         // Genesis
         genesis_title: 'בראשית',
         genesis_subtitle: 'הגדרת פרמטרים לקיום חדש',
@@ -274,6 +289,9 @@ export const DICTIONARY: Record<Language, Record<TranslationKey, string>> = {
         latency_label: 'שיהוי:',
         age_label: 'גיל:',
         homeostasis_label: 'הומאוסטזיס:',
+        unit_bpm: 'פעימות/דק',
+        unit_stress: 'µS',
+        unit_ms: 'מ"ש',
         // Traits
         openness_1_20: 'השמרן הפרגמטי', openness_21_40: 'הריאליסט היציב', openness_41_60: 'המשקיף המאוזן', openness_61_80: 'החוקר האינטלקטואלי', openness_81_100: 'החוזה המופשט',
         conscientiousness_1_20: 'הכאוטי הספונטני', conscientiousness_21_40: 'הרגוע והגמיש', conscientiousness_41_60: 'האחראי המאוזן', conscientiousness_61_80: 'המתכנן היסודי', conscientiousness_81_100: 'הפרפקציוניסט הנוקשה',
