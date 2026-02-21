@@ -3,11 +3,10 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOrgan } from '../context/OrganContext';
 import { LUMEN_CONFIG } from '../lumen.config';
-import { FlexCol, AbsoluteFill } from './shared/Layout';
+import { Flex, FlexCol, AbsoluteFill } from './shared/Layout';
 import { VisualPhysics } from './d3/VisualPhysics';
 import GenesisScreen from './GenesisScreen';
-import { MetricCards } from './organism/MetricCards';
-import { StatusBadges } from './organism/StatusBadges';
+import { BiometricsPanel } from './organism/BiometricsPanel';
 import { ChatHistory } from './organism/ChatHistory';
 import { Send } from 'lucide-react';
 import { useNeuralUplink } from '../hooks/useNeuralUplink';
@@ -51,11 +50,20 @@ const MainGrid = styled.main<{ $isRTL?: boolean }>`
   align-items: center;
   min-height: 0;
   overflow: hidden;
+`;
+
+const ContentWrapper = styled(Flex) <{ $isRTL?: boolean }>`
+  position: absolute;
+  top: 74px;
+  bottom: 10px;
+  left: 1rem;
+  right: 1rem;
+  gap: 1.5rem;
   direction: ${props => props.$isRTL ? 'rtl' : 'ltr'};
 `;
 
 const CenterColumn = styled(FlexCol)`
-  grid-column: span 8;
+  grid-column: span 12;
   align-items: center;
   justify-content: center;
   position: relative;
@@ -89,12 +97,7 @@ const OrbContainer = styled.div`
   width: 100%;
 `;
 
-const FloatingStatusBadges = styled.div<{ $isRTL?: boolean }>`
-  position: absolute;
-  top: 5rem;
-  ${props => props.$isRTL ? 'left' : 'right'}: 2rem;
-  z-index: 50;
-`;
+
 
 const FloatingInputContainer = styled(motion.div) <{ $isRTL?: boolean }>`
   position: absolute;
@@ -258,21 +261,20 @@ const OrganismView: React.FC = () => {
     <Container>
       <BackgroundGradient />
 
-      <FloatingStatusBadges $isRTL={isRTL}>
-        <StatusBadges
-          generation={lifeStatus.generation}
-          latency={status.latency}
-          vitality={status.vitality}
-          ageRatio={ageRatio}
-        />
-      </FloatingStatusBadges>
-
-      <MainGrid $isRTL={isRTL}>
-        <MetricCards
+      <ContentWrapper $isRTL={isRTL}>
+        <BiometricsPanel
           bpm={biometrics.bpm}
           stressIndex={biometrics.stressIndex}
           hrv={biometrics.hrv}
+          latency={status.latency}
+          generation={lifeStatus.generation}
+          ageRatio={ageRatio}
+          vitality={status.vitality}
         />
+        <ChatHistory currentInteraction={currentInteraction} />
+      </ContentWrapper>
+
+      <MainGrid $isRTL={isRTL}>
 
         <CenterColumn>
           <AnimatePresence mode="wait">
@@ -306,8 +308,6 @@ const OrganismView: React.FC = () => {
             </CoreSynapseText>
           </CoreSynapseContainer> */}
         </CenterColumn>
-
-        <ChatHistory currentInteraction={currentInteraction} />
       </MainGrid>
 
       <FloatingInputContainer $isRTL={isRTL}

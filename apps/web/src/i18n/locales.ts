@@ -70,6 +70,7 @@ export type TranslationKey =
     | 'conflict_agree_shadow'
     | 'conflict_consc_cog'
     // Organism Metrics
+    | 'biometrics_title'
     | 'heart_rate'
     | 'stress_index'
     | 'hrv_variation'
@@ -172,6 +173,7 @@ export const DICTIONARY: Record<Language, Record<TranslationKey, string>> = {
         conflict_agree_shadow: 'Dissonance: Compassion vs Clinical Empathy Deficit',
         conflict_consc_cog: 'Inconsistency: Chaotic Nature vs Structural Control',
         // Organism Metrics
+        biometrics_title: 'BIOMETRICS',
         heart_rate: 'HEART RATE',
         stress_index: 'STRESS INDEX',
         hrv_variation: 'HRV VARIATION',
@@ -280,6 +282,7 @@ export const DICTIONARY: Record<Language, Record<TranslationKey, string>> = {
         conflict_agree_shadow: 'דיסוננס: חמלה מול גירעון אמפתיה קליני',
         conflict_consc_cog: 'חוסר עקביות: טבע כאוטי מול שליטה מבנית',
         // Organism Metrics
+        biometrics_title: 'מדדים ביומטריים',
         heart_rate: 'קצב לב',
         stress_index: 'מדד דחק',
         hrv_variation: 'השתנות קצב לב',
