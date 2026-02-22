@@ -87,7 +87,7 @@ const ProfileSection = styled.div`
 `;
 
 const DisplayName = styled.span`
-    color: #fff;
+    color: ${props => props.theme.palette.white};
     font-size: 0.9rem;
     letter-spacing: 0.05em;
 `;

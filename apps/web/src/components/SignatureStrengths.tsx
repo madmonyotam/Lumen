@@ -27,9 +27,9 @@ const Tabs = styled(Flex)`
 `;
 
 const Tab = styled.button<{ $active: boolean }>`
-    background: ${props => props.$active ? 'rgba(0, 242, 254, 0.1)' : 'transparent'};
-    border: 1px solid ${props => props.$active ? '#00f2fe' : 'rgba(255, 255, 255, 0.1)'};
-    color: ${props => props.$active ? '#00f2fe' : props.theme.ui.text.dim};
+    background: ${props => props.$active ? props.theme.palette.teal.dim : 'transparent'};
+    border: 1px solid ${props => props.$active ? props.theme.palette.teal.main : props.theme.ui.border.dim};
+    color: ${props => props.$active ? props.theme.palette.teal.main : props.theme.ui.text.dim};
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
     font-size: 0.75rem;
@@ -38,8 +38,8 @@ const Tab = styled.button<{ $active: boolean }>`
     transition: all 0.2s ease;
 
     &:hover {
-        border-color: #00f2fe;
-        color: #00f2fe;
+        border-color: ${props => props.theme.palette.teal.main};
+        color: ${props => props.theme.palette.teal.main};
     }
 `;
 
@@ -68,8 +68,8 @@ const AvailableList = styled.div`
 `;
 
 const StrengthCard = styled(motion.div) <{ $selected: boolean }>`
-    background: ${props => props.$selected ? 'rgba(0, 242, 254, 0.05)' : 'rgba(255, 255, 255, 0.03)'};
-    border: 1px solid ${props => props.$selected ? '#00f2fe' : 'rgba(255, 255, 255, 0.1)'};
+    background: ${props => props.$selected ? props.theme.palette.teal.dim : 'rgba(255, 255, 255, 0.03)'};
+    border: 1px solid ${props => props.$selected ? props.theme.palette.teal.main : props.theme.ui.border.main};
     padding: 0.75rem;
     border-radius: 0.5rem;
     cursor: ${props => props.$selected ? 'default' : 'pointer'};
@@ -113,14 +113,14 @@ const RankSlot = styled(Reorder.Item)`
     
     &:active {
         cursor: grabbing;
-        border-color: #00f2fe;
+        border-color: ${props => props.theme.palette.teal.main};
         scale: 1.02;
     }
 `;
 
 const RankNumber = styled.span<{ $isRTL?: boolean }>`
     font-family: ${props => props.theme.config.fonts.code || props.theme.config.fonts.main};
-    color: #00f2fe;
+    color: ${props => props.theme.palette.teal.main};
     font-size: 0.75rem;
     margin-right: ${props => props.$isRTL ? '0' : '1rem'};
     margin-left: ${props => props.$isRTL ? '1rem' : '0'};
@@ -136,7 +136,7 @@ const RemoveBtn = styled.button`
     display: flex;
     
     &:hover {
-        color: #ff4d4d;
+        color: ${props => props.theme.palette.red.main};
     }
 `;
 

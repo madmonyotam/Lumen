@@ -32,7 +32,8 @@ const Title = styled.h1`
     font-weight: 700;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    background: linear-gradient(to right, #00f2fe, #4facfe);
+    text-transform: uppercase;
+    background: linear-gradient(to right, ${props => props.theme.palette.teal.main}, ${props => props.theme.palette.blue.main});
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 0.5rem;

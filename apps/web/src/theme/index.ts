@@ -18,9 +18,9 @@ const palette = {
         bgOverlay: 'rgba(0, 0, 0, 0.85)',
     },
     teal: {
-        main: '#00f2c3',
+        main: '#00f2fe',
         dim: 'rgba(0, 242, 195, 0.1)',
-        neon: '0 0 15px rgba(0, 242, 195, 0.4)',
+        neon: '0 0 15px rgba(0, 242, 254, 0.4)',
     },
     purple: {
         main: '#d946ef',
@@ -28,37 +28,52 @@ const palette = {
         neon: '0 0 15px rgba(217, 70, 239, 0.4)',
     },
     red: {
-        main: '#FF4444',
+        main: '#ff4d4d',
         dim: 'rgba(255, 68, 68, 0.1)',
         neon: '0 0 15px rgba(255, 68, 68, 0.4)',
+        dark: '#d01717',
+        deep: '#800000', // אדום עמוק לדופק נמוך
+        pulse: '#ff0000', // אדום טהור לפעימה
     },
     blue: {
-        main: '#60a5fa',
-        dim: 'rgba(96, 165, 250, 0.1)',
+        main: '#4facfe',
+        dim: 'rgba(79, 172, 254, 0.1)',
+        dark: '#001e97',
+        midnight: '#050a1f', // כחול כהה מאוד לגיל מבוגר
     },
     yellow: {
         main: '#facc15',
+        bright: '#e9e027',
+    },
+    gender: {
+        male: '#4facfe',
+        female: '#ff69b4',
+    },
+    balance: {
+        perfect: '#ffffff', // לבן
+        stable: '#00ff9f',  // ירוק
+        unstable: '#6a0dad', // סגול
     },
     gradients: {
-        vitalityStart: '#00f2c3',
-        vitalityEnd: '#67e8f9',
+        vitalityStart: '#00f2fe',
+        vitalityEnd: '#4facfe',
         backgroundStart: '#112233',
     },
     visuals: {
         sphere: {
-            cold: '#001e97ff',
-            neutral: '#ffffffff',
+            cold: '#001e97',
+            neutral: '#ffffff',
             hot: '#ff0000'
         },
         fog: {
-            calm: '#0d1a4cff',
-            neutral: '#494949ff',
-            stressed: '#4f1616ff'
+            calm: '#0d1a4c',
+            neutral: '#494949',
+            stressed: '#4f1616'
         },
         physics: {
-            calm: '#7887baff',
-            neutral: '#c7bdbdff',
-            stressed: '#f07474ff'
+            calm: '#7887ba',
+            neutral: '#c7bdbd',
+            stressed: '#f07474'
         }
     }
 } as const;
@@ -95,6 +110,44 @@ const ui = {
     action: {
         hover: 'rgba(255, 255, 255, 0.1)',
         active: 'rgba(255, 255, 255, 0.2)',
+    },
+    metricColors: {
+        age: {
+            child: palette.teal.main,
+            male: palette.gender.male,
+            female: palette.gender.female,
+            senior: palette.blue.midnight,
+        },
+        bpm: {
+            low: palette.red.deep,   // אדום עמוק
+            normal: palette.red.main, // אדום סטנדרטי
+            high: palette.red.pulse, // אדום בוהק
+            veryHigh: palette.red.pulse,
+        },
+        stress: {
+            low: palette.blue.main,    // כחול
+            mid: palette.yellow.main,  // צהוב
+            high: palette.red.main,    // אדום
+        },
+        hrv: {
+            low: palette.red.main,
+            normal: palette.teal.main,
+            high: palette.blue.main,
+            line: palette.blue.main,
+        },
+        homeostasis: {
+            stable: palette.balance.perfect,   // לבן
+            adaptive: palette.balance.stable,  // ירוק
+            unstable: palette.balance.unstable, // סגול
+        },
+        latency: {
+            good: palette.teal.main,
+            fair: palette.purple.main,
+            poor: palette.red.main,
+        },
+        gen: {
+            main: palette.blue.main,
+        }
     }
 } as const;
 

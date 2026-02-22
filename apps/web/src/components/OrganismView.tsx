@@ -25,7 +25,7 @@ const Container = styled(FlexCol)`
   
   ::selection {
     background: ${props => props.theme.ui.brand.primary};
-    color: #000;
+    color: ${props => props.theme.palette.black};
   }
 `;
 
@@ -129,6 +129,7 @@ const OrganismView: React.FC<OrganismViewProps> = (props) => {
           generation={lifeStatus.generation}
           ageRatio={ageRatio}
           vitality={status.vitality}
+          gender={lifeStatus.gender}
         />
         <ChatHistory currentInteraction={currentInteraction} />
       </ContentWrapper>

@@ -28,7 +28,7 @@ const Label = styled.span`
 
 const ValueLabel = styled.span`
     font-size: 0.75rem;
-    color: #4facfe;
+    color: ${props => props.theme.palette.blue.main};
     font-family: ${props => props.theme.config.fonts.code || 'monospace'};
     font-weight: bold;
 `;
@@ -52,8 +52,8 @@ const Track = styled.div`
 
 const Fill = styled(motion.div) <{ $percentage: number, $isRTL: boolean }>`
     height: 100%;
-    background: linear-gradient(90deg, #00f2fe, #4facfe);
-    box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+    background: linear-gradient(90deg, ${props => props.theme.palette.teal.main}, ${props => props.theme.palette.blue.main});
+    box-shadow: ${props => props.theme.palette.teal.neon};
     position: absolute;
     top: 0;
     width: ${props => props.$percentage}%;
@@ -78,7 +78,7 @@ const Thumb = styled(motion.div) <{ $percentage: number, $isRTL: boolean }>`
     &:active {
         cursor: grabbing;
         scale: 1.1;
-        border-color: #00f2fe;
+        border-color: ${props => props.theme.palette.teal.main};
     }
 `;
 
@@ -91,7 +91,7 @@ const Tooltip = styled(motion.div)`
     padding: 0.5rem 0.75rem;
     border-radius: 0.5rem;
     white-space: nowrap;
-    color: #00f2fe;
+    color: ${props => props.theme.palette.teal.main};
     font-size: 1rem;
     font-family: ${props => props.theme.config.fonts.code || 'monospace'};
     pointer-events: none;

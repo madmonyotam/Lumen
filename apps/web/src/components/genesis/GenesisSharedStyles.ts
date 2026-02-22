@@ -44,7 +44,7 @@ export const Title = styled.h2`
     letter-spacing: 0.2em;
     text-transform: uppercase;
     text-align: center;
-    background: linear-gradient(to right, #00f2fe, #4facfe);
+    background: linear-gradient(to right, ${props => props.theme.palette.teal.main}, ${props => props.theme.palette.blue.main});
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 0.5rem;
@@ -84,7 +84,7 @@ export const Input = styled.input`
 
     &:focus {
         outline: none;
-        border-color: #00f2fe;
+        border-color: ${props => props.theme.palette.teal.main};
         background: rgba(255, 255, 255, 0.08);
     }
 `;
@@ -102,7 +102,7 @@ export const Grid = styled.div`
 
 export const LifespanSlider = styled.input`
     width: 100%;
-    accent-color: #00f2fe;
+    accent-color: ${props => props.theme.palette.teal.main};
     margin-top: 1rem;
 `;
 
@@ -114,11 +114,11 @@ export const LifespanLabels = styled(Flex)`
 `;
 
 export const SubmitButton = styled(motion.button)`
-    background: linear-gradient(to right, #00f2fe, #4facfe);
+    background: linear-gradient(to right, ${props => props.theme.palette.teal.main}, ${props => props.theme.palette.blue.main});
     border: none;
     border-radius: 9999px;
     padding: 1.25rem;
-    color: #000;
+    color: ${props => props.theme.palette.black};
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.2em;
@@ -150,8 +150,8 @@ export const NavButton = styled(motion.button)`
     transition: all 0.2s ease;
 
     &:hover {
-        border-color: #00f2fe;
-        color: #00f2fe;
+        border-color: ${props => props.theme.palette.teal.main};
+        color: ${props => props.theme.palette.teal.main};
     }
 `;
 
@@ -159,7 +159,7 @@ export const StepDot = styled.div<{ $active: boolean }>`
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: ${props => props.$active ? '#00f2fe' : 'rgba(255, 255, 255, 0.1)'};
+    background: ${props => props.$active ? props.theme.palette.teal.main : 'rgba(255, 255, 255, 0.1)'};
     transition: all 0.3s ease;
 `;
 

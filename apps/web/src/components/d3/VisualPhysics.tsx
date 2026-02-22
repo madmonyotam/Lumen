@@ -17,7 +17,7 @@ interface VisualPhysicsProps {
 
 const OrganContainer = styled.div`
     width: 100%;
-    height: 90vh;
+    height: 70vh;
     display: flex;
     position: relative;
     justify-content: center;

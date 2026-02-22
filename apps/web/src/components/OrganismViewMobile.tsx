@@ -92,6 +92,7 @@ const OrganismViewMobile: React.FC<OrganismViewProps> = (props) => {
           generation={lifeStatus.generation}
           ageRatio={ageRatio}
           vitality={status.vitality}
+          gender={lifeStatus.gender}
         />
         {/* On mobile, chat history might block the view if fully opened, but we'll include it for now */}
         <ChatHistory currentInteraction={currentInteraction} />
