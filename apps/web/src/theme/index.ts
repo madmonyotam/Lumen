@@ -43,6 +43,23 @@ const palette = {
         vitalityStart: '#00f2c3',
         vitalityEnd: '#67e8f9',
         backgroundStart: '#112233',
+    },
+    visuals: {
+        sphere: {
+            cold: '#001e97ff',
+            neutral: '#ffffffff',
+            hot: '#ff0000'
+        },
+        fog: {
+            calm: '#0d1a4cff',
+            neutral: '#494949ff',
+            stressed: '#4f1616ff'
+        },
+        physics: {
+            calm: '#7887baff',
+            neutral: '#c7bdbdff',
+            stressed: '#f07474ff'
+        }
     }
 } as const;
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { useOrgan } from '../../context/OrganContext';
 import LumenMemoryFlowCore, { type MemoryWord } from './LumenMemoryFlowCore';
 
@@ -31,11 +31,18 @@ export const MemoryFog: React.FC = () => {
     // State to hold the new batch of words to send to the visualizer
     const [newWordsBatch, setNewWordsBatch] = useState<MemoryWord[]>([]);
 
+    const theme = useTheme();
+    const fogColors = useMemo(() => ({
+        calm: theme.palette.visuals.fog.calm,
+        neutral: theme.palette.visuals.fog.neutral,
+        stressed: theme.palette.visuals.fog.stressed
+    }), [theme]);
+
     // 1. Color Scale (Cold -> Neutral -> Warm/Alert) - Memoized
     const colorScale = useMemo(() => d3.scaleLinear<string>()
         .domain([0, 0.5, 1])
-        .range(["#0d1a4cff", "#494949ff", "#4f1616ff"])
-        .interpolate(d3.interpolateHsl), []);
+        .range([fogColors.calm, fogColors.neutral, fogColors.stressed])
+        .interpolate(d3.interpolateHsl), [fogColors]);
 
     // 2. Clear timeouts on unmount
     useEffect(() => {

@@ -43,26 +43,37 @@ export const StatusBadges: React.FC<StatusBadgesProps> = ({ generation, latency,
     const theme = useTheme();
     const { t } = useTranslation();
 
+    const badgeColors = {
+        gen: theme.palette.teal.main,
+        latency: theme.palette.teal.main,
+        age: theme.palette.purple.main,
+        homeostasis: {
+            stable: theme.palette.teal.main,
+            warning: theme.palette.purple.main,
+            critical: theme.palette.red.main,
+        }
+    };
+
     return (
         <BadgesContainer $align="flex-end">
             <Flex $gap="1rem">
                 <StatusBadge>
                     <BadgeLabel>{t('gen_label')}</BadgeLabel>
-                    <BadgeValue $color={theme.palette.teal.main}>{generation}</BadgeValue>
+                    <BadgeValue $color={badgeColors.gen}>{generation}</BadgeValue>
                 </StatusBadge>
                 <StatusBadge>
                     <BadgeLabel>{t('latency_label')}</BadgeLabel>
-                    <BadgeValue $color={theme.palette.teal.main}>{latency.toFixed(0)}ms</BadgeValue>
+                    <BadgeValue $color={badgeColors.latency}>{latency.toFixed(0)}ms</BadgeValue>
                 </StatusBadge>
             </Flex>
             <Flex $gap="1rem">
                 <StatusBadge>
                     <BadgeLabel>{t('age_label')}</BadgeLabel>
-                    <BadgeValue $color={theme.palette.purple.main}>{Math.round((1 - ageRatio) * 100)}%</BadgeValue>
+                    <BadgeValue $color={badgeColors.age}>{Math.round((1 - ageRatio) * 100)}%</BadgeValue>
                 </StatusBadge>
                 <StatusBadge>
                     <BadgeLabel>{t('homeostasis_label')}</BadgeLabel>
-                    <BadgeValue $color={vitality > 0.6 ? theme.palette.teal.main : vitality > 0.3 ? theme.palette.purple.main : theme.palette.red.main}>
+                    <BadgeValue $color={vitality > 0.6 ? badgeColors.homeostasis.stable : vitality > 0.3 ? badgeColors.homeostasis.warning : badgeColors.homeostasis.critical}>
                         {Math.round(vitality * 100)}%
                     </BadgeValue>
                 </StatusBadge>

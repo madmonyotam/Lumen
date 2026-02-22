@@ -320,6 +320,46 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
 
     const togglePanel = () => setIsOpen(!isOpen);
 
+    const metricColors = {
+        age: {
+            young: theme.palette.teal.main,
+            mid: theme.palette.purple.main,
+            old: theme.palette.red.main,
+            bar: theme.palette.purple.main,
+        },
+        bpm: {
+            low: theme.palette.blue.main,
+            normal: theme.palette.teal.main,
+            high: theme.palette.red.main,
+            visual: theme.palette.teal.main,
+        },
+        stress: {
+            low: theme.palette.teal.main,
+            mid: theme.palette.purple.main,
+            high: theme.palette.red.main,
+            bar: theme.palette.purple.main,
+        },
+        hrv: {
+            low: theme.palette.red.main,
+            normal: theme.palette.teal.main,
+            high: theme.palette.blue.main,
+            line: theme.palette.blue.main,
+        },
+        homeostasis: {
+            unstable: theme.palette.red.main,
+            mid: theme.palette.purple.main,
+            stable: theme.palette.teal.main,
+        },
+        latency: {
+            good: theme.palette.teal.main,
+            fair: theme.palette.purple.main,
+            poor: theme.palette.red.main,
+        },
+        gen: {
+            main: theme.palette.blue.main,
+        }
+    };
+
     const metrics = [
         {
             id: 'age',
@@ -327,11 +367,11 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('age_label'),
             value: `${Math.round((1 - ageRatio) * 100)}`,
             unit: '%',
-            color: ageRatio > 0.8 ? theme.palette.red.main : ageRatio > 0.5 ? theme.palette.purple.main : theme.palette.teal.main,
+            color: ageRatio > 0.8 ? metricColors.age.old : ageRatio > 0.5 ? metricColors.age.mid : metricColors.age.young,
             renderVisual: () => (
                 <ProgressTrack>
                     <ProgressFill
-                        $color={theme.palette.purple.main}
+                        $color={metricColors.age.bar}
                         initial={{ width: 0 }}
                         animate={{ width: `${(1 - ageRatio) * 100}%` }}
                         transition={{ type: "spring", stiffness: 50 }}
@@ -345,13 +385,13 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('heart_rate'),
             value: bpm,
             unit: t('unit_bpm'),
-            color: bpm > 100 ? theme.palette.red.main : bpm < 50 ? theme.palette.blue.main : theme.palette.teal.main,
+            color: bpm > 100 ? metricColors.bpm.high : bpm < 50 ? metricColors.bpm.low : metricColors.bpm.normal,
             renderVisual: () => (
                 <VisualContainer>
                     {[0.3, 0.5, 0.4, 0.8, 0.6, 0.9, 0.7, 0.4, 0.6, 0.5, 0.8, 0.3, 0.5, 0.9, 0.2].map((h, i) => (
                         <Bar
                             key={i}
-                            $color={theme.palette.teal.main}
+                            $color={metricColors.bpm.visual}
                             animate={{ height: `${(h + Math.random() * 0.2) * 100}%` }}
                             transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse", delay: i * 0.05 }}
                         />
@@ -365,12 +405,12 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('stress_index'),
             value: `${Math.round(stressIndex * 100)}`,
             unit: '%',
-            color: stressIndex > 0.6 ? theme.palette.red.main : stressIndex > 0.3 ? theme.palette.purple.main : theme.palette.teal.main,
+            color: stressIndex > 0.6 ? metricColors.stress.high : stressIndex > 0.3 ? metricColors.stress.mid : metricColors.stress.low,
             badge: stressIndex > 0.6 ? 'HIGH' : stressIndex > 0.3 ? 'MED' : 'LOW',
             renderVisual: () => (
                 <ProgressTrack>
                     <ProgressFill
-                        $color={theme.palette.purple.main}
+                        $color={metricColors.stress.bar}
                         initial={{ width: 0 }}
                         animate={{ width: `${stressIndex * 100}%` }}
                         transition={{ type: "spring", stiffness: 50 }}
@@ -384,14 +424,14 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('hrv_variation'),
             value: hrv,
             unit: t('unit_ms'),
-            color: hrv < 30 ? theme.palette.red.main : hrv > 70 ? theme.palette.teal.main : theme.palette.blue.main,
+            color: hrv < 30 ? metricColors.hrv.low : hrv > 70 ? metricColors.hrv.high : metricColors.hrv.normal,
             renderVisual: () => (
                 <VisualContainer>
                     <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 24">
                         <motion.path
                             d="M 0,12 Q 25,0 50,12 T 100,12"
                             fill="none"
-                            stroke={theme.palette.blue.main}
+                            stroke={metricColors.hrv.line}
                             strokeWidth="2"
                             initial={{ pathLength: 0 }}
                             animate={{ pathLength: 1 }}
@@ -407,7 +447,7 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('homeostasis_label'),
             value: `${Math.round(vitality * 100)}`,
             unit: '%',
-            color: vitality > 0.6 ? theme.palette.teal.main : vitality > 0.3 ? theme.palette.purple.main : theme.palette.red.main,
+            color: vitality > 0.6 ? metricColors.homeostasis.stable : vitality > 0.3 ? metricColors.homeostasis.mid : metricColors.homeostasis.unstable,
             badge: vitality > 0.6 ? 'STABLE →' : 'UNSTABLE ↘',
             renderVisual: () => null // Minimal pure text metric like reference
         },
@@ -417,7 +457,7 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('latency_label'),
             value: latency.toFixed(0),
             unit: 'ms',
-            color: latency > 300 ? theme.palette.red.main : latency > 150 ? theme.palette.purple.main : theme.palette.teal.main,
+            color: latency > 300 ? metricColors.latency.poor : latency > 150 ? metricColors.latency.fair : metricColors.latency.good,
             renderVisual: () => null
         },
         {
@@ -426,7 +466,7 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('gen_label'),
             value: generation,
             unit: '',
-            color: theme.palette.blue.main,
+            color: metricColors.gen.main,
             renderVisual: () => null
         }
     ];

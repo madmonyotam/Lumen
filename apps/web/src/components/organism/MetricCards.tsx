@@ -63,9 +63,9 @@ const HeartRateVisual = styled(Flex)`
   overflow: hidden;
 `;
 
-const HeartBar = styled(motion.div)`
+const HeartBar = styled(motion.div) <{ $color?: string }>`
   width: 0.375rem;
-  background-color: ${props => props.theme.ui.brand.primary};
+  background-color: ${props => props.$color || props.theme.ui.brand.primary};
   border-radius: 2px 2px 0 0;
 `;
 
@@ -78,9 +78,9 @@ const StressBarContainer = styled.div`
   border: 1px solid ${props => props.theme.ui.border.dim};
 `;
 
-const StressBarFill = styled(motion.div)`
+const StressBarFill = styled(motion.div) <{ $color?: string }>`
   height: 100%;
-  background-color: ${props => props.theme.palette.purple.main};
+  background-color: ${props => props.$color || props.theme.palette.purple.main};
   box-shadow: ${props => props.theme.config.shadows.neonPurple};
 `;
 
@@ -103,12 +103,27 @@ export const MetricCards: React.FC<MetricCardProps> = React.memo(({ bpm, stressI
   const theme = useTheme();
   const { t } = useTranslation();
 
+  const metricColors = {
+    bpm: {
+      base: theme.palette.teal.main,
+      border: `${theme.palette.teal.main}80`,
+    },
+    stress: {
+      base: theme.palette.purple.main,
+      border: `${theme.palette.purple.main}80`,
+    },
+    hrv: {
+      base: theme.palette.blue.main,
+      border: `${theme.palette.blue.main}80`,
+    }
+  };
+
   return (
     <CardsContainer>
       {/* Heart Rate */}
-      <Card $borderColor={`${theme.palette.teal.main}80`}>
+      <Card $borderColor={metricColors.bpm.border}>
         <CardHeader>
-          <Heart size={16} color={theme.palette.teal.main} />
+          <Heart size={16} color={metricColors.bpm.base} />
           <CardTitle>{t('heart_rate')}</CardTitle>
         </CardHeader>
         <MetricContainer>
@@ -119,6 +134,7 @@ export const MetricCards: React.FC<MetricCardProps> = React.memo(({ bpm, stressI
           {[0.3, 0.5, 0.4, 0.8, 0.6, 0.9, 0.7, 0.4, 0.6, 0.5].map((h, i) => (
             <HeartBar
               key={i}
+              $color={metricColors.bpm.base}
               animate={{ height: `${(h + Math.random() * 0.2) * 100}%` }}
               transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse", delay: i * 0.1 }}
             />
@@ -127,9 +143,9 @@ export const MetricCards: React.FC<MetricCardProps> = React.memo(({ bpm, stressI
       </Card>
 
       {/* Stress Index */}
-      <Card $borderColor={`${theme.palette.purple.main}80`}>
+      <Card $borderColor={metricColors.stress.border}>
         <CardHeader>
-          <Zap size={16} color={theme.palette.purple.main} />
+          <Zap size={16} color={metricColors.stress.base} />
           <CardTitle>{t('stress_index')}</CardTitle>
         </CardHeader>
         <StressMetricContainer>
@@ -138,6 +154,7 @@ export const MetricCards: React.FC<MetricCardProps> = React.memo(({ bpm, stressI
         </StressMetricContainer>
         <StressBarContainer>
           <StressBarFill
+            $color={metricColors.stress.base}
             animate={{ width: `${stressIndex * 100}%` }}
             transition={{ type: "spring", stiffness: 50 }}
           />
@@ -145,9 +162,9 @@ export const MetricCards: React.FC<MetricCardProps> = React.memo(({ bpm, stressI
       </Card>
 
       {/* HRV */}
-      <Card $borderColor={`${theme.palette.blue.main}80`}>
+      <Card $borderColor={metricColors.hrv.border}>
         <CardHeader>
-          <Activity size={16} color={theme.palette.blue.main} />
+          <Activity size={16} color={metricColors.hrv.base} />
           <CardTitle>{t('hrv_variation')}</CardTitle>
         </CardHeader>
         <MetricContainer>

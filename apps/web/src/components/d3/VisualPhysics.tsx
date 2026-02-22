@@ -1,5 +1,5 @@
-import React, { memo } from 'react';
-import styled from 'styled-components';
+import React, { memo, useMemo } from 'react';
+import styled, { useTheme } from 'styled-components';
 import MeshedSphereCore from './MeshedSphereCore';
 import RadiatingThoughtsCore from './RadiatingThoughtsCore';
 import * as d3 from 'd3';
@@ -66,10 +66,17 @@ export const VisualPhysics: React.FC<VisualPhysicsProps> = memo(({ biometricsRef
         }
     }, [thought, currentInteraction]);
 
-    const colorScale = d3.scaleLinear<string>()
+    const theme = useTheme();
+    const physicsColors = useMemo(() => ({
+        calm: theme.palette.visuals.physics.calm,
+        neutral: theme.palette.visuals.physics.neutral,
+        stressed: theme.palette.visuals.physics.stressed
+    }), [theme]);
+
+    const colorScale = useMemo(() => d3.scaleLinear<string>()
         .domain([0, 0.5, 1])
-        .range(["#8992b4ff", "#ffffffff", "#f49494ff"])
-        .interpolate(d3.interpolateHsl);
+        .range([physicsColors.calm, physicsColors.neutral, physicsColors.stressed])
+        .interpolate(d3.interpolateHsl), [physicsColors]);
 
     const strokeColor = colorScale(biometricsRef.current.stress);
 
