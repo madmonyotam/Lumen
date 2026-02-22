@@ -27,6 +27,14 @@ const OrganContainer = styled.div`
             drop-shadow(0 0 60px ${props => props.theme.colors.purple}22);
 `;
 
+const ThoughtsOverlay = styled.div`
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+`;
+
 export const VisualPhysics: React.FC<VisualPhysicsProps> = memo(({ biometricsRef, thought, currentInteraction }) => {
     console.log('[VisualPhysics] Mount/Update');
 
@@ -72,8 +80,7 @@ export const VisualPhysics: React.FC<VisualPhysicsProps> = memo(({ biometricsRef
                 biometricsRef={biometricsRef}
                 isPlaying={true}
             />
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
-
+            <ThoughtsOverlay>
                 <RadiatingThoughtsCore
                     colors={[strokeColor]}
                     maxThoughts={maxThoughts}
@@ -86,7 +93,7 @@ export const VisualPhysics: React.FC<VisualPhysicsProps> = memo(({ biometricsRef
                     startRadius={15}
                     glowIntensity={1.5}
                 />
-            </div >
+            </ThoughtsOverlay>
         </OrganContainer>
     );
 }, (prevProps, nextProps) => {

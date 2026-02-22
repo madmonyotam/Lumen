@@ -50,15 +50,17 @@ const Track = styled.div`
     overflow: hidden;
 `;
 
-const Fill = styled(motion.div)`
+const Fill = styled(motion.div) <{ $percentage: number, $isRTL: boolean }>`
     height: 100%;
     background: linear-gradient(90deg, #00f2fe, #4facfe);
     box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
     position: absolute;
     top: 0;
+    width: ${props => props.$percentage}%;
+    ${props => props.$isRTL ? 'right' : 'left'}: 0;
 `;
 
-const Thumb = styled(motion.div)`
+const Thumb = styled(motion.div) <{ $percentage: number, $isRTL: boolean }>`
     width: 16px;
     height: 16px;
     background: #fff;
@@ -70,6 +72,8 @@ const Thumb = styled(motion.div)`
     box-shadow: 0 0 15px rgba(0, 242, 254, 0.8);
     z-index: 10;
     border: 2px solid rgba(0, 0, 0, 0.1);
+
+    ${props => props.$isRTL ? 'right' : 'left'}: ${props => props.$percentage}%;
 
     &:active {
         cursor: grabbing;
@@ -177,16 +181,13 @@ export const TraitSlider: React.FC<Props> = ({ label, value, onChange, onCommit,
             <TrackContainer ref={containerRef} onClick={handleTrackClick}>
                 <Track>
                     <Fill
-                        style={{
-                            width: `${localValue}%`,
-                            [isRTL ? 'right' : 'left']: 0
-                        }}
+                        $percentage={localValue}
+                        $isRTL={isRTL}
                     />
                 </Track>
                 <Thumb
-                    style={{
-                        [isRTL ? 'right' : 'left']: `${localValue}%`
-                    }}
+                    $percentage={localValue}
+                    $isRTL={isRTL}
                     initial={{ x: isRTL ? '50%' : '-50%', y: '-50%' }}
                     animate={{ x: isRTL ? '50%' : '-50%', y: '-50%' }}
                     onPointerDown={handlePointerDown}

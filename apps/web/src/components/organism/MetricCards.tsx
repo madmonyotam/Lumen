@@ -84,6 +84,15 @@ const StressBarFill = styled(motion.div)`
   box-shadow: ${props => props.theme.shadows.neonPurple};
 `;
 
+const CardsContainer = styled(FlexCol)`
+  grid-column: span 2;
+  gap: 1.25rem;
+`;
+
+const StressMetricContainer = styled(MetricContainer)`
+  margin-bottom: 1rem;
+`;
+
 interface MetricCardProps {
   bpm: number;
   stressIndex: number;
@@ -95,7 +104,7 @@ export const MetricCards: React.FC<MetricCardProps> = React.memo(({ bpm, stressI
   const { t } = useTranslation();
 
   return (
-    <FlexCol style={{ gridColumn: 'span 2', gap: '1.25rem' }}>
+    <CardsContainer>
       {/* Heart Rate */}
       <Card $borderColor={`${theme.colors.teal}80`}>
         <CardHeader>
@@ -123,10 +132,10 @@ export const MetricCards: React.FC<MetricCardProps> = React.memo(({ bpm, stressI
           <Zap size={16} color={theme.colors.purple} />
           <CardTitle>{t('stress_index')}</CardTitle>
         </CardHeader>
-        <MetricContainer style={{ marginBottom: '1rem' }}>
+        <StressMetricContainer>
           <MetricValue>{stressIndex}</MetricValue>
           <MetricLabel>{t('unit_stress')}</MetricLabel>
-        </MetricContainer>
+        </StressMetricContainer>
         <StressBarContainer>
           <StressBarFill
             animate={{ width: `${stressIndex * 100}%` }}
@@ -146,7 +155,7 @@ export const MetricCards: React.FC<MetricCardProps> = React.memo(({ bpm, stressI
           <MetricLabel>{t('unit_ms')}</MetricLabel>
         </MetricContainer>
       </Card>
-    </FlexCol>
+    </CardsContainer>
   );
 });
 

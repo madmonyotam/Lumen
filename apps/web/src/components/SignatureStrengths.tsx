@@ -73,7 +73,8 @@ const StrengthCard = styled(motion.div) <{ $selected: boolean }>`
     border: 1px solid ${props => props.$selected ? '#00f2fe' : 'rgba(255, 255, 255, 0.1)'};
     padding: 0.75rem;
     border-radius: 0.5rem;
-    cursor: pointer;
+    cursor: ${props => props.$selected ? 'default' : 'pointer'};
+    opacity: ${props => props.$selected ? 0.5 : 1};
     font-size: 0.875rem;
     color: ${props => props.$selected ? 'white' : props.theme.colors.textDim};
     transition: all 0.2s ease;
@@ -90,6 +91,14 @@ const RankingZone = styled(FlexCol)`
     border-radius: 1rem;
     padding: 1.5rem;
     border: 1px dashed rgba(255, 255, 255, 0.1);
+`;
+
+const SectionTitle = styled.h4`
+    margin-bottom: 1rem;
+    color: white;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 `;
 
 const RankSlot = styled(Reorder.Item)`
@@ -200,7 +209,6 @@ export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, select
                                     $selected={isSelected}
                                     onClick={() => !isSelected && handleSelect(strength.id)}
                                     layoutId={strength.id}
-                                    style={{ opacity: isSelected ? 0.5 : 1, cursor: isSelected ? 'default' : 'pointer' }}
                                 >
                                     {t(('strength_' + strength.id.replace(/-/g, '_')) as any)}
                                 </StrengthCard>
@@ -210,9 +218,9 @@ export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, select
 
                 {/* Right: Ranking Zone */}
                 <RankingZone>
-                    <h4 style={{ marginBottom: '1rem', color: '#fff', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    <SectionTitle>
                         {t('core_signature')} ({selectedIds.length}/5)
-                    </h4>
+                    </SectionTitle>
 
                     <Reorder.Group axis="y" values={selectedIds} onReorder={handleReorder}>
                         {selectedIds.map((id, index) => {
@@ -220,7 +228,7 @@ export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, select
                             if (!strength) return null;
                             return (
                                 <RankSlot key={id} value={id}>
-                                    <Flex style={{ alignItems: 'center' }}>
+                                    <Flex $align="center">
                                         <RankNumber $isRTL={isRTL}>0{index + 1}</RankNumber>
                                         <span>{t(('strength_' + strength.id.replace(/-/g, '_')) as any)}</span>
                                     </Flex>

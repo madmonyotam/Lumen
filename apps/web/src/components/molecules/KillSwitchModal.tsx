@@ -43,9 +43,9 @@ const ModalText = styled.p`
   line-height: 1.5;
 `;
 
-const OptionButton = styled.button`
+const OptionButton = styled.button<{ $danger?: boolean }>`
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid ${props => props.theme.colors.ui.borderDim};
+  border: 1px solid ${props => props.$danger ? props.theme.colors.redDim : props.theme.colors.ui.borderDim};
   padding: 1rem;
   width: 100%;
   cursor: pointer;
@@ -54,12 +54,12 @@ const OptionButton = styled.button`
 
   &:hover {
     background: ${props => props.theme.colors.action.hover};
-    border-color: ${props => props.theme.colors.teal};
+    border-color: ${props => props.$danger ? props.theme.colors.red : props.theme.colors.teal};
   }
 `;
 
-const OptionTitle = styled.div`
-  color: ${props => props.theme.colors.teal};
+const OptionTitle = styled.div<{ $danger?: boolean }>`
+  color: ${props => props.$danger ? props.theme.colors.red : props.theme.colors.teal};
   font-weight: bold;
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
@@ -103,16 +103,16 @@ export const KillSwitchModal: React.FC<KillSwitchModalProps> = ({ isOpen, onClos
           <ModalContent initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}>
             <ModalTitle>{t('terminate_modal_title')}</ModalTitle>
             <ModalText>{t('terminate_modal_text')}</ModalText>
-            <FlexCol style={{ gap: '1rem' }}>
+            <FlexCol $gap="1rem">
               <OptionButton onClick={() => onKill('diminish')}>
                 <OptionTitle>{t('terminate_diminish')}</OptionTitle>
                 <OptionDesc>{t('terminate_diminish_desc')}</OptionDesc>
               </OptionButton>
               <OptionButton
                 onClick={() => onKill('wipe')}
-                style={{ borderColor: 'rgba(255, 68, 68, 0.5)' }}
+                $danger
               >
-                <OptionTitle style={{ color: '#FF4444' }}>{t('terminate_erase')}</OptionTitle>
+                <OptionTitle $danger>{t('terminate_erase')}</OptionTitle>
                 <OptionDesc>{t('terminate_erase_desc')}</OptionDesc>
               </OptionButton>
             </FlexCol>

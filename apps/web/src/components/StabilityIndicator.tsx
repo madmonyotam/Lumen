@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Activity } from 'lucide-react';
 import type { Conflict } from '../utils/genesisValidation';
@@ -27,6 +27,12 @@ const Header = styled.div`
     color: ${props => props.theme.colors.textDim};
 `;
 
+const HeaderTitle = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+`;
+
 const ScoreBar = styled.div`
     height: 4px;
     background: rgba(255, 255, 255, 0.1);
@@ -39,9 +45,9 @@ const ScoreBar = styled.div`
 const ScoreFill = styled(motion.div) <{ $score: number }>`
     height: 100%;
     background: ${props => {
-        if (props.$score > 80) return '#00f2c3'; // Teal/Green
-        if (props.$score > 50) return '#facc15'; // Yellow
-        return '#ef4444'; // Red
+        if (props.$score > 80) return props.theme.colors.teal;
+        if (props.$score > 50) return props.theme.colors.yellow;
+        return props.theme.colors.red;
     }};
 `;
 
@@ -57,11 +63,11 @@ const ConflictItem = styled(motion.div)`
     align-items: center;
     gap: 0.5rem;
     font-size: 0.75rem;
-    color: #ef4444; // Warning/Critical color
-    background: rgba(239, 68, 68, 0.1);
+    color: ${props => props.theme.colors.red};
+    background: ${props => `${props.theme.colors.red}1A`}; // 10% opacity
     padding: 0.5rem;
     border-radius: 0.5rem;
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    border: 1px solid ${props => `${props.theme.colors.red}33`}; // 20% opacity
 `;
 
 interface Props {
@@ -71,14 +77,15 @@ interface Props {
 
 export const StabilityIndicator: React.FC<Props> = ({ stability, conflicts }) => {
     const { t } = useTranslation();
+    const theme = useTheme();
     return (
         <Container initial={false}>
             <Header>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Activity size={14} color={stability > 50 ? '#00f2c3' : '#ef4444'} />
+                <HeaderTitle>
+                    <Activity size={14} color={stability > 50 ? theme.colors.teal : theme.colors.red} />
                     <span>{t('neural_stability')}</span>
-                </div>
-                <span style={{ color: stability > 50 ? '#00f2c3' : '#ef4444' }}>{stability}%</span>
+                </HeaderTitle>
+                <span style={{ color: stability > 50 ? theme.colors.teal : theme.colors.red }}>{stability}%</span>
             </Header>
             <ScoreBar>
                 <ScoreFill

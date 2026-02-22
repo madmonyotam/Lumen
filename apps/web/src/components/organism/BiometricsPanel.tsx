@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import styled, { useTheme } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Activity, Zap, Wifi, Dna, Hourglass, Globe, Menu, ChevronRight, ChevronLeft, ShieldCheck, AlignJustify } from 'lucide-react';
+import { Heart, Activity, Zap, Wifi, Dna, Hourglass, Globe, AlignJustify } from 'lucide-react';
 import { Flex, FlexCol } from '../shared/Layout';
 import { useTranslation } from '../../hooks/useTranslation';
 
@@ -42,33 +42,6 @@ const ToggleButton = styled.button<{ $isRTL?: boolean }>`
   &:hover {
     background: ${props => props.theme.colors.tealDim};
   }
-`;
-
-const HeaderRow = styled(Flex)`
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  padding: 0 0.25rem;
-  width: 100%;
-`;
-
-const PanelTitle = styled(motion.h2)`
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: white;
-  margin: 0;
-  letter-spacing: 0.05em;
-`;
-
-const RealTimeBadge = styled(motion.div)`
-  background: rgba(0, 242, 195, 0.1);
-  color: ${props => props.theme.colors.teal};
-  font-size: 0.6rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-weight: bold;
-  letter-spacing: 0.1em;
-  border: 1px solid rgba(0, 242, 195, 0.2);
 `;
 
 const MetricsList = styled(FlexCol)`
@@ -182,6 +155,45 @@ const VisualContainer = styled.div`
   display: flex;
   align-items: flex-end;
   gap: 0.15rem;
+  position: relative;
+  overflow: hidden;
+`;
+
+const MetricIconContainer = styled.div<{ $bgColor: string }>`
+    padding: 0.4rem;
+    border-radius: 0.5rem;
+    background: ${props => props.$bgColor};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
+
+const ClosedMetricWrapper = styled.div`
+    width: 100%;
+    display: flex;
+    justify-content: center;
+`;
+
+const PanelToggleWrapper = styled(Flex) <{ $isOpen: boolean }>`
+    padding: 0 0.5rem;
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: ${props => props.$isOpen ? 'space-between' : 'center'};
+`;
+
+const MetricValueArea = styled.div`
+    flex: 1;
+    height: 1.5rem;
+    display: flex;
+    align-items: flex-end;
+`;
+
+const ClosedStateContainer = styled(motion.div)`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
 `;
 
 const Bar = styled(motion.div) <{ $color?: string }>`
@@ -214,6 +226,18 @@ const SmallBadge = styled.span<{ $color?: string }>`
   letter-spacing: 0.1em;
 `;
 
+const OpenStateContainer = styled(motion.div)`
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+`;
+
+const ExpandedValueWrapper = styled(Flex)`
+    width: 100%;
+    margin-top: 0.25rem;
+`;
+
 // --- Utils & Props ---
 
 interface BiometricsPanelProps {
@@ -243,10 +267,9 @@ const ClosedMetricWithTooltip = ({ m, togglePanel, isRTL }: { m: any, togglePane
     }, [isHovered, isRTL]);
 
     return (
-        <div
+        <ClosedMetricWrapper
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
         >
             <ClosedMetricItem
                 ref={ref}
@@ -280,7 +303,7 @@ const ClosedMetricWithTooltip = ({ m, togglePanel, isRTL }: { m: any, togglePane
                 </AnimatePresence>,
                 document.body
             )}
-        </div>
+        </ClosedMetricWrapper>
     );
 };
 
@@ -359,7 +382,7 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             unit: t('unit_ms'),
             color: hrv < 30 ? theme.colors.red : hrv > 70 ? theme.colors.teal : theme.colors.blue,
             renderVisual: () => (
-                <div style={{ height: '1.5rem', width: '100%', position: 'relative', overflow: 'hidden' }}>
+                <VisualContainer>
                     <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 24">
                         <motion.path
                             d="M 0,12 Q 25,0 50,12 T 100,12"
@@ -371,7 +394,7 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
                             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                         />
                     </svg>
-                </div>
+                </VisualContainer>
             )
         },
         {
@@ -415,36 +438,28 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
-            <Flex style={{ padding: '0 0.5rem', marginBottom: '1rem', flexShrink: 0, alignItems: 'center', justifyContent: isOpen ? 'space-between' : 'center' }}>
-                <ToggleButton onClick={togglePanel} $isRTL={isRTL} style={{ marginBottom: 0 }}>
+            <PanelToggleWrapper $isOpen={isOpen}>
+                <ToggleButton onClick={togglePanel} $isRTL={isRTL}>
                     <AlignJustify size={20} />
                 </ToggleButton>
-            </Flex>
+            </PanelToggleWrapper>
 
             <AnimatePresence mode="wait">
                 {isOpen ? (
-                    <motion.div
+                    <OpenStateContainer
                         key="open"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0, transition: { duration: 0.1 } }}
-                        style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
                     >
                         <MetricsList>
                             {metrics.map((m) => (
                                 <MetricCard key={m.id} $borderColor={`${m.color}80`}>
                                     <CardHeader>
-                                        <Flex $gap="0.5rem" className="items-center">
-                                            <div style={{
-                                                padding: '0.4rem',
-                                                borderRadius: '0.5rem',
-                                                background: `${m.color}20`,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center'
-                                            }}>
+                                        <Flex $gap="0.5rem" $align="center">
+                                            <MetricIconContainer $bgColor={`${m.color}20`}>
                                                 <m.icon size={16} color={m.color} />
-                                            </div>
+                                            </MetricIconContainer>
                                             <CardTitle>{m.title}</CardTitle>
                                         </Flex>
                                         <FlexCol $align={isRTL ? "flex-start" : "flex-end"}>
@@ -452,26 +467,25 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
                                         </FlexCol>
                                     </CardHeader>
 
-                                    <Flex className="w-full justify-between items-end mt-1" style={{ gap: '1rem' }}>
-                                        <div style={{ flex: 1, height: '1.5rem', display: 'flex', alignItems: 'flex-end' }}>
+                                    <ExpandedValueWrapper $justify="space-between" $align="center" $gap="1rem">
+                                        <MetricValueArea>
                                             {m.renderVisual()}
-                                        </div>
-                                        <MetricValueContainer style={{ width: 'auto' }}>
+                                        </MetricValueArea>
+                                        <MetricValueContainer>
                                             <MetricValue>{m.value}</MetricValue>
                                             {m.unit && <MetricUnit>{m.unit}</MetricUnit>}
                                         </MetricValueContainer>
-                                    </Flex>
+                                    </ExpandedValueWrapper>
                                 </MetricCard>
                             ))}
                         </MetricsList>
-                    </motion.div>
+                    </OpenStateContainer>
                 ) : (
-                    <motion.div
+                    <ClosedStateContainer
                         key="closed"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0, transition: { duration: 0.1 } }}
-                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}
                     >
                         {metrics.map((m) => (
                             <ClosedMetricWithTooltip
@@ -481,7 +495,7 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
                                 isRTL={isRTL}
                             />
                         ))}
-                    </motion.div>
+                    </ClosedStateContainer>
                 )}
             </AnimatePresence>
         </PanelContainer>

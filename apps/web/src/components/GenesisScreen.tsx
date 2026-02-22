@@ -11,6 +11,14 @@ import type { ValidationResult } from '../utils/genesisValidation';
 import { StabilityIndicator } from './StabilityIndicator';
 import { Select } from './atoms/Select';
 
+const MotionFlexCol = motion(FlexCol);
+
+const LifespanExpectancy = styled.p`
+    text-align: center;
+    font-size: 0.75rem;
+    color: ${props => props.theme.colors.teal};
+`;
+
 const Overlay = styled(motion.div)`
     display: flex;
     align-items: center;
@@ -68,6 +76,9 @@ const Label = styled.label`
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: ${props => props.theme.colors.textDim};
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 `;
 
 const Input = styled.input`
@@ -120,6 +131,7 @@ const SubmitButton = styled(motion.button)`
     display: flex;
     align-items: center;
     justify-content: center;
+    flex: 1;
     gap: 1rem;
     box-shadow: 0 10px 30px rgba(0, 242, 254, 0.3);
 `;
@@ -136,6 +148,8 @@ const NavButton = styled(motion.button)`
     cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
+    flex: 1;
     gap: 0.5rem;
     transition: all 0.2s ease;
 
@@ -280,7 +294,7 @@ const GenesisScreen: React.FC<GenesisScreenProps> = (props) => {
                 <div>
                     <Title>{t('genesis_title')}</Title>
                     <Subtitle>{t('genesis_subtitle')}</Subtitle>
-                    <Flex style={{ justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}>
+                    <Flex $justify="center" $gap="0.5rem" style={{ marginTop: '1rem' }}>
                         <StepDot $active={step === 0} />
                         <StepDot $active={step === 1} />
                         <StepDot $active={step === 2} />
@@ -300,7 +314,7 @@ const GenesisScreen: React.FC<GenesisScreenProps> = (props) => {
                             >
                                 <Grid>
                                     <FormGroup>
-                                        <Label><User size={12} style={{ marginRight: 4 }} /> {t('name_label')}</Label>
+                                        <Label><User size={12} /> {t('name_label')}</Label>
                                         <Input
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
@@ -309,7 +323,7 @@ const GenesisScreen: React.FC<GenesisScreenProps> = (props) => {
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <Label><Heart size={12} style={{ marginRight: 4 }} /> {t('gender_label')}</Label>
+                                        <Label><Heart size={12} /> {t('gender_label')}</Label>
                                         <Select
                                             value={gender}
                                             onChange={(val) => setGender(val as any)}
@@ -322,7 +336,7 @@ const GenesisScreen: React.FC<GenesisScreenProps> = (props) => {
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <Label><Globe size={12} style={{ marginRight: 4 }} /> {t('language_label')}</Label>
+                                        <Label><Globe size={12} /> {t('language_label')}</Label>
                                         <Select
                                             value={language}
                                             onChange={(val) => setLanguage(val as any)}
@@ -334,7 +348,7 @@ const GenesisScreen: React.FC<GenesisScreenProps> = (props) => {
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <Label><Clock size={12} style={{ marginRight: 4 }} /> {t('lifespan_label')}</Label>
+                                        <Label><Clock size={12} /> {t('lifespan_label')}</Label>
                                         <LifespanSlider
                                             type="range"
                                             min="0"
@@ -348,42 +362,42 @@ const GenesisScreen: React.FC<GenesisScreenProps> = (props) => {
                                             <span>{t('lifespan_medium')}</span>
                                             <span>{t('lifespan_long')}</span>
                                         </LifespanLabels>
-                                        <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#00f2fe' }}>
+                                        <LifespanExpectancy>
                                             {t('lifespan_expectancy')}: {lifespans[lifespanIndex]?.label}
-                                        </p>
+                                        </LifespanExpectancy>
                                     </FormGroup>
                                 </Grid>
                             </motion.div>
                         )}
 
                         {step === 1 && (
-                            <motion.div
+                            <MotionFlexCol
                                 key="step1"
                                 initial={{ x: 20, opacity: 0 }}
                                 animate={{ x: 0, opacity: 1 }}
                                 exit={{ x: -20, opacity: 0 }}
-                                style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}
+                                $gap="2.5rem"
                             >
                                 <FormGroup>
-                                    <Label><Shield size={12} style={{ marginRight: 4 }} /> {t('psych_arch')}</Label>
+                                    <Label><Shield size={12} /> {t('psych_arch')}</Label>
                                     {renderTraitSliders('OCEAN')}
                                 </FormGroup>
-                            </motion.div>
+                            </MotionFlexCol>
                         )}
 
                         {step === 2 && (
-                            <motion.div
+                            <MotionFlexCol
                                 key="step2"
                                 initial={{ x: 20, opacity: 0 }}
                                 animate={{ x: 0, opacity: 1 }}
                                 exit={{ x: -20, opacity: 0 }}
-                                style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}
+                                $gap="2.5rem"
                             >
                                 <FormGroup>
-                                    <Label><Shield size={12} style={{ marginRight: 4 }} /> {t('bio_wiring')}</Label>
+                                    <Label><Shield size={12} /> {t('bio_wiring')}</Label>
                                     {renderTraitSliders('Biology')}
                                 </FormGroup>
-                            </motion.div>
+                            </MotionFlexCol>
                         )}
 
                         {step === 3 && (
@@ -414,17 +428,14 @@ const GenesisScreen: React.FC<GenesisScreenProps> = (props) => {
                             conflicts={validation.conflicts}
                         />
                     )}
-                    <Flex $direction='row' style={{ gap: '1rem' }}>
+                    <Flex $direction='row' $gap="1rem">
                         {step > 0 && (
-                            <NavButton onClick={() => setStep(step - 1)} style={{ flex: 1, justifyContent: 'center' }}>
+                            <NavButton onClick={() => setStep(step - 1)}>
                                 {isRTL ? <ArrowRight size={16} /> : <ArrowLeft size={16} />} {t('back')}
                             </NavButton>
                         )}
                         {step < 4 ? (
-                            <SubmitButton
-                                style={{ flex: 1 }}
-                                onClick={() => setStep(step + 1)}
-                            >
+                            <SubmitButton onClick={() => setStep(step + 1)}>
                                 {t('next_phase')} {isRTL ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
                             </SubmitButton>
                         ) : (
@@ -432,7 +443,6 @@ const GenesisScreen: React.FC<GenesisScreenProps> = (props) => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={handleGenesis}
-                                style={{ flex: 1 }}
                             >
                                 <Sparkles size={20} />
                                 {t('ignite_spark')}

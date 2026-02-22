@@ -24,6 +24,7 @@ export const lumenTheme = {
         redDim: 'rgba(255, 68, 68, 0.1)',
         blue: '#60a5fa',
         blueDim: 'rgba(96, 165, 250, 0.1)',
+        yellow: '#facc15',
 
         // Semantic Tokens
         action: {

@@ -192,6 +192,18 @@ export interface OrganismViewProps {
   isRTL: boolean;
 }
 
+const EstablishingLinkText = styled.div`
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  letter-spacing: 0.1em;
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+`;
+
 const OrganismView: React.FC<OrganismViewProps> = (props) => {
   const {
     isConnected,
@@ -210,7 +222,7 @@ const OrganismView: React.FC<OrganismViewProps> = (props) => {
   if (!isConnected || !organState) {
     return (
       <Container style={{ justifyContent: 'center', alignItems: 'center' }}>
-        <div className="animate-pulse text-2xl tracking-widest">{t('establishing_link')}</div>
+        <EstablishingLinkText>{t('establishing_link')}</EstablishingLinkText>
       </Container>
     );
   }

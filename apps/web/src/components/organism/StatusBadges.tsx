@@ -35,12 +35,16 @@ interface StatusBadgesProps {
     ageRatio: number;
 }
 
+const BadgesContainer = styled(FlexCol)`
+  min-width: fit-content;
+`;
+
 export const StatusBadges: React.FC<StatusBadgesProps> = ({ generation, latency, vitality, ageRatio }) => {
     const theme = useTheme();
     const { t } = useTranslation();
 
     return (
-        <FlexCol $align="flex-end" style={{ minWidth: 'fit-content' }}>
+        <BadgesContainer $align="flex-end">
             <Flex $gap="1rem">
                 <StatusBadge>
                     <BadgeLabel>{t('gen_label')}</BadgeLabel>
@@ -63,6 +67,6 @@ export const StatusBadges: React.FC<StatusBadgesProps> = ({ generation, latency,
                     </BadgeValue>
                 </StatusBadge>
             </Flex>
-        </FlexCol>
+        </BadgesContainer>
     );
 };
