@@ -40,8 +40,7 @@ function processBiometrics(bpm, stress, hrv) {
             generation: 1,
             name: "Lumen",
             gender: "non-binary",
-            language: "en",
-            traits: ["Curious", "Stoic"]
+            language: "en"
         },
         visualParams: {
             coreColor,

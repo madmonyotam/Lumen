@@ -19,14 +19,6 @@ const NeuralStatus = styled.div`
   text-transform: uppercase;
 `;
 
-const SpecimenTitle = styled.h1`
-  font-size: 1.875rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  color: white;
-  text-transform: uppercase;
-  text-shadow: 0 0 10px ${props => props.theme.colors.tealDim};
-`;
 
 const StatusDotContainer = styled(Relative)`
   width: 0.75rem;
@@ -136,7 +128,6 @@ export const NeuralHeader: React.FC<NeuralHeaderProps> = ({
             <StatusDotCore $color={theme.colors.teal} />
             <StatusDotPing $color={theme.colors.teal} />
           </StatusDotContainer>
-          <SpecimenTitle>{name}</SpecimenTitle>
         </Flex>
       </FlexCol>
 

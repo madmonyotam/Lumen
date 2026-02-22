@@ -3,18 +3,16 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOrgan } from '../context/OrganContext';
 import { LUMEN_CONFIG } from '../lumen.config';
-import { FlexCol, AbsoluteFill } from './shared/Layout';
+import { Flex, FlexCol, AbsoluteFill } from './shared/Layout';
 import { VisualPhysics } from './d3/VisualPhysics';
 import GenesisScreen from './GenesisScreen';
-import { NeuralHeader } from './organism/NeuralHeader';
-import { MetricCards } from './organism/MetricCards';
-import { StatusBadges } from './organism/StatusBadges';
+import { BiometricsPanel } from './organism/BiometricsPanel';
 import { ChatHistory } from './organism/ChatHistory';
+import { Send } from 'lucide-react';
 import { useNeuralUplink } from '../hooks/useNeuralUplink';
 import { useBiometricsSync } from '../hooks/useBiometricsSync';
 import { MemoryFog } from './d3/MemoryFog';
 import { useTranslation } from '../hooks/useTranslation';
-import { KillSwitchModal } from './molecules/KillSwitchModal';
 
 // --- Styled Components ---
 
@@ -25,7 +23,10 @@ const Container = styled(FlexCol)`
   font-family: ${props => props.theme.fonts.main};
   position: relative;
   overflow: hidden;
-  padding: 2rem;
+  padding-top: 64px;
+  padding-bottom: 0;
+  padding-left: 1rem;
+  padding-right: 1rem;
   
   ::selection {
     background: ${props => props.theme.colors.teal};
@@ -39,7 +40,7 @@ const BackgroundGradient = styled(AbsoluteFill)`
   opacity: 0.6;
 `;
 
-const MainGrid = styled.main`
+const MainGrid = styled.main<{ $isRTL?: boolean }>`
   flex: 1;
   display: grid;
   grid-template-columns: repeat(12, 1fr);
@@ -51,8 +52,18 @@ const MainGrid = styled.main`
   overflow: hidden;
 `;
 
+const ContentWrapper = styled(Flex) <{ $isRTL?: boolean }>`
+  position: absolute;
+  top: 74px;
+  bottom: 10px;
+  left: 1rem;
+  right: 1rem;
+  gap: 1.5rem;
+  direction: ${props => props.$isRTL ? 'rtl' : 'ltr'};
+`;
+
 const CenterColumn = styled(FlexCol)`
-  grid-column: span 8;
+  grid-column: span 12;
   align-items: center;
   justify-content: center;
   position: relative;
@@ -62,11 +73,11 @@ const CenterColumn = styled(FlexCol)`
 
 const ThoughtBubble = styled(motion.div)`
   position: absolute;
-  top: 0;
+  top: 5%;
   text-align: center;
   color: ${props => props.theme.colors.teal};
   opacity: 0.4;
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-style: italic;
   font-weight: 300;
   letter-spacing: 0.05em;
@@ -82,34 +93,92 @@ const OrbContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 70vh;
+  height: 100%;
   width: 100%;
 `;
 
-const KillSwitchContainer = styled.div<{ $isRTL?: boolean }>`
+
+
+const FloatingInputContainer = styled(motion.div) <{ $isRTL?: boolean }>`
   position: absolute;
   bottom: 2rem;
-  ${props => props.$isRTL ? 'left' : 'right'}: 2rem;
-  z-index: 50;
+  left: 50%;
+  width: 90%;
+  max-width: 40rem;
+  z-index: 100;
+  display: flex;
+  align-items: center; /* Ensures strict vertical centering for child items */
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(${props => props.theme.glass.blur});
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 99px; /* Give it a more rounded pill shape */
+  padding: 1rem 2rem; /* Even padding all around for vertical balance */
+  transition: all ${props => props.theme.animations.fast};
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+
+  &:focus-within {
+    border-color: ${props => props.theme.colors.teal};
+    box-shadow: 0 0 15px ${props => props.theme.colors.teal}40;
+  }
 `;
 
-const KillButton = styled.button`
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid ${props => props.theme.colors.red};
-  color: ${props => props.theme.colors.red};
-  padding: 0.5rem 1rem;
-  font-family: ${props => props.theme.fonts.code};
-  font-size: 1rem;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  border-radius: 0.5rem;
-  transition: all ${props => props.theme.animations.fast};
-  backdrop-filter: blur(4px);
+const ChatTextarea = styled.textarea<{ $isRTL?: boolean }>`
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: ${props => props.theme.colors.text};
+  font-family: ${props => props.theme.fonts.main};
+  font-size: 1.1rem;
+  line-height: 1.5;
+  padding: 0;
+  margin: 0;
+  resize: none;
+  height: auto;
+  min-height: 26px;
+  max-height: 120px;
+  overflow-y: auto;
+  text-align: ${props => props.$isRTL ? 'right' : 'left'};
+  direction: ${props => props.$isRTL ? 'rtl' : 'ltr'};
+  
+  /* Hide scrollbar for cleaner look */
+  &::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+  
+  &:focus {
+    outline: none;
+  }
+  
+  &::placeholder {
+    color: ${props => props.theme.colors.textDim};
+    line-height: 1.5;
+  }
+`;
 
+const SendButton = styled.button<{ $isRTL?: boolean }>`
+  padding: 0.5rem;
+  margin: 0;
+  margin-inline-start: 1rem;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: ${props => props.theme.colors.teal};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all ${props => props.theme.animations.fast};
+  transform: ${props => props.$isRTL ? 'scaleX(-1)' : 'scaleX(1)'};
+  margin-bottom: -2px;
+  
   &:hover {
-    background: ${props => props.theme.colors.red};
-    color: black;
-    box-shadow: ${props => props.theme.shadows.neonRed};
+    background: ${props => props.theme.colors.tealDim};
+    transform: ${props => props.$isRTL ? 'scaleX(-1) scale(1.1)' : 'scaleX(1) scale(1.1)'};
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;
 
@@ -118,7 +187,7 @@ const KillButton = styled.button`
 const OrganismView: React.FC = () => {
   const { organState, isConnected } = useOrgan();
   const {
-    inputValue, setInputValue, showKillModal, setShowKillModal, handleSend, handleKill
+    inputValue, setInputValue, handleSend
   } = useNeuralUplink();
   const { biometricsRef } = useBiometricsSync(organState);
   const { t, isRTL } = useTranslation();
@@ -172,30 +241,40 @@ const OrganismView: React.FC = () => {
 
   const ageRatio = lifeStatus.age / lifeStatus.lifespan;
 
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    e.target.style.height = 'auto'; // Reset height briefly to calculate scrollHeight correctly
+    e.target.style.height = `${e.target.scrollHeight}px`;
+    setInputValue(e.target.value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+      // Reset height
+      const target = e.target as HTMLTextAreaElement;
+      target.style.height = 'auto';
+    }
+  };
+
   return (
     <Container>
       <BackgroundGradient />
-      <NeuralHeader
-        name={lifeStatus.name}
-        inputValue={inputValue}
-        onInputChange={setInputValue}
-        onSend={handleSend}
-        rightContent={
-          <StatusBadges
-            generation={lifeStatus.generation}
-            latency={status.latency}
-            vitality={status.vitality}
-            ageRatio={ageRatio}
-          />
-        }
-      />
 
-      <MainGrid>
-        <MetricCards
+      <ContentWrapper $isRTL={isRTL}>
+        <BiometricsPanel
           bpm={biometrics.bpm}
           stressIndex={biometrics.stressIndex}
           hrv={biometrics.hrv}
+          latency={status.latency}
+          generation={lifeStatus.generation}
+          ageRatio={ageRatio}
+          vitality={status.vitality}
         />
+        <ChatHistory currentInteraction={currentInteraction} />
+      </ContentWrapper>
+
+      <MainGrid $isRTL={isRTL}>
 
         <CenterColumn>
           <AnimatePresence mode="wait">
@@ -211,7 +290,11 @@ const OrganismView: React.FC = () => {
           </AnimatePresence>
 
           <OrbContainer>
-            <VisualPhysics biometricsRef={biometricsRef} />
+            <VisualPhysics
+              biometricsRef={biometricsRef}
+              thought={thought}
+              currentInteraction={currentInteraction}
+            />
           </OrbContainer>
 
           {/* <CoreSynapseContainer>
@@ -225,19 +308,27 @@ const OrganismView: React.FC = () => {
             </CoreSynapseText>
           </CoreSynapseContainer> */}
         </CenterColumn>
-
-        <ChatHistory currentInteraction={currentInteraction} />
       </MainGrid>
-      <MemoryFog />
-      <KillSwitchContainer $isRTL={isRTL}>
-        <KillButton onClick={() => setShowKillModal(true)}>{t('terminate')}</KillButton>
-      </KillSwitchContainer>
 
-      <KillSwitchModal
-        isOpen={showKillModal}
-        onClose={() => setShowKillModal(false)}
-        onKill={handleKill}
-      />
+      <FloatingInputContainer $isRTL={isRTL}
+        initial={{ x: "-50%", y: 50, opacity: 0 }}
+        animate={{ x: "-50%", y: 0, opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        <ChatTextarea
+          $isRTL={isRTL}
+          rows={1}
+          placeholder={`${t('speak_to_placeholder')} ${lifeStatus.name}...`}
+          value={inputValue}
+          onChange={handleTextareaChange}
+          onKeyDown={handleKeyDown}
+        />
+        <SendButton onClick={handleSend} $isRTL={isRTL} disabled={!inputValue.trim()}>
+          <Send size={20} />
+        </SendButton>
+      </FloatingInputContainer>
+
+      <MemoryFog />
     </Container>
   );
 };

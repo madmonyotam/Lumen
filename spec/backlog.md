@@ -132,11 +132,11 @@ Transitioning from local state to multi-tenant architecture with Firebase Auth a
 
 | # | Ticket | Status | Owner |
 |---|--------|--------|-------|
-| 11.1 | **Backend/DB:** Schema migration for `pgvector` and RLS policies (Users, Lumens, Memories tables). [View Spec](tasks/sprint_9/task_9_1_schema_migration.md) | 🔲 Todo | DB Arch / Backend |
-| 11.2 | **Auth Service:** Firebase Google Sign-In on frontend and token validation on the backend. [View Spec](tasks/sprint_9/task_9_2_auth_service.md) | 🔲 Todo | Backend / Soft Arch |
-| 11.3 | **State Sync:** Logic to persist the existing JSON state to Postgres on changes. [View Spec](tasks/sprint_9/task_9_3_state_sync.md) | 🔲 Todo | Fullstack |
-| 11.4 | **Frontend Components:** Persistent Header, UserAvatar, Logout dropdown, and Auth Guard HOC. [View Spec](tasks/sprint_9/task_9_4_frontend_components.md) | 🔲 Todo | Frontend |
-| 11.5 | **API/DAO:** Functions for saving/retrieving embeddings filtered by `user_id`. [View Spec](tasks/sprint_9/task_9_5_api_dao.md) | 🔲 Todo | Backend |
+| 11.1 | **Backend/DB:** Schema migration for `pgvector` and RLS policies (Users, Lumens, Memories tables). [View Spec](tasks/sprint_9/task_9_1_schema_migration.md) | ✅ Done | DB Arch / Backend |
+| 11.2 | **Auth Service:** Firebase Google Sign-In on frontend and token validation on the backend. [View Spec](tasks/sprint_9/task_9_2_auth_service.md) | ✅ Done | Backend / Soft Arch |
+| 11.3 | **State Sync:** Logic to persist the existing JSON state to Postgres on changes. [View Spec](tasks/sprint_9/task_9_3_state_sync.md) | ✅ Done | Fullstack |
+| 11.4 | **Frontend Components:** Persistent Header, UserAvatar, Logout dropdown, and Auth Guard HOC. [View Spec](tasks/sprint_9/task_9_4_frontend_components.md) | ✅ Done | Frontend |
+| 11.5 | **API/DAO:** Functions for saving/retrieving embeddings filtered by `user_id`. [View Spec](tasks/sprint_9/task_9_5_api_dao.md) | ✅ Done | Backend |
 
 ## 14. Bugs & Known Issues
 | # | Issue | Severity | Status |

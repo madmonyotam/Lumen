@@ -22,7 +22,10 @@ const Card = styled.div<{ $borderColor?: string }>`
 
 const CardHeader = styled(Flex)`
   justify-content: space-between;
-  margin-bottom: 1.5rem;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 `;
 
 const CardTitle = styled.span`
@@ -37,17 +40,18 @@ const MetricContainer = styled(Flex)`
 `;
 
 const MetricValue = styled.span`
-  font-size: 3.75rem;
-  font-weight: 300;
+  font-size: 3rem;
+  font-weight: 200;
   color: white;
   letter-spacing: -0.05em;
   line-height: 1;
 `;
 
 const MetricLabel = styled.span`
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: ${props => props.theme.colors.textDim};
-  font-weight: 700;
+  font-weight: 500;
+  transition: color ${props => props.theme.animations.fast};
 `;
 
 const HeartRateVisual = styled(Flex)`
@@ -95,12 +99,12 @@ export const MetricCards: React.FC<MetricCardProps> = React.memo(({ bpm, stressI
       {/* Heart Rate */}
       <Card $borderColor={`${theme.colors.teal}80`}>
         <CardHeader>
-          <Heart size={20} color={theme.colors.teal} />
+          <Heart size={16} color={theme.colors.teal} />
           <CardTitle>{t('heart_rate')}</CardTitle>
         </CardHeader>
         <MetricContainer>
           <MetricValue>{bpm}</MetricValue>
-          <MetricLabel>BPM</MetricLabel>
+          <MetricLabel>{t('unit_bpm')}</MetricLabel>
         </MetricContainer>
         <HeartRateVisual>
           {[0.3, 0.5, 0.4, 0.8, 0.6, 0.9, 0.7, 0.4, 0.6, 0.5].map((h, i) => (
@@ -116,12 +120,12 @@ export const MetricCards: React.FC<MetricCardProps> = React.memo(({ bpm, stressI
       {/* Stress Index */}
       <Card $borderColor={`${theme.colors.purple}80`}>
         <CardHeader>
-          <Zap size={20} color={theme.colors.purple} />
+          <Zap size={16} color={theme.colors.purple} />
           <CardTitle>{t('stress_index')}</CardTitle>
         </CardHeader>
         <MetricContainer style={{ marginBottom: '1rem' }}>
           <MetricValue>{stressIndex}</MetricValue>
-          <MetricLabel>µS</MetricLabel>
+          <MetricLabel>{t('unit_stress')}</MetricLabel>
         </MetricContainer>
         <StressBarContainer>
           <StressBarFill
@@ -134,12 +138,12 @@ export const MetricCards: React.FC<MetricCardProps> = React.memo(({ bpm, stressI
       {/* HRV */}
       <Card $borderColor={`${theme.colors.blue}80`}>
         <CardHeader>
-          <Activity size={20} color={theme.colors.blue} />
+          <Activity size={16} color={theme.colors.blue} />
           <CardTitle>{t('hrv_variation')}</CardTitle>
         </CardHeader>
         <MetricContainer>
           <MetricValue>{hrv}</MetricValue>
-          <MetricLabel>ms</MetricLabel>
+          <MetricLabel>{t('unit_ms')}</MetricLabel>
         </MetricContainer>
       </Card>
     </FlexCol>

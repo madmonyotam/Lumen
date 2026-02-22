@@ -14,6 +14,7 @@ import type { ValidationResult } from '../utils/genesisValidation';
 import { StabilityIndicator } from './StabilityIndicator';
 import type { LumenPersona, BigFiveScores, InternalScores } from '@lumen/shared/types/index';
 import { Select } from './atoms/Select';
+import { useAuth } from '../context/AuthContext';
 
 const Overlay = styled(motion.div)`
     display: flex;
@@ -204,6 +205,7 @@ const GenesisScreen: React.FC = () => {
     const [step, setStep] = useState(0); // 0=Identity, 1=Psychology, 2=Biology, 3=Stability, 4=Strengths
 
     const { t, isRTL } = useTranslation();
+    const { token } = useAuth();
 
     const { options, loading, error } = useGenesisOptions();
 
@@ -332,7 +334,10 @@ const GenesisScreen: React.FC = () => {
         try {
             const res = await fetch(`${LUMEN_CONFIG.API_URL}/api/genesis`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(payload)
             });
             if (!res.ok) throw new Error('Genesis failed');

@@ -22,6 +22,6 @@ exports.BIOMETRIC_RANGES = {
     },
     VITALITY: {
         // Below this, system starts decaying/rusting
-        THRESHOLD_LOW: 0.3
+        THRESHOLD_LOW: 0.3,
     }
 };

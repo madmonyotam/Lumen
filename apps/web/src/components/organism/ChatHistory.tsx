@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FlexCol } from '../shared/Layout';
 
 const RightColumn = styled(FlexCol)`
-  grid-column: span 2;
+  width: 100%;
   align-items: stretch;
   justify-content: flex-start;
   height: 100%;
@@ -13,7 +13,8 @@ const RightColumn = styled(FlexCol)`
 `;
 
 const ChatContainer = styled(FlexCol)`
-  width: 100%;
+  width: 25vw;
+  align-self: flex-end;
   height: 100%;
   z-index: 30;
   overflow-y: auto;

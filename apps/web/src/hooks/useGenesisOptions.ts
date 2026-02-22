@@ -10,6 +10,8 @@ export const useGenesisOptions = () => {
     useEffect(() => {
         const fetchOptions = async () => {
             try {
+                // This endpoint doesn't strictly need auth for reading options, 
+                // but we can pass it if we ever secure it. 
                 const response = await fetch(`${LUMEN_CONFIG.API_URL}/api/genesis/options`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch genesis options');

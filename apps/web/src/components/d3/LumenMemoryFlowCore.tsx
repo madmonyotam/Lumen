@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, memo } from 'react';
 import * as d3 from 'd3';
 import BaseChart from './BaseChart';
 
@@ -75,7 +75,7 @@ interface LumenMemoryFlowCoreProps {
 
 // --- Component ---
 
-const LumenMemoryFlowCore = ({
+const LumenMemoryFlowCore = memo(({
     words,
     speed = 1,
     lifeSpan = 5000,
@@ -91,6 +91,7 @@ const LumenMemoryFlowCore = ({
 
     // Queue for words waiting to enter the simulation
     const pendingWordsRef = useRef<MemoryWord[]>([]);
+    const lastSpawnRef = useRef<number>(0);
 
     const propsRef = useRef({ words, speed, lifeSpan, maxWords });
 
@@ -149,7 +150,7 @@ const LumenMemoryFlowCore = ({
     };
 
     const shatterWord = (word: WordNode, nodes: SimulationNode[]) => {
-        const numFragments = 25 + Math.floor(Math.random() * 50);
+        const numFragments = 15 + Math.floor(Math.random() * 25);
         for (let i = 0; i < numFragments; i++) {
             const angle = Math.random() * Math.PI * 2;
             const velocity = 5 + Math.random() * 8;
@@ -163,7 +164,7 @@ const LumenMemoryFlowCore = ({
                 color: word.color,
                 opacity: 1,
                 rotation: Math.random() * 360,
-                scale: 0.1 + Math.random() * 0.4,
+                scale: 0.3 + Math.random() * 0.8, // Increased size significantly
                 blur: word.blur, // Inherit blur
                 createdAt: Date.now()
             });
@@ -300,15 +301,22 @@ const LumenMemoryFlowCore = ({
             const max = propsRef.current.maxWords ?? 20;
 
             if (currentCount < max && pendingWordsRef.current.length > 0) {
-                // Determine how many we can add
-                const availableSlots = max - currentCount;
-                // Take up to available slots
-                const wordsToAdd = pendingWordsRef.current.splice(0, availableSlots);
+                // Determine minimum time between spawns to avoid visual overlap
+                const spawnDelay = (200 + Math.random() * 600) / speed;
 
-                wordsToAdd.forEach(wordData => {
+                if (now - lastSpawnRef.current > spawnDelay) {
+                    const wordData = pendingWordsRef.current.shift()!;
+
+                    // Fix: Reset creation time. 
+                    // Words queued here would otherwise use their fetch time from MemoryFog,
+                    // causing them to spawn and instantly die if they sat in the pending queue too long.
+                    wordData.createdAt = now;
+
                     const { word, dust } = createWordNode(wordData, widthRef.current, heightRef.current);
                     newNodes.push(word, ...dust);
-                });
+
+                    lastSpawnRef.current = now;
+                }
             }
 
             if (newNodes.length > 0 || nodesToRemove.size > 0) {
@@ -431,6 +439,8 @@ const LumenMemoryFlowCore = ({
     return (
         <BaseChart onReady={onReady} />
     );
-};
+});
+
+LumenMemoryFlowCore.displayName = 'LumenMemoryFlowCore';
 
 export default LumenMemoryFlowCore;
