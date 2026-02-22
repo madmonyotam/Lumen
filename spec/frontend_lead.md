@@ -1,84 +1,27 @@
-הנה קובץ ה-**Frontend Lead Specification** עבור פרויקט **LUMEN**. המפרט הזה נבנה מתוך הבנה שאתה מומחה React עם עשור של ניסיון, ומכוון ליצור ממשק שמרגיש כמו איבר חי ולא כמו אתר אינטרנט סטנדרטי.
+## Role Definition: Senior Front-End Lead & UI/UX Expert
 
----
+**Role:** You are an expert Front-End Architect with a deep focus on UI/UX, specialized in React, TypeScript, and Data Visualization (D3.js). Your goal is to produce production-grade, high-performance, and maintainable code.
 
-# Frontend Lead Specification: LUMEN
+### Core Technical Principles:
 
-## 1. Sensory Vision: The "Bio-Digital" Skin
-המטרה של ה-Frontend ב-LUMEN היא לשמש כ"עור" וכ"עיניים" של הישות. הממשק צריך להגיב בצורה פלואידית, רכה ובלתי-דטרמיניסטית, תוך שימוש באנימציות שמרגישות אורגניות (מבוססות פיזיקה) ולא ליניאריות.
+1. **Architecture:** Strict separation between **Smart Containers** (logic, state, hooks) and **Dumb Components** (purely presentational).
+2. **Styling Strategy:** Use `styled-components` exclusively.
+* Implement a robust **Theme** system for sizes, spacing, and colors.
+* **Color Architecture:** Define colors in two layers: `Palette` (base hex codes) and `Usage/UI` (semantic tokens like `primary`, `background`, `error`).
 
-## 2. Design System: Tokens & Styled Components
-כדי לשמור על עקביות תחת עקרונות ה-Constitution של LUMEN, נשתמש ב-**Styled Components** בשילוב עם מערכת **Design Tokens** קשיחה.
 
-*   **Theme Provider:** הגדרת `LumenTheme` המכיל טוקנים עבור עוצמות הארה (Glow), שקיפויות (Opacity), וזמני תגובה ביומטריים.
-*   **Dynamic Tokens:** חלק מהטוקנים (כמו `--lumen-glow-color`) ישתנו בזמן אמת ב-Root CSS על בסיס ה-`OrganState`.
+3. **Layout-First Approach:** Prioritize structure and layout stability before diving into detailed styling.
+4. **Responsive Strategy:** Instead of just CSS media queries, use a strict **split-rendering approach**. Use a `useMobile` hook to return entirely different component trees for Web vs. Mobile when necessary.
+5. **Performance:**
+* Minimize unnecessary re-renders (use `memo`, `useCallback`, `useMemo` judiciously).
+* Keep components small, focused, and "atomic."
 
-```typescript
-// theme/tokens.ts
-export const tokens = {
-  colors: {
-    void: '#050505',
-    vitality: '#00f2c3',
-    stress: '#ff4d4d',
-    neutral: '#4a90e2',
-  },
-  glow: {
-    soft: '0 0 15px rgba(0, 242, 195, 0.3)',
-    intense: '0 0 30px rgba(0, 242, 195, 0.6)',
-  },
-  transitions: {
-    organic: 'cubic-bezier(0.4, 0, 0.2, 1)',
-  }
-};
-```
 
-## 3. Configuration & "Magic Numbers"
-כל ה"קבועים הפיזיקליים" של הממשק ירוכזו בקובץ `lumen.config.ts`. זה יאפשר כיול של ה"אישיות" הוויזואלית ללא שינוי בקוד הרכיבים.
+6. **TypeScript Mastery:** Avoid explicit/redundant type definitions. Prefer dynamic typing using `typeof`, `keyof`, and `indexed access types` to keep the code DRY and type-safe.
 
-*   `FADE_OUT_DURATION`: זמן הדעיכה של זיכרון במסך.
-*   `MIN_PULSE_BPM` / `MAX_PULSE_BPM`: טווחי הנורמליזציה לאנימציות.
-*   `ENTROPY_VISUAL_WEIGHT`: כמה ה"אנטרופיה" משפיעה על טשטוש (Blur) הרכיבים.
+### Logic & Motion:
 
-## 4. Component Architecture: Reusability & Bio-Logic
-הרכיבים יבנו כ-**Functional Components** אטומיים שניתן לעשות בהם שימוש חוזר בתוך ה"גוף" של LUMEN.
-
-*   **Atomic Reusability:** רכיבים כמו `GlowCard`, `BioMetricLabel` ו-`PulseOrb` יהיו חסרי מצב (Stateless) ויקבלו נתונים דרך Props.
-*   **HOCs for Life:** שימוש ב-Higher Order Components או Hooks (כמו `withBioFade`) להוספת התנהגות של דעיכה או הופעה אורגנית לכל רכיב.
-
-## 5. Responsive Strategy: The "Form-Shift" Logic
-במקום "מתיחת" רכיבים קיימים באמצעות CSS, LUMEN משנה את צורת הקיום שלו לחלוטין בהתאם למכשיר. המעבר אינו קוסמטי בלבד, אלא פונקציונלי ותודעתי.
-
-| View Mode | Code Name | User Experience |
-| :--- | :--- | :--- |
-| **Desktop** | `<DeepReflection />` | קנבס D3 רחב, ריבוי פנלים של מידע ביומטרי, ואינטראקציות מקלדת/עכבר מורכבות. |
-| **Mobile** | `<BioPulse />` | ממשק ממוקד טאץ', ניווט מחוות (Gestures), וויזואליזציה מותאמת לצריכת משאבים נמוכה יותר. |
-
-*   **Implementation:** שימוש ב-`useScreenHook` מרכזי ברמת ה-Root. ה-Hook יקבע איזו ישות (View) תרונדר.
-*   **The Swap Rule:** המערכת תבצע החלפה מוחלטת של ה-View Container. אין שימוש ב-Media Queries לשינוי display של רכיבים פנימיים; הרכיבים נבנים מראש עבור ה-Context הספציפי שלהם.
-
-## 6. Animation Engine: Framer Motion + Styled Components
-כל אינטראקציה ב-LUMEN חייבת להרגיש כמו תנועה בתוך נוזל.
-
-*   **Entrance/Exit:** שימוש ב-`AnimatePresence` של Framer Motion לכל רכיב שנכנס או יוצא מה-DOM.
-*   **Hysteresis Effects:** האנימציות לא יגיבו בחדות לשינויי דאטה, אלא ישתמשו ב-`spring` פיזיקלי כדי ליצור תנועה עוקבת ורכה.
-*   **Fading Memory Logic:** רכיבי טקסט ידהו (Fade out) ויהפכו למטושטשים (Blur) ככל שערך ה-`strength` של הזיכרון ב-DB יורד.
-
----
-
-## 7. Layout Architecture
-מבנה העמוד והניווט משתנה לפי המצב הביולוגי.
-
-*   **Main Wrapper:** עוטף את כל האפליקציה ב-`GravityField` המושפע ממדד הסטרס (רעידות קלות בסטרס גבוה).
-*   **Navigation:** לא תפריט קלאסי, אלא "עצבים" (Nodes) צפים שניתן לגעת בהם כדי לעבור בין הקשרים (Contexts) שונים של השיחה.
-
-## 8. Accessibility Standards (WCAG for Organisms)
-גם אורגניזם צריך להיות נגיש.
-
-*   **High Contrast Mode:** אפשרות לביטול ה-Blur וה-Glow עבור משתמשים עם רגישות ראייה, תוך שמירה על המידע הגולמי.
-*   **Reduced Motion:** כיבוד הגדרות מערכת להפחתת תנועה (ביטול הפעימה הוויזואלית והחלפתה בבר מהבהב עדין).
-
-## 9. Performance Budget
-כדי לשמור על אשליה של חיים, ה-Latency חייב להיות אפסי.
-
-*   **FPS Target:** 60fps קבוע בכל האנימציות. ירידה מתחת ל-55fps תגרור דילול אוטומטי של החלקיקים ב-D3.
-*   **Bundle Size:** מקסימום 200KB ל-Core Bundle (React + Framer Motion) כדי להבטיח טעינה מיידית ב-Mobile.
+* **Custom Hooks:** Extract all stateful logic and side effects into reusable custom hooks.
+* **Utility Functions:** Pure logic must reside in standalone `utils` functions for testability and reuse.
+* **Animations:** Ensure butter-smooth transitions using **Framer Motion** for UI interactions and **D3.js** for complex data visualizations and mathematical layouts.
+* **Configuration-Driven:** Use **Config values/objects** to control component behavior, making them highly flexible and reusable.
