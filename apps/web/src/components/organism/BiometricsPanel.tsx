@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import styled, { useTheme } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Activity, Zap, Wifi, Dna, Hourglass, Globe, Menu, ChevronRight, ChevronLeft, ShieldCheck, AlignJustify } from 'lucide-react';
+import * as d3 from 'd3';
+import { Heart, Activity, Zap, Wifi, Dna, Hourglass, Globe, AlignJustify } from 'lucide-react';
 import { Flex, FlexCol } from '../shared/Layout';
 import { useTranslation } from '../../hooks/useTranslation';
 
@@ -11,16 +12,16 @@ import { useTranslation } from '../../hooks/useTranslation';
 const PanelContainer = styled(motion.div) <{ $isRTL?: boolean, $isOpen: boolean }>`
   position: relative;
   height: 100%;
-  background-color: ${props => props.theme.colors.card};
-  backdrop-filter: blur(${props => props.theme.glass.blur});
-  border: ${props => props.theme.glass.border};
+  background-color: ${props => props.theme.ui.background.card};
+  backdrop-filter: blur(${props => props.theme.config.glass.blur});
+  border: ${props => props.theme.config.glass.border};
   border-radius: 1rem;
   padding: 1.25rem 0.75rem;
   z-index: 50;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: ${props => props.theme.shadows.card};
+  box-shadow: ${props => props.theme.config.shadows.card};
   white-space: nowrap;
   flex-shrink: 0;
 `;
@@ -28,7 +29,7 @@ const PanelContainer = styled(motion.div) <{ $isRTL?: boolean, $isOpen: boolean 
 const ToggleButton = styled.button<{ $isRTL?: boolean }>`
   background: transparent;
   border: none;
-  color: ${props => props.theme.colors.teal};
+  color: ${props => props.theme.ui.brand.primary};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -36,39 +37,12 @@ const ToggleButton = styled.button<{ $isRTL?: boolean }>`
   padding: 0.5rem;
   margin-bottom: 1rem;
   border-radius: 0.5rem;
-  transition: all ${props => props.theme.animations.fast};
+  transition: ${props => props.theme.config.transitions.fast};
   align-self: flex-start;
 
   &:hover {
-    background: ${props => props.theme.colors.tealDim};
+    background: ${props => props.theme.palette.teal.dim};
   }
-`;
-
-const HeaderRow = styled(Flex)`
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  padding: 0 0.25rem;
-  width: 100%;
-`;
-
-const PanelTitle = styled(motion.h2)`
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: white;
-  margin: 0;
-  letter-spacing: 0.05em;
-`;
-
-const RealTimeBadge = styled(motion.div)`
-  background: rgba(0, 242, 195, 0.1);
-  color: ${props => props.theme.colors.teal};
-  font-size: 0.6rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-weight: bold;
-  letter-spacing: 0.1em;
-  border: 1px solid rgba(0, 242, 195, 0.2);
 `;
 
 const MetricsList = styled(FlexCol)`
@@ -89,13 +63,13 @@ const MetricCard = styled(motion.div) <{ $borderColor?: string }>`
   border-radius: 1rem;
   padding: 1rem;
   position: relative;
-  transition: all ${props => props.theme.animations.normal};
+  transition: ${props => props.theme.config.transitions.normal};
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 
   &:hover {
-    border-color: ${props => props.$borderColor || props.theme.colors.tealDim};
+    border-color: ${props => props.$borderColor || props.theme.palette.teal.dim};
     background-color: rgba(0, 0, 0, 0.4);
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   }
@@ -109,14 +83,14 @@ const ClosedMetricItem = styled(motion.button) <{ $color?: string }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${props => props.$color || props.theme.colors.teal};
+  color: ${props => props.$color || props.theme.ui.brand.primary};
   cursor: pointer;
-  transition: all ${props => props.theme.animations.fast};
+  transition: ${props => props.theme.config.transitions.fast};
   margin-bottom: 0.5rem;
 
   &:hover {
     background: rgba(255, 255, 255, 0.05);
-    border-color: ${props => props.$color || props.theme.colors.tealDim};
+    border-color: ${props => props.$color || props.theme.palette.teal.dim};
     box-shadow: 0 0 10px ${props => props.$color ? props.$color + '40' : 'rgba(0, 242, 195, 0.2)'};
   }
 `;
@@ -124,7 +98,7 @@ const ClosedMetricItem = styled(motion.button) <{ $color?: string }>`
 const TooltipContent = styled(motion.div) <{ $color?: string, $isRTL?: boolean }>`
   position: fixed;
   transform: translateY(-50%);
-  background-color: ${props => props.theme.colors.card};
+  background-color: ${props => props.theme.ui.background.card};
   border: 1px solid ${props => props.$color ? props.$color + '80' : 'rgba(255,255,255,0.1)'};
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   padding: 0.5rem 0.75rem;
@@ -139,7 +113,7 @@ const TooltipContent = styled(motion.div) <{ $color?: string, $isRTL?: boolean }
   gap: 0.25rem;
   font-weight: 500;
   letter-spacing: 0.05em;
-  backdrop-filter: blur(${props => props.theme.glass.blur});
+  backdrop-filter: blur(${props => props.theme.config.glass.blur});
 `;
 
 const CardHeader = styled(Flex)`
@@ -159,7 +133,6 @@ const MetricValueContainer = styled(Flex)`
   align-items: baseline;
   justify-content: flex-end;
   gap: 0.25rem;
-  width: 100%;
 `;
 
 const MetricValue = styled.span`
@@ -172,7 +145,7 @@ const MetricValue = styled.span`
 
 const MetricUnit = styled.span`
   font-size: 0.7rem;
-  color: ${props => props.theme.colors.textDim};
+  color: ${props => props.theme.ui.text.dim};
   font-weight: 500;
 `;
 
@@ -182,13 +155,56 @@ const VisualContainer = styled.div`
   display: flex;
   align-items: flex-end;
   gap: 0.15rem;
+  position: relative;
+  overflow: hidden;
+`;
+
+const MetricIconContainer = styled.div<{ $bgColor: string }>`
+    padding: 0.4rem;
+    border-radius: 0.5rem;
+    background: ${props => props.$bgColor};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
+
+const ClosedMetricWrapper = styled.div`
+    width: 100%;
+    display: flex;
+    justify-content: center;
+`;
+
+const PanelToggleWrapper = styled(Flex) <{ $isOpen: boolean }>`
+    padding: 0 0.5rem;
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: ${props => props.$isOpen ? 'space-between' : 'center'};
+`;
+
+const MetricValueArea = styled.div`
+    flex: 1;
+    height: 1.5rem;
+    display: flex;
+    align-items: flex-end;
+`;
+
+const ClosedStateContainer = styled(motion.div)`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
 `;
 
 const Bar = styled(motion.div) <{ $color?: string }>`
   flex: 1;
-  background-color: ${props => props.$color || props.theme.colors.teal};
-  border-radius: 1px 1px 0 0;
+  background-color: ${props => props.$color || props.theme.ui.brand.primary};
+  border-radius: 2px 2px 0 0;
+  min-height: 2px;
+  opacity: 0.8;
 `;
+
+
 
 const ProgressTrack = styled.div`
   height: 0.25rem;
@@ -200,8 +216,8 @@ const ProgressTrack = styled.div`
 
 const ProgressFill = styled(motion.div) <{ $color?: string }>`
   height: 100%;
-  background-color: ${props => props.$color || props.theme.colors.purple};
-  box-shadow: 0 0 10px ${props => props.$color || props.theme.colors.purple};
+  background-color: ${props => props.$color || props.theme.palette.purple.main};
+  box-shadow: 0 0 10px ${props => props.$color || props.theme.palette.purple.main};
 `;
 
 const SmallBadge = styled.span<{ $color?: string }>`
@@ -214,6 +230,18 @@ const SmallBadge = styled.span<{ $color?: string }>`
   letter-spacing: 0.1em;
 `;
 
+const OpenStateContainer = styled(motion.div)`
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+`;
+
+const ExpandedValueWrapper = styled(Flex)`
+    width: 100%;
+    margin-top: 0.25rem;
+`;
+
 // --- Utils & Props ---
 
 interface BiometricsPanelProps {
@@ -224,6 +252,7 @@ interface BiometricsPanelProps {
     generation: number;
     ageRatio: number;
     vitality: number;
+    gender: 'male' | 'female' | string;
 }
 
 // --- Tooltip Wrapper Component ---
@@ -243,10 +272,9 @@ const ClosedMetricWithTooltip = ({ m, togglePanel, isRTL }: { m: any, togglePane
     }, [isHovered, isRTL]);
 
     return (
-        <div
+        <ClosedMetricWrapper
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
         >
             <ClosedMetricItem
                 ref={ref}
@@ -280,18 +308,58 @@ const ClosedMetricWithTooltip = ({ m, togglePanel, isRTL }: { m: any, togglePane
                 </AnimatePresence>,
                 document.body
             )}
-        </div>
+        </ClosedMetricWrapper>
     );
 };
 
 export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
-    bpm, stressIndex, hrv, latency, generation, ageRatio, vitality
+    bpm, stressIndex, hrv, latency, generation, ageRatio, vitality, gender
 }) => {
     const theme = useTheme();
     const { t, isRTL } = useTranslation();
     const [isOpen, setIsOpen] = useState(true);
 
     const togglePanel = () => setIsOpen(!isOpen);
+
+    const { metricColors } = theme.ui;
+    const genderColor = useMemo(() => {
+        return gender === 'male' ? metricColors.age.male : metricColors.age.female;
+    }, [gender, metricColors.age]);
+    const ageScale = useMemo(() => d3.scaleLinear<string>()
+        .domain([0, 0.5, 1])
+        .range([metricColors.age.child, genderColor, metricColors.age.senior])
+        .clamp(true)
+        .interpolate(d3.interpolateHsl), [metricColors.age]);
+
+    const bpmScale = useMemo(() => d3.scaleLinear<string>()
+        .domain([50, 75, 100, 150])
+        .range([metricColors.bpm.low, metricColors.bpm.normal, metricColors.bpm.high, metricColors.bpm.veryHigh])
+        .clamp(true)
+        .interpolate(d3.interpolateHsl), [metricColors.bpm]);
+
+    const stressScale = useMemo(() => d3.scaleLinear<string>()
+        .domain([0, 0.5, 1])
+        .range([metricColors.stress.low, metricColors.stress.mid, metricColors.stress.high])
+        .clamp(true)
+        .interpolate(d3.interpolateHsl), [metricColors.stress]);
+
+    const hrvScale = useMemo(() => d3.scaleLinear<string>()
+        .domain([30, 50, 70])
+        .range([metricColors.hrv.low, metricColors.hrv.normal, metricColors.hrv.high])
+        .clamp(true)
+        .interpolate(d3.interpolateHsl), [metricColors.hrv]);
+
+    const homeostasisScale = useMemo(() => d3.scaleLinear<string>()
+        .domain([0, 0.5, 1])
+        .range([metricColors.homeostasis.unstable, metricColors.homeostasis.mid, metricColors.homeostasis.stable])
+        .clamp(true)
+        .interpolate(d3.interpolateHsl), [metricColors.homeostasis]);
+
+    const latencyScale = useMemo(() => d3.scaleLinear<string>()
+        .domain([50, 150, 300])
+        .range([metricColors.latency.good, metricColors.latency.fair, metricColors.latency.poor])
+        .clamp(true)
+        .interpolate(d3.interpolateHsl), [metricColors.latency]);
 
     const metrics = [
         {
@@ -300,11 +368,11 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('age_label'),
             value: `${Math.round((1 - ageRatio) * 100)}`,
             unit: '%',
-            color: ageRatio > 0.8 ? theme.colors.red : ageRatio > 0.5 ? theme.colors.purple : theme.colors.teal,
+            color: ageScale(ageRatio),
             renderVisual: () => (
                 <ProgressTrack>
                     <ProgressFill
-                        $color={theme.colors.purple}
+                        $color={ageScale(ageRatio)}
                         initial={{ width: 0 }}
                         animate={{ width: `${(1 - ageRatio) * 100}%` }}
                         transition={{ type: "spring", stiffness: 50 }}
@@ -318,13 +386,13 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('heart_rate'),
             value: bpm,
             unit: t('unit_bpm'),
-            color: bpm > 100 ? theme.colors.red : bpm < 50 ? theme.colors.blue : theme.colors.teal,
+            color: bpmScale(bpm),
             renderVisual: () => (
                 <VisualContainer>
                     {[0.3, 0.5, 0.4, 0.8, 0.6, 0.9, 0.7, 0.4, 0.6, 0.5, 0.8, 0.3, 0.5, 0.9, 0.2].map((h, i) => (
                         <Bar
                             key={i}
-                            $color={theme.colors.teal}
+                            $color={bpmScale(bpm + i * 1.5)}
                             animate={{ height: `${(h + Math.random() * 0.2) * 100}%` }}
                             transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse", delay: i * 0.05 }}
                         />
@@ -338,12 +406,12 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('stress_index'),
             value: `${Math.round(stressIndex * 100)}`,
             unit: '%',
-            color: stressIndex > 0.6 ? theme.colors.red : stressIndex > 0.3 ? theme.colors.purple : theme.colors.teal,
+            color: stressScale(stressIndex),
             badge: stressIndex > 0.6 ? 'HIGH' : stressIndex > 0.3 ? 'MED' : 'LOW',
             renderVisual: () => (
                 <ProgressTrack>
                     <ProgressFill
-                        $color={theme.colors.purple}
+                        $color={stressScale(stressIndex)}
                         initial={{ width: 0 }}
                         animate={{ width: `${stressIndex * 100}%` }}
                         transition={{ type: "spring", stiffness: 50 }}
@@ -357,21 +425,21 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('hrv_variation'),
             value: hrv,
             unit: t('unit_ms'),
-            color: hrv < 30 ? theme.colors.red : hrv > 70 ? theme.colors.teal : theme.colors.blue,
+            color: hrvScale(hrv),
             renderVisual: () => (
-                <div style={{ height: '1.5rem', width: '100%', position: 'relative', overflow: 'hidden' }}>
+                <VisualContainer>
                     <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 24">
                         <motion.path
                             d="M 0,12 Q 25,0 50,12 T 100,12"
                             fill="none"
-                            stroke={theme.colors.blue}
+                            stroke={metricColors.hrv.line}
                             strokeWidth="2"
                             initial={{ pathLength: 0 }}
                             animate={{ pathLength: 1 }}
                             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                         />
                     </svg>
-                </div>
+                </VisualContainer>
             )
         },
         {
@@ -380,7 +448,7 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('homeostasis_label'),
             value: `${Math.round(vitality * 100)}`,
             unit: '%',
-            color: vitality > 0.6 ? theme.colors.teal : vitality > 0.3 ? theme.colors.purple : theme.colors.red,
+            color: homeostasisScale(vitality),
             badge: vitality > 0.6 ? 'STABLE →' : 'UNSTABLE ↘',
             renderVisual: () => null // Minimal pure text metric like reference
         },
@@ -390,7 +458,7 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('latency_label'),
             value: latency.toFixed(0),
             unit: 'ms',
-            color: latency > 300 ? theme.colors.red : latency > 150 ? theme.colors.purple : theme.colors.teal,
+            color: latencyScale(latency),
             renderVisual: () => null
         },
         {
@@ -399,7 +467,7 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('gen_label'),
             value: generation,
             unit: '',
-            color: theme.colors.blue,
+            color: metricColors.gen.main,
             renderVisual: () => null
         }
     ];
@@ -415,36 +483,28 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
-            <Flex style={{ padding: '0 0.5rem', marginBottom: '1rem', flexShrink: 0, alignItems: 'center', justifyContent: isOpen ? 'space-between' : 'center' }}>
-                <ToggleButton onClick={togglePanel} $isRTL={isRTL} style={{ marginBottom: 0 }}>
+            <PanelToggleWrapper $isOpen={isOpen}>
+                <ToggleButton onClick={togglePanel} $isRTL={isRTL}>
                     <AlignJustify size={20} />
                 </ToggleButton>
-            </Flex>
+            </PanelToggleWrapper>
 
             <AnimatePresence mode="wait">
                 {isOpen ? (
-                    <motion.div
+                    <OpenStateContainer
                         key="open"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0, transition: { duration: 0.1 } }}
-                        style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
                     >
                         <MetricsList>
                             {metrics.map((m) => (
                                 <MetricCard key={m.id} $borderColor={`${m.color}80`}>
                                     <CardHeader>
-                                        <Flex $gap="0.5rem" className="items-center">
-                                            <div style={{
-                                                padding: '0.4rem',
-                                                borderRadius: '0.5rem',
-                                                background: `${m.color}20`,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center'
-                                            }}>
+                                        <Flex $gap="0.5rem" $align="center">
+                                            <MetricIconContainer $bgColor={`${m.color}20`}>
                                                 <m.icon size={16} color={m.color} />
-                                            </div>
+                                            </MetricIconContainer>
                                             <CardTitle>{m.title}</CardTitle>
                                         </Flex>
                                         <FlexCol $align={isRTL ? "flex-start" : "flex-end"}>
@@ -452,26 +512,25 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
                                         </FlexCol>
                                     </CardHeader>
 
-                                    <Flex className="w-full justify-between items-end mt-1" style={{ gap: '1rem' }}>
-                                        <div style={{ flex: 1, height: '1.5rem', display: 'flex', alignItems: 'flex-end' }}>
+                                    <ExpandedValueWrapper $justify="space-between" $align="center" $gap="1rem">
+                                        <MetricValueArea>
                                             {m.renderVisual()}
-                                        </div>
-                                        <MetricValueContainer style={{ width: 'auto' }}>
+                                        </MetricValueArea>
+                                        <MetricValueContainer>
                                             <MetricValue>{m.value}</MetricValue>
                                             {m.unit && <MetricUnit>{m.unit}</MetricUnit>}
                                         </MetricValueContainer>
-                                    </Flex>
+                                    </ExpandedValueWrapper>
                                 </MetricCard>
                             ))}
                         </MetricsList>
-                    </motion.div>
+                    </OpenStateContainer>
                 ) : (
-                    <motion.div
+                    <ClosedStateContainer
                         key="closed"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0, transition: { duration: 0.1 } }}
-                        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}
                     >
                         {metrics.map((m) => (
                             <ClosedMetricWithTooltip
@@ -481,7 +540,7 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
                                 isRTL={isRTL}
                             />
                         ))}
-                    </motion.div>
+                    </ClosedStateContainer>
                 )}
             </AnimatePresence>
         </PanelContainer>

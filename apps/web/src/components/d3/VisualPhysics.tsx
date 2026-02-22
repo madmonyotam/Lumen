@@ -1,5 +1,5 @@
-import React, { memo } from 'react';
-import styled from 'styled-components';
+import React, { memo, useMemo } from 'react';
+import styled, { useTheme } from 'styled-components';
 import MeshedSphereCore from './MeshedSphereCore';
 import RadiatingThoughtsCore from './RadiatingThoughtsCore';
 import * as d3 from 'd3';
@@ -17,14 +17,22 @@ interface VisualPhysicsProps {
 
 const OrganContainer = styled.div`
     width: 100%;
-    height: 90vh;
+    height: 70vh;
     display: flex;
     position: relative;
     justify-content: center;
     align-items: center;
     background: transparent;
-    filter: drop-shadow(0 0 30px ${props => props.theme.colors.teal}33) 
-            drop-shadow(0 0 60px ${props => props.theme.colors.purple}22);
+    filter: drop-shadow(0 0 30px ${props => props.theme.palette.teal.main}33) 
+            drop-shadow(0 0 60px ${props => props.theme.palette.purple.main}22);
+`;
+
+const ThoughtsOverlay = styled.div`
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 `;
 
 export const VisualPhysics: React.FC<VisualPhysicsProps> = memo(({ biometricsRef, thought, currentInteraction }) => {
@@ -58,10 +66,17 @@ export const VisualPhysics: React.FC<VisualPhysicsProps> = memo(({ biometricsRef
         }
     }, [thought, currentInteraction]);
 
-    const colorScale = d3.scaleLinear<string>()
+    const theme = useTheme();
+    const physicsColors = useMemo(() => ({
+        calm: theme.palette.visuals.physics.calm,
+        neutral: theme.palette.visuals.physics.neutral,
+        stressed: theme.palette.visuals.physics.stressed
+    }), [theme]);
+
+    const colorScale = useMemo(() => d3.scaleLinear<string>()
         .domain([0, 0.5, 1])
-        .range(["#8992b4ff", "#ffffffff", "#f49494ff"])
-        .interpolate(d3.interpolateHsl);
+        .range([physicsColors.calm, physicsColors.neutral, physicsColors.stressed])
+        .interpolate(d3.interpolateHsl), [physicsColors]);
 
     const strokeColor = colorScale(biometricsRef.current.stress);
 
@@ -72,8 +87,7 @@ export const VisualPhysics: React.FC<VisualPhysicsProps> = memo(({ biometricsRef
                 biometricsRef={biometricsRef}
                 isPlaying={true}
             />
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
-
+            <ThoughtsOverlay>
                 <RadiatingThoughtsCore
                     colors={[strokeColor]}
                     maxThoughts={maxThoughts}
@@ -86,7 +100,7 @@ export const VisualPhysics: React.FC<VisualPhysicsProps> = memo(({ biometricsRef
                     startRadius={15}
                     glowIntensity={1.5}
                 />
-            </div >
+            </ThoughtsOverlay>
         </OrganContainer>
     );
 }, (prevProps, nextProps) => {

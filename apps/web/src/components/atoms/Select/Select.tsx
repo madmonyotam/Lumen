@@ -14,24 +14,24 @@ const SelectTrigger = styled.button<{ $isOpen: boolean }>`
   align-items: center;
   justify-content: space-between;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid ${props => props.$isOpen ? props.theme.colors.teal : props.theme.colors.ui.border};
+  border: 1px solid ${props => props.$isOpen ? props.theme.ui.brand.primary : props.theme.ui.border.main};
   border-radius: 0.75rem;
   padding: 1rem 1.5rem;
-  color: ${props => props.theme.colors.text};
-  font-family: ${props => props.theme.fonts.main};
+  color: ${props => props.theme.ui.text.primary};
+  font-family: ${props => props.theme.config.fonts.main};
   font-size: 1rem;
   cursor: pointer;
-  transition: all ${props => props.theme.animations.fast};
+  transition: ${props => props.theme.config.transitions.fast};
   text-align: left;
 
   &:hover {
-    background: ${props => props.theme.colors.action.hover};
-    border-color: ${props => props.$isOpen ? props.theme.colors.teal : props.theme.colors.tealDim};
+    background: ${props => props.theme.ui.action.hover};
+    border-color: ${props => props.$isOpen ? props.theme.ui.brand.primary : props.theme.palette.teal.dim};
   }
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 2px ${props => props.theme.colors.tealDim};
+    box-shadow: 0 0 0 2px ${props => props.theme.palette.teal.dim};
   }
 `;
 
@@ -40,17 +40,18 @@ const OptionsList = styled(motion.ul)`
   top: calc(100% + 0.5rem);
   left: 0;
   right: 0;
-  background: ${props => props.theme.colors.bg};
-  border: 1px solid ${props => props.theme.colors.ui.border};
+  background: ${props => props.theme.ui.background.main};
+  border: 1px solid ${props => props.theme.ui.border.main};
   border-radius: 0.75rem;
   padding: 0.5rem;
   z-index: 50;
   max-height: 200px;
   overflow-y: auto;
   backdrop-filter: blur(20px);
-  box-shadow: ${props => props.theme.shadows.card};
+  box-shadow: ${props => props.theme.config.shadows.card};
   list-style: none;
   margin: 0;
+  transform-origin: top;
 `;
 
 const OptionItem = styled.li<{ $isSelected: boolean }>`
@@ -61,14 +62,14 @@ const OptionItem = styled.li<{ $isSelected: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: ${props => props.$isSelected ? props.theme.colors.teal : props.theme.colors.textDim};
+  color: ${props => props.$isSelected ? props.theme.ui.brand.primary : props.theme.ui.text.dim};
   background: ${props => props.$isSelected ? 'rgba(0, 242, 195, 0.1)' : 'transparent'};
-  transition: all ${props => props.theme.animations.fast};
+  transition: ${props => props.theme.config.transitions.fast};
   font-size: 0.875rem;
 
   &:hover {
-    background: ${props => props.theme.colors.action.hover};
-    color: ${props => props.theme.colors.text};
+    background: ${props => props.theme.ui.action.hover};
+    color: ${props => props.theme.ui.text.primary};
   }
 `;
 
@@ -84,7 +85,7 @@ interface SelectProps {
     placeholder?: string;
 }
 
-export const Select: React.FC<SelectProps> = ({ options, value, onChange, placeholder = 'Select...' }) => {
+export const Select: React.FC<SelectProps> = React.memo(({ options, value, onChange, placeholder = 'Select...' }) => {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -121,10 +122,10 @@ export const Select: React.FC<SelectProps> = ({ options, value, onChange, placeh
             <AnimatePresence>
                 {isOpen && (
                     <OptionsList
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.2 }}
+                        initial={{ opacity: 0, scaleY: 0 }}
+                        animate={{ opacity: 1, scaleY: 1 }}
+                        exit={{ opacity: 0, scaleY: 0 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
                     >
                         {options.map((option) => (
                             <OptionItem
@@ -141,4 +142,4 @@ export const Select: React.FC<SelectProps> = ({ options, value, onChange, placeh
             </AnimatePresence>
         </SelectContainer>
     );
-};
+});

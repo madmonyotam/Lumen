@@ -14,13 +14,13 @@ export const GlobalStyles = createGlobalStyle`
     margin: 0;
     padding: 0;
     overflow: hidden;
-    direction: ${props => props.theme.direction};
+    direction: ${props => props.theme.config.direction};
   }
 
   body {
-    background-color: ${props => props.theme.colors.bg};
-    color: ${props => props.theme.colors.text};
-    font-family: ${props => props.theme.fonts.main};
+    background-color: ${props => props.theme.ui.background.main};
+    color: ${props => props.theme.ui.text.primary};
+    font-family: ${props => props.theme.config.fonts.main};
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -32,11 +32,11 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   code {
-    font-family: ${props => props.theme.fonts.code};
+    font-family: ${props => props.theme.config.fonts.code};
   }
 
   ::selection {
-    background: ${props => props.theme.colors.teal};
-    color: #000;
+    background: ${props => props.theme.ui.brand.primary};
+    color: ${props => props.theme.ui.text.inverse};
   }
 `;

@@ -7,7 +7,7 @@ import { FlexCol } from './shared/Layout';
 const Container = styled(FlexCol)`
     height: 100vh;
     width: 100vw;
-    background-color: ${props => props.theme.colors.bg};
+    background-color: ${props => props.theme.ui.background.main};
     align-items: center;
     justify-content: center;
     position: relative;
@@ -32,14 +32,15 @@ const Title = styled.h1`
     font-weight: 700;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    background: linear-gradient(to right, #00f2fe, #4facfe);
+    text-transform: uppercase;
+    background: linear-gradient(to right, ${props => props.theme.palette.teal.main}, ${props => props.theme.palette.blue.main});
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 0.5rem;
 `;
 
 const Subtitle = styled.p`
-    color: ${props => props.theme.colors.textDim};
+    color: ${props => props.theme.ui.text.dim};
     font-size: 1rem;
     letter-spacing: 0.1em;
     margin-bottom: 3rem;

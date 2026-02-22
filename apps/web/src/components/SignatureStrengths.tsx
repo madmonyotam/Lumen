@@ -27,9 +27,9 @@ const Tabs = styled(Flex)`
 `;
 
 const Tab = styled.button<{ $active: boolean }>`
-    background: ${props => props.$active ? 'rgba(0, 242, 254, 0.1)' : 'transparent'};
-    border: 1px solid ${props => props.$active ? '#00f2fe' : 'rgba(255, 255, 255, 0.1)'};
-    color: ${props => props.$active ? '#00f2fe' : props.theme.colors.textDim};
+    background: ${props => props.$active ? props.theme.palette.teal.dim : 'transparent'};
+    border: 1px solid ${props => props.$active ? props.theme.palette.teal.main : props.theme.ui.border.dim};
+    color: ${props => props.$active ? props.theme.palette.teal.main : props.theme.ui.text.dim};
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
     font-size: 0.75rem;
@@ -38,8 +38,8 @@ const Tab = styled.button<{ $active: boolean }>`
     transition: all 0.2s ease;
 
     &:hover {
-        border-color: #00f2fe;
-        color: #00f2fe;
+        border-color: ${props => props.theme.palette.teal.main};
+        color: ${props => props.theme.palette.teal.main};
     }
 `;
 
@@ -47,7 +47,6 @@ const ContentArea = styled.div`
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
-    min-height: 400px;
 `;
 
 const AvailableList = styled.div`
@@ -69,13 +68,14 @@ const AvailableList = styled.div`
 `;
 
 const StrengthCard = styled(motion.div) <{ $selected: boolean }>`
-    background: ${props => props.$selected ? 'rgba(0, 242, 254, 0.05)' : 'rgba(255, 255, 255, 0.03)'};
-    border: 1px solid ${props => props.$selected ? '#00f2fe' : 'rgba(255, 255, 255, 0.1)'};
+    background: ${props => props.$selected ? props.theme.palette.teal.dim : 'rgba(255, 255, 255, 0.03)'};
+    border: 1px solid ${props => props.$selected ? props.theme.palette.teal.main : props.theme.ui.border.main};
     padding: 0.75rem;
     border-radius: 0.5rem;
-    cursor: pointer;
+    cursor: ${props => props.$selected ? 'default' : 'pointer'};
+    opacity: ${props => props.$selected ? 0.5 : 1};
     font-size: 0.875rem;
-    color: ${props => props.$selected ? 'white' : props.theme.colors.textDim};
+    color: ${props => props.$selected ? 'white' : props.theme.ui.text.dim};
     transition: all 0.2s ease;
     user-select: none;
 
@@ -92,6 +92,14 @@ const RankingZone = styled(FlexCol)`
     border: 1px dashed rgba(255, 255, 255, 0.1);
 `;
 
+const SectionTitle = styled.h4`
+    margin-bottom: 1rem;
+    color: white;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+`;
+
 const RankSlot = styled(Reorder.Item)`
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -105,14 +113,14 @@ const RankSlot = styled(Reorder.Item)`
     
     &:active {
         cursor: grabbing;
-        border-color: #00f2fe;
+        border-color: ${props => props.theme.palette.teal.main};
         scale: 1.02;
     }
 `;
 
 const RankNumber = styled.span<{ $isRTL?: boolean }>`
-    font-family: ${props => props.theme.fonts.code || props.theme.fonts.main};
-    color: #00f2fe;
+    font-family: ${props => props.theme.config.fonts.code || props.theme.config.fonts.main};
+    color: ${props => props.theme.palette.teal.main};
     font-size: 0.75rem;
     margin-right: ${props => props.$isRTL ? '0' : '1rem'};
     margin-left: ${props => props.$isRTL ? '1rem' : '0'};
@@ -122,13 +130,13 @@ const RankNumber = styled.span<{ $isRTL?: boolean }>`
 const RemoveBtn = styled.button`
     background: none;
     border: none;
-    color: ${props => props.theme.colors.textDim};
+    color: ${props => props.theme.ui.text.dim};
     cursor: pointer;
     padding: 0.25rem;
     display: flex;
     
     &:hover {
-        color: #ff4d4d;
+        color: ${props => props.theme.palette.red.main};
     }
 `;
 
@@ -150,7 +158,7 @@ interface Props {
     onUpdateSelection: (ids: string[]) => void;
 }
 
-export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, selectedIds, onUpdateSelection }) => {
+export const SignatureStrengths: React.FC<Props> = React.memo(({ availableStrengths, selectedIds, onUpdateSelection }) => {
     const [activeTab, setActiveTab] = useState<StrengthCategory>('Wisdom');
     const { t, isRTL } = useTranslation();
 
@@ -200,7 +208,6 @@ export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, select
                                     $selected={isSelected}
                                     onClick={() => !isSelected && handleSelect(strength.id)}
                                     layoutId={strength.id}
-                                    style={{ opacity: isSelected ? 0.5 : 1, cursor: isSelected ? 'default' : 'pointer' }}
                                 >
                                     {t(('strength_' + strength.id.replace(/-/g, '_')) as any)}
                                 </StrengthCard>
@@ -210,9 +217,9 @@ export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, select
 
                 {/* Right: Ranking Zone */}
                 <RankingZone>
-                    <h4 style={{ marginBottom: '1rem', color: '#fff', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    <SectionTitle>
                         {t('core_signature')} ({selectedIds.length}/5)
-                    </h4>
+                    </SectionTitle>
 
                     <Reorder.Group axis="y" values={selectedIds} onReorder={handleReorder}>
                         {selectedIds.map((id, index) => {
@@ -220,7 +227,7 @@ export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, select
                             if (!strength) return null;
                             return (
                                 <RankSlot key={id} value={id}>
-                                    <Flex style={{ alignItems: 'center' }}>
+                                    <Flex $align="center">
                                         <RankNumber $isRTL={isRTL}>0{index + 1}</RankNumber>
                                         <span>{t(('strength_' + strength.id.replace(/-/g, '_')) as any)}</span>
                                     </Flex>
@@ -242,4 +249,4 @@ export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, select
             </ContentArea>
         </Container>
     );
-};
+});

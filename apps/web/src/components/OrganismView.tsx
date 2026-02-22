@@ -1,26 +1,21 @@
 import React from 'react';
 import styled from 'styled-components';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useOrgan } from '../context/OrganContext';
-import { LUMEN_CONFIG } from '../lumen.config';
-import { Flex, FlexCol, AbsoluteFill } from './shared/Layout';
+import { AnimatePresence } from 'framer-motion';
+import { Flex, FlexCol } from './shared/Layout';
 import { VisualPhysics } from './d3/VisualPhysics';
-import GenesisScreen from './GenesisScreen';
 import { BiometricsPanel } from './organism/BiometricsPanel';
 import { ChatHistory } from './organism/ChatHistory';
 import { Send } from 'lucide-react';
-import { useNeuralUplink } from '../hooks/useNeuralUplink';
-import { useBiometricsSync } from '../hooks/useBiometricsSync';
 import { MemoryFog } from './d3/MemoryFog';
-import { useTranslation } from '../hooks/useTranslation';
+import { BackgroundGradient, ThoughtBubble, FloatingInputContainer, ChatTextarea, SendButton, EstablishingLinkText } from './organism/OrganismSharedStyles';
 
 // --- Styled Components ---
 
 const Container = styled(FlexCol)`
   height: 100vh;
-  background-color: ${props => props.theme.colors.bg};
-  color: ${props => props.theme.colors.teal};
-  font-family: ${props => props.theme.fonts.main};
+  background-color: ${props => props.theme.ui.background.main};
+  color: ${props => props.theme.ui.brand.primary};
+  font-family: ${props => props.theme.config.fonts.main};
   position: relative;
   overflow: hidden;
   padding-top: 64px;
@@ -29,15 +24,9 @@ const Container = styled(FlexCol)`
   padding-right: 1rem;
   
   ::selection {
-    background: ${props => props.theme.colors.teal};
-    color: #000;
+    background: ${props => props.theme.ui.brand.primary};
+    color: ${props => props.theme.palette.black};
   }
-`;
-
-const BackgroundGradient = styled(AbsoluteFill)`
-  z-index: 0;
-  background: radial-gradient(circle at center, ${props => props.theme.colors.gradientStart} 0%, ${props => props.theme.colors.bg} 70%);
-  opacity: 0.6;
 `;
 
 const MainGrid = styled.main<{ $isRTL?: boolean }>`
@@ -71,23 +60,6 @@ const CenterColumn = styled(FlexCol)`
   min-height: 400px;
 `;
 
-const ThoughtBubble = styled(motion.div)`
-  position: absolute;
-  top: 5%;
-  text-align: center;
-  color: ${props => props.theme.colors.teal};
-  opacity: 0.4;
-  font-size: 1rem;
-  font-style: italic;
-  font-weight: 300;
-  letter-spacing: 0.05em;
-  max-width: 32rem;
-  width: 100%;
-  z-index: 20;
-`;
-
-
-
 const OrbContainer = styled.div`
   position: relative;
   display: flex;
@@ -97,138 +69,39 @@ const OrbContainer = styled.div`
   width: 100%;
 `;
 
+export interface OrganismViewProps {
+  isConnected: boolean;
+  organState: any; // Type from OrganContext
+  inputValue: string;
+  thought: string;
+  currentInteraction: { text: string, sender: 'user' | 'lumen', timestamp: number } | null;
+  biometricsRef: React.MutableRefObject<any>;
+  handleTextareaChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  handleSend: () => void;
+  t: (key: any) => string;
+  isRTL: boolean;
+}
 
-
-const FloatingInputContainer = styled(motion.div) <{ $isRTL?: boolean }>`
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  width: 90%;
-  max-width: 40rem;
-  z-index: 100;
-  display: flex;
-  align-items: center; /* Ensures strict vertical centering for child items */
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(${props => props.theme.glass.blur});
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 99px; /* Give it a more rounded pill shape */
-  padding: 1rem 2rem; /* Even padding all around for vertical balance */
-  transition: all ${props => props.theme.animations.fast};
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-
-  &:focus-within {
-    border-color: ${props => props.theme.colors.teal};
-    box-shadow: 0 0 15px ${props => props.theme.colors.teal}40;
-  }
-`;
-
-const ChatTextarea = styled.textarea<{ $isRTL?: boolean }>`
-  flex: 1;
-  background: transparent;
-  border: none;
-  color: ${props => props.theme.colors.text};
-  font-family: ${props => props.theme.fonts.main};
-  font-size: 1.1rem;
-  line-height: 1.5;
-  padding: 0;
-  margin: 0;
-  resize: none;
-  height: auto;
-  min-height: 26px;
-  max-height: 120px;
-  overflow-y: auto;
-  text-align: ${props => props.$isRTL ? 'right' : 'left'};
-  direction: ${props => props.$isRTL ? 'rtl' : 'ltr'};
-  
-  /* Hide scrollbar for cleaner look */
-  &::-webkit-scrollbar {
-    width: 0px;
-    background: transparent;
-  }
-  
-  &:focus {
-    outline: none;
-  }
-  
-  &::placeholder {
-    color: ${props => props.theme.colors.textDim};
-    line-height: 1.5;
-  }
-`;
-
-const SendButton = styled.button<{ $isRTL?: boolean }>`
-  padding: 0.5rem;
-  margin: 0;
-  margin-inline-start: 1rem;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
-  color: ${props => props.theme.colors.teal};
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all ${props => props.theme.animations.fast};
-  transform: ${props => props.$isRTL ? 'scaleX(-1)' : 'scaleX(1)'};
-  margin-bottom: -2px;
-  
-  &:hover {
-    background: ${props => props.theme.colors.tealDim};
-    transform: ${props => props.$isRTL ? 'scaleX(-1) scale(1.1)' : 'scaleX(1) scale(1.1)'};
-  }
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-
-
-const OrganismView: React.FC = () => {
-  const { organState, isConnected } = useOrgan();
+const OrganismView: React.FC<OrganismViewProps> = (props) => {
   const {
-    inputValue, setInputValue, handleSend
-  } = useNeuralUplink();
-  const { biometricsRef } = useBiometricsSync(organState);
-  const { t, isRTL } = useTranslation();
-
-  const [thought, setThought] = React.useState<string>(t('organism_silent'));
-  const [currentInteraction, setCurrentInteraction] = React.useState<{ text: string, sender: 'user' | 'lumen', timestamp: number } | null>(null);
-
-  React.useEffect(() => {
-    const latest = organState?.status?.latestInteraction;
-    if (latest) {
-      const now = Date.now();
-      const isRecent = (now - latest.timestamp) < 60000;
-      const isNew = latest.timestamp !== currentInteraction?.timestamp;
-
-      if (isRecent && isNew) {
-        setCurrentInteraction(latest);
-      }
-    }
-  }, [organState?.status?.latestInteraction, currentInteraction?.timestamp]);
-
-  // Expiration Logic (absolute)
-  React.useEffect(() => {
-    if (!currentInteraction) return;
-    const interval = setInterval(() => {
-      if (Date.now() - currentInteraction.timestamp > LUMEN_CONFIG.INTERACTION_EXPIRY_MS) {
-        setCurrentInteraction(null);
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [currentInteraction]);
-
-  React.useEffect(() => {
-    if (organState?.status?.thought) {
-      setThought(organState.status.thought);
-    }
-  }, [organState?.status?.thought]);
+    isConnected,
+    organState,
+    inputValue,
+    thought,
+    currentInteraction,
+    biometricsRef,
+    handleTextareaChange,
+    handleKeyDown,
+    handleSend,
+    t,
+    isRTL
+  } = props;
 
   if (!isConnected || !organState) {
     return (
       <Container style={{ justifyContent: 'center', alignItems: 'center' }}>
-        <div className="animate-pulse text-2xl tracking-widest">{t('establishing_link')}</div>
+        <EstablishingLinkText>{t('establishing_link')}</EstablishingLinkText>
       </Container>
     );
   }
@@ -236,26 +109,12 @@ const OrganismView: React.FC = () => {
   const { biometrics, status, lifeStatus } = organState;
 
   if (!lifeStatus?.isAlive) {
-    return <GenesisScreen />;
+    // This will be handled by the parent component (App or Router) now
+    // But for fallback we can render null or a link to Genesis
+    return null;
   }
 
   const ageRatio = lifeStatus.age / lifeStatus.lifespan;
-
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    e.target.style.height = 'auto'; // Reset height briefly to calculate scrollHeight correctly
-    e.target.style.height = `${e.target.scrollHeight}px`;
-    setInputValue(e.target.value);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-      // Reset height
-      const target = e.target as HTMLTextAreaElement;
-      target.style.height = 'auto';
-    }
-  };
 
   return (
     <Container>
@@ -270,6 +129,7 @@ const OrganismView: React.FC = () => {
           generation={lifeStatus.generation}
           ageRatio={ageRatio}
           vitality={status.vitality}
+          gender={lifeStatus.gender}
         />
         <ChatHistory currentInteraction={currentInteraction} />
       </ContentWrapper>

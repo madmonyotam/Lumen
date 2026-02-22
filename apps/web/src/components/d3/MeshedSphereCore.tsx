@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useCallback, memo } from 'react';
+import { useEffect, useRef, useCallback, memo, useMemo } from 'react';
+import { useTheme } from 'styled-components';
 import * as d3 from 'd3';
 import BaseChart from './BaseChart';
 import { LUMEN_CONFIG } from '../../lumen.config';
@@ -32,11 +33,19 @@ const MeshedSphereCore = memo(({
     const selectionRef = useRef<d3.Selection<SVGGElement, unknown, null, undefined> | null>(null);
     const currentDataRef = useRef<{ points: any[], connections: [number, number][] } | null>(null);
 
+    const theme = useTheme();
+
+    const sphereColors = useMemo(() => ({
+        cold: theme.palette.visuals.sphere.cold,
+        neutral: theme.palette.visuals.sphere.neutral,
+        hot: theme.palette.visuals.sphere.hot
+    }), [theme]);
+
     // 1. Organic Color Palette (Cold Loneliness -> Warm Storm)
-    const colorScale = d3.scaleLinear<string>()
+    const colorScale = useMemo(() => d3.scaleLinear<string>()
         .domain([0, 0.5, 1])
-        .range(["#001e97ff", "#ffffffff", "#ff0000"])
-        .interpolate(d3.interpolateHsl);
+        .range([sphereColors.cold, sphereColors.neutral, sphereColors.hot])
+        .interpolate(d3.interpolateHsl), [sphereColors]);
 
     // 2. Opacity Scale based on Vitality
     const opacityScale = d3.scaleLinear<number>()

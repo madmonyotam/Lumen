@@ -20,7 +20,7 @@ const Header = styled.div`
 
 const Label = styled.span`
     font-size: 0.75rem;
-    color: ${props => props.theme.colors.textDim};
+    color: ${props => props.theme.ui.text.dim};
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-weight: 500;
@@ -28,8 +28,8 @@ const Label = styled.span`
 
 const ValueLabel = styled.span`
     font-size: 0.75rem;
-    color: #4facfe;
-    font-family: ${props => props.theme.fonts.code || 'monospace'};
+    color: ${props => props.theme.palette.blue.main};
+    font-family: ${props => props.theme.config.fonts.code || 'monospace'};
     font-weight: bold;
 `;
 
@@ -50,15 +50,17 @@ const Track = styled.div`
     overflow: hidden;
 `;
 
-const Fill = styled(motion.div)`
+const Fill = styled(motion.div) <{ $percentage: number, $isRTL: boolean }>`
     height: 100%;
-    background: linear-gradient(90deg, #00f2fe, #4facfe);
-    box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+    background: linear-gradient(90deg, ${props => props.theme.palette.teal.main}, ${props => props.theme.palette.blue.main});
+    box-shadow: ${props => props.theme.palette.teal.neon};
     position: absolute;
     top: 0;
+    width: ${props => props.$percentage}%;
+    ${props => props.$isRTL ? 'right' : 'left'}: 0;
 `;
 
-const Thumb = styled(motion.div)`
+const Thumb = styled(motion.div) <{ $percentage: number, $isRTL: boolean }>`
     width: 16px;
     height: 16px;
     background: #fff;
@@ -71,10 +73,12 @@ const Thumb = styled(motion.div)`
     z-index: 10;
     border: 2px solid rgba(0, 0, 0, 0.1);
 
+    ${props => props.$isRTL ? 'right' : 'left'}: ${props => props.$percentage}%;
+
     &:active {
         cursor: grabbing;
         scale: 1.1;
-        border-color: #00f2fe;
+        border-color: ${props => props.theme.palette.teal.main};
     }
 `;
 
@@ -87,9 +91,9 @@ const Tooltip = styled(motion.div)`
     padding: 0.5rem 0.75rem;
     border-radius: 0.5rem;
     white-space: nowrap;
-    color: #00f2fe;
+    color: ${props => props.theme.palette.teal.main};
     font-size: 1rem;
-    font-family: ${props => props.theme.fonts.code || 'monospace'};
+    font-family: ${props => props.theme.config.fonts.code || 'monospace'};
     pointer-events: none;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(8px);
@@ -105,7 +109,7 @@ interface Props {
     getTooltipText: (val: number) => string;
 }
 
-export const TraitSlider: React.FC<Props> = ({ label, value, onChange, onCommit, getTooltipText }) => {
+export const TraitSlider: React.FC<Props> = React.memo(({ label, value, onChange, onCommit, getTooltipText }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [localValue, setLocalValue] = useState(value);
@@ -177,16 +181,13 @@ export const TraitSlider: React.FC<Props> = ({ label, value, onChange, onCommit,
             <TrackContainer ref={containerRef} onClick={handleTrackClick}>
                 <Track>
                     <Fill
-                        style={{
-                            width: `${localValue}%`,
-                            [isRTL ? 'right' : 'left']: 0
-                        }}
+                        $percentage={localValue}
+                        $isRTL={isRTL}
                     />
                 </Track>
                 <Thumb
-                    style={{
-                        [isRTL ? 'right' : 'left']: `${localValue}%`
-                    }}
+                    $percentage={localValue}
+                    $isRTL={isRTL}
                     initial={{ x: isRTL ? '50%' : '-50%', y: '-50%' }}
                     animate={{ x: isRTL ? '50%' : '-50%', y: '-50%' }}
                     onPointerDown={handlePointerDown}
@@ -209,4 +210,4 @@ export const TraitSlider: React.FC<Props> = ({ label, value, onChange, onCommit,
             </TrackContainer>
         </SliderContainer>
     );
-};
+});

@@ -38,7 +38,7 @@ export interface GenesisScreenProps {
     handleGenesis: () => Promise<void>;
 }
 
-const GenesisScreen: React.FC<GenesisScreenProps> = (props) => {
+const GenesisScreenMobile: React.FC<GenesisScreenProps> = (props) => {
     const {
         name, setName,
         gender, setGender,
@@ -278,4 +278,4 @@ const GenesisScreen: React.FC<GenesisScreenProps> = (props) => {
     );
 };
 
-export default GenesisScreen;
+export default GenesisScreenMobile;

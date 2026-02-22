@@ -2,20 +2,32 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LoginScreen } from './LoginScreen';
 import { motion } from 'framer-motion';
+import styled from 'styled-components';
+
+const GuardContainer = styled.div`
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: ${props => props.theme.ui.background.main};
+    color: ${props => props.theme.ui.brand.primary};
+    font-family: ${props => props.theme.config.fonts.code};
+`;
 
 export const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { user, loading } = useAuth();
 
     if (loading) {
         return (
-            <div style={{ height: '100vh', width: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0c', color: '#00f2fe', fontFamily: 'monospace' }}>
+            <GuardContainer>
                 <motion.div
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
                 >
                     Authenticating Neural Link...
                 </motion.div>
-            </div>
+            </GuardContainer>
         );
     }
 

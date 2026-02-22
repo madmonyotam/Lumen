@@ -13,7 +13,7 @@ const Header = styled(Flex)`
 const NeuralStatus = styled.div`
   font-size: 0.75rem;
   letter-spacing: 0.2em;
-  color: ${props => props.theme.colors.teal}; 
+  color: ${props => props.theme.ui.brand.primary}; 
   opacity: 0.8;
   margin-bottom: 0.5rem;
   text-transform: uppercase;
@@ -29,14 +29,14 @@ const StatusDotCore = styled.div<{ $color?: string }>`
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background-color: ${props => props.$color || props.theme.colors.teal};
+  background-color: ${props => props.$color || props.theme.ui.brand.primary};
 `;
 
 const StatusDotPing = styled.div<{ $color?: string }>`
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background-color: ${props => props.$color || props.theme.colors.teal};
+  background-color: ${props => props.$color || props.theme.ui.brand.primary};
   opacity: 0.5;
   animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
 
@@ -58,24 +58,24 @@ const HeaderInputContainer = styled(Relative)`
 const Input = styled.input`
   width: 100%;
   background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(${props => props.theme.glass.blur});
-  border: ${props => props.theme.glass.border};
+  backdrop-filter: blur(${props => props.theme.config.glass.blur});
+  border: ${props => props.theme.config.glass.border};
   border-radius: 9999px;
   padding: 1rem 2rem;
-  color: ${props => props.theme.colors.text};
-  font-family: ${props => props.theme.fonts.main};
+  color: ${props => props.theme.ui.text.primary};
+  font-family: ${props => props.theme.config.fonts.main};
   font-weight: 300;
   letter-spacing: 0.05em;
-  transition: all ${props => props.theme.animations.fast};
+  transition: ${props => props.theme.config.transitions.fast};
 
   &:focus {
     outline: none;
-    border-color: ${props => props.theme.colors.teal};
-    box-shadow: ${props => props.theme.shadows.neonTeal};
+    border-color: ${props => props.theme.ui.brand.primary};
+    box-shadow: ${props => props.theme.config.shadows.neonTeal};
   }
 
   &::placeholder {
-    color: ${props => props.theme.colors.textDim};
+    color: ${props => props.theme.ui.text.dim};
   }
 `;
 
@@ -88,15 +88,15 @@ const SendButton = styled.button<{ $isRTL?: boolean }>`
   border-radius: 50%;
   border: none;
   background: transparent;
-  color: ${props => props.theme.colors.teal};
+  color: ${props => props.theme.ui.brand.primary};
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all ${props => props.theme.animations.fast};
+  transition: ${props => props.theme.config.transitions.fast};
   
   &:hover {
-    background: ${props => props.theme.colors.tealDim};
+    background: ${props => props.theme.palette.teal.dim};
     transform: translateY(-50%) ${props => props.$isRTL ? 'rotate(-90deg) scale(1.1)' : 'rotate(90deg) scale(1.1)'};
   }
 `;
@@ -125,8 +125,8 @@ export const NeuralHeader: React.FC<NeuralHeaderProps> = ({
         <NeuralStatus>{t('neural_connection_established')}</NeuralStatus>
         <Flex $gap="1rem" $align="center">
           <StatusDotContainer>
-            <StatusDotCore $color={theme.colors.teal} />
-            <StatusDotPing $color={theme.colors.teal} />
+            <StatusDotCore $color={theme.palette.teal.main} />
+            <StatusDotPing $color={theme.palette.teal.main} />
           </StatusDotContainer>
         </Flex>
       </FlexCol>
