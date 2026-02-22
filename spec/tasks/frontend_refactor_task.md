@@ -4,13 +4,13 @@
 This task outlines a comprehensive refactoring of the frontend application to align with the core technical principles defined in `spec/frontend_lead.md`. The goal is to achieve production-grade, high-performance, and maintainable code with a strong emphasis on UI/UX, built on React, TypeScript, and Data Visualization (D3.js).
 
 ## Phase 1: Architecture & Structural Refactoring
-- [ ] **Smart vs. Dumb Component Separation:**
+- [x] **Smart vs. Dumb Component Separation:**
   - Audit existing components.
   - Refactor to strictly separate **Smart Containers** (handling logic, state, data fetching, hooks) from **Dumb Components** (purely presentational, receiving props only).
-- [ ] **Logic Extraction:**
+- [x] **Logic Extraction:**
   - Move stateful logic and side-effects out of components and into **Reusable Custom Hooks**.
   - Relocate pure logic and calculations to standalone `utils` functions to improve testability and reuse.
-- [ ] **Configuration-Driven Components:**
+- [x] **Configuration-Driven Components:**
   - Update complex components to be configuration-driven, using configuration objects/values for flexible behavior.
 
 ## Phase 2: Styling System & Layout Strategy

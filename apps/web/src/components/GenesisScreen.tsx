@@ -1,20 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Shield, Clock, User, Heart, Globe, ArrowRight, ArrowLeft } from 'lucide-react';
-import { LUMEN_CONFIG } from '../lumen.config';
 import { Flex, FlexCol } from './shared/Layout';
-import { useGenesisOptions } from '../hooks/useGenesisOptions';
 import { useTranslation } from '../hooks/useTranslation';
 import { SignatureStrengths } from './SignatureStrengths';
 import { TraitSlider } from './TraitSlider';
 import type { TraitDescription } from '@lumen/shared';
-import { validateGenesisState } from '../utils/genesisValidation';
 import type { ValidationResult } from '../utils/genesisValidation';
 import { StabilityIndicator } from './StabilityIndicator';
-import type { LumenPersona, BigFiveScores, InternalScores } from '@lumen/shared/types/index';
 import { Select } from './atoms/Select';
-import { useAuth } from '../context/AuthContext';
 
 const Overlay = styled(motion.div)`
     display: flex;
@@ -98,10 +93,6 @@ const Grid = styled.div`
     gap: 1.5rem;
 `;
 
-
-
-
-
 const LifespanSlider = styled.input`
     width: 100%;
     accent-color: #00f2fe;
@@ -161,6 +152,7 @@ const StepDot = styled.div<{ $active: boolean }>`
     background: ${props => props.$active ? '#00f2fe' : 'rgba(255, 255, 255, 0.1)'};
     transition: all 0.3s ease;
 `;
+
 const StepWrapper = styled.div`
     flex: 1;
     overflow-y: auto;
@@ -187,59 +179,55 @@ const StepWrapper = styled.div`
     }
 `;
 
-// const TRAITS = ["Stoic", "Curious", "Anxious", "Poetic", "Analytical", "Rebellious", "Serene", "Erratic"]; // Removed hardcoded
+export interface GenesisScreenProps {
+    name: string;
+    setName: React.Dispatch<React.SetStateAction<string>>;
+    gender: 'male' | 'female' | 'non-binary';
+    setGender: React.Dispatch<React.SetStateAction<'male' | 'female' | 'non-binary'>>;
+    language: 'en' | 'he';
+    setLanguage: React.Dispatch<React.SetStateAction<'en' | 'he'>>;
+    traitValues: Record<string, number>;
+    setTraitValues: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+    selectedStrengths: string[];
+    setSelectedStrengths: React.Dispatch<React.SetStateAction<string[]>>;
+    lifespanIndex: number;
+    setLifespanIndex: React.Dispatch<React.SetStateAction<number>>;
+    step: number;
+    setStep: React.Dispatch<React.SetStateAction<number>>;
+    validation: ValidationResult;
+    options: any;
+    loading: boolean;
+    error: Error | null;
+    handleGenesis: () => Promise<void>;
+}
 
-// const TRAITS = ["Stoic", "Curious", "Anxious", "Poetic", "Analytical", "Rebellious", "Serene", "Erratic"]; // Removed hardcoded
-
-const GenesisScreen: React.FC = () => {
-    const [name, setName] = useState('Lumen');
-    const [gender, setGender] = useState<'male' | 'female' | 'non-binary'>('non-binary');
-    const [language, setLanguage] = useState<'en' | 'he'>('en');
-    // Store selected traits as map: { openness: 'The Abstract Visionary', ... }
-    // Or just list of IDs? The backend takes string[].
-    // Let's stick to IDs for now, or Labels. The previous code used Labels.
-    // Ideally we use IDs. The slider will find the ID based on value.
-    const [traitValues, setTraitValues] = useState<Record<string, number>>({}); // dimension -> value (0-100)
-    const [selectedStrengths, setSelectedStrengths] = useState<string[]>([]); // Ranked IDs
-    const [lifespanIndex, setLifespanIndex] = useState(1); // 0=Short, 1=Medium, 2=Long
-    const [step, setStep] = useState(0); // 0=Identity, 1=Psychology, 2=Biology, 3=Stability, 4=Strengths
+const GenesisScreen: React.FC<GenesisScreenProps> = (props) => {
+    const {
+        name, setName,
+        gender, setGender,
+        language, setLanguage,
+        traitValues, setTraitValues,
+        selectedStrengths, setSelectedStrengths,
+        lifespanIndex, setLifespanIndex,
+        step, setStep,
+        validation,
+        options, loading, error,
+        handleGenesis
+    } = props;
 
     const { t, isRTL } = useTranslation();
-    const { token } = useAuth();
 
-    const { options, loading, error } = useGenesisOptions();
-
-    // Use fetched options or fallback to empty/loading state
     const traits = options?.traits || [];
     const lifespans = options?.mechanics || [];
-    const strengths = options?.strengths || []; // For next task
-
-    // Validation State
-    const [validation, setValidation] = useState<ValidationResult>({
-        conflicts: [],
-        stabilityScore: 100,
-        details: []
-    });
-
-    // Run validation when traits change
-    useEffect(() => {
-        const result = validateGenesisState(traitValues);
-        setValidation(result);
-
-        // Log details if conflicts exist
-        if (result.conflicts.length > 0) {
-            console.log('[Genesis Conflict Engine]:', result.details);
-        }
-    }, [traitValues]);
+    const strengths = options?.strengths || [];
 
     if (loading) return <Overlay>{t('loading_genesis')}</Overlay>;
-    if (error) return <Overlay>{t('error_prefix')}: {error}</Overlay>;
+    if (error) return <Overlay>{t('error_prefix')}: {error.message}</Overlay>;
 
-    // Helper to group traits by dimension
     const groupTraits = (list: TraitDescription[]) => {
         const groups: Record<string, TraitDescription[]> = {};
         list.forEach(t => {
-            const dim = t.id.split('_')[0]; // simple heuristic
+            const dim = t.id.split('_')[0];
             if (!groups[dim]) groups[dim] = [];
             groups[dim].push(t);
         });
@@ -247,20 +235,17 @@ const GenesisScreen: React.FC = () => {
     };
 
     const getTraitForValue = (val: number, list: TraitDescription[]) => {
-        // Find which range covers 'val'. ID is dim_min_max
         return list.find(t => {
             const parts = t.id.split('_');
             const min = parseInt(parts[parts.length - 2]);
             const max = parseInt(parts[parts.length - 1]);
-            // Ensure 1-20 covers 0-20, 81-100 covers 81-100
-            // Map 0 -> 1
             const normalized = Math.max(1, Math.min(100, val));
             return normalized >= min && normalized <= max;
         });
     };
 
     const renderTraitSliders = (category: string) => {
-        const catTraits = traits.filter(t => t.category === category);
+        const catTraits = traits.filter((t: TraitDescription) => t.category === category);
         const grouped = groupTraits(catTraits);
 
         return Object.entries(grouped).map(([dim, list]) => (
@@ -269,18 +254,6 @@ const GenesisScreen: React.FC = () => {
                 label={t(('trait_' + dim) as any)}
                 value={traitValues[dim] ?? 50}
                 onChange={(v) => {
-                    // Optimistic update for UI
-                    // But we want to persist only on commit?
-                    // Actually TraitSlider handles local dragging.
-                    // But we want "Live Tooltip" which implies we need the lookup here?
-                    // Or pass lookup to slider?
-                    // We passed `getTooltipText` to slider.
-                    // So here we only update state on commit?
-                    // "onChange should only update local ... onDragEnd commit to store".
-                    // Since `traitValues` IS local state (not Redux), it's fine to update it.
-                    // But if we want to avoid re-renders of the WHOLE GenesisScreen, 
-                    // maybe we should debit.
-                    // For now, let's update. React is fast enough for 5 sliders.
                     setTraitValues(prev => ({ ...prev, [dim]: v }));
                 }}
                 onCommit={(v) => {
@@ -292,60 +265,6 @@ const GenesisScreen: React.FC = () => {
                 }}
             />
         ));
-    };
-
-    const handleGenesis = async () => {
-        // Assemble LumenPersona
-        const ocean: Partial<BigFiveScores> = {};
-        const internal: Partial<InternalScores> = {};
-
-        // Helper to safely get value
-        const getVal = (key: string) => traitValues[key] ?? 50;
-
-        // Map OCEAN
-        ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism'].forEach(k => {
-            (ocean as any)[k] = getVal(k);
-        });
-
-        // Map Internal
-        ['attachment', 'temperament', 'cognitive', 'shadow'].forEach(k => {
-            (internal as any)[k] = getVal(k);
-        });
-
-        const stringsConficts = validation.conflicts.map(c => c.id);
-
-        const persona: LumenPersona = {
-            core: {
-                name,
-                gender,
-                language,
-                lifespan: lifespans[lifespanIndex]?.value || 24 * 60 * 60 * 1000
-            },
-            traits: ocean as BigFiveScores,
-            internal: internal as InternalScores,
-            strengths: selectedStrengths,
-            conflicts: stringsConficts
-        };
-
-        const payload = {
-            persona
-        };
-
-        try {
-            const res = await fetch(`${LUMEN_CONFIG.API_URL}/api/genesis`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(payload)
-            });
-            if (!res.ok) throw new Error('Genesis failed');
-            // Success! The pulse loop will handle the update
-        } catch (e) {
-            console.error(e);
-            alert("The spark failed to ignite. Check neural connection.");
-        }
     };
 
     return (

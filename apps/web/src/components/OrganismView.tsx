@@ -1,18 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useOrgan } from '../context/OrganContext';
-import { LUMEN_CONFIG } from '../lumen.config';
 import { Flex, FlexCol, AbsoluteFill } from './shared/Layout';
 import { VisualPhysics } from './d3/VisualPhysics';
-import GenesisScreen from './GenesisScreen';
 import { BiometricsPanel } from './organism/BiometricsPanel';
 import { ChatHistory } from './organism/ChatHistory';
 import { Send } from 'lucide-react';
-import { useNeuralUplink } from '../hooks/useNeuralUplink';
-import { useBiometricsSync } from '../hooks/useBiometricsSync';
 import { MemoryFog } from './d3/MemoryFog';
-import { useTranslation } from '../hooks/useTranslation';
 
 // --- Styled Components ---
 
@@ -184,46 +178,34 @@ const SendButton = styled.button<{ $isRTL?: boolean }>`
 
 
 
-const OrganismView: React.FC = () => {
-  const { organState, isConnected } = useOrgan();
+export interface OrganismViewProps {
+  isConnected: boolean;
+  organState: any; // Type from OrganContext
+  inputValue: string;
+  thought: string;
+  currentInteraction: { text: string, sender: 'user' | 'lumen', timestamp: number } | null;
+  biometricsRef: React.MutableRefObject<any>;
+  handleTextareaChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  handleSend: () => void;
+  t: (key: any) => string;
+  isRTL: boolean;
+}
+
+const OrganismView: React.FC<OrganismViewProps> = (props) => {
   const {
-    inputValue, setInputValue, handleSend
-  } = useNeuralUplink();
-  const { biometricsRef } = useBiometricsSync(organState);
-  const { t, isRTL } = useTranslation();
-
-  const [thought, setThought] = React.useState<string>(t('organism_silent'));
-  const [currentInteraction, setCurrentInteraction] = React.useState<{ text: string, sender: 'user' | 'lumen', timestamp: number } | null>(null);
-
-  React.useEffect(() => {
-    const latest = organState?.status?.latestInteraction;
-    if (latest) {
-      const now = Date.now();
-      const isRecent = (now - latest.timestamp) < 60000;
-      const isNew = latest.timestamp !== currentInteraction?.timestamp;
-
-      if (isRecent && isNew) {
-        setCurrentInteraction(latest);
-      }
-    }
-  }, [organState?.status?.latestInteraction, currentInteraction?.timestamp]);
-
-  // Expiration Logic (absolute)
-  React.useEffect(() => {
-    if (!currentInteraction) return;
-    const interval = setInterval(() => {
-      if (Date.now() - currentInteraction.timestamp > LUMEN_CONFIG.INTERACTION_EXPIRY_MS) {
-        setCurrentInteraction(null);
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [currentInteraction]);
-
-  React.useEffect(() => {
-    if (organState?.status?.thought) {
-      setThought(organState.status.thought);
-    }
-  }, [organState?.status?.thought]);
+    isConnected,
+    organState,
+    inputValue,
+    thought,
+    currentInteraction,
+    biometricsRef,
+    handleTextareaChange,
+    handleKeyDown,
+    handleSend,
+    t,
+    isRTL
+  } = props;
 
   if (!isConnected || !organState) {
     return (
@@ -236,26 +218,12 @@ const OrganismView: React.FC = () => {
   const { biometrics, status, lifeStatus } = organState;
 
   if (!lifeStatus?.isAlive) {
-    return <GenesisScreen />;
+    // This will be handled by the parent component (App or Router) now
+    // But for fallback we can render null or a link to Genesis
+    return null;
   }
 
   const ageRatio = lifeStatus.age / lifeStatus.lifespan;
-
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    e.target.style.height = 'auto'; // Reset height briefly to calculate scrollHeight correctly
-    e.target.style.height = `${e.target.scrollHeight}px`;
-    setInputValue(e.target.value);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-      // Reset height
-      const target = e.target as HTMLTextAreaElement;
-      target.style.height = 'auto';
-    }
-  };
 
   return (
     <Container>
