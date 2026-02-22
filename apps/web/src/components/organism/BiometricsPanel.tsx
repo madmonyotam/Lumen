@@ -11,16 +11,16 @@ import { useTranslation } from '../../hooks/useTranslation';
 const PanelContainer = styled(motion.div) <{ $isRTL?: boolean, $isOpen: boolean }>`
   position: relative;
   height: 100%;
-  background-color: ${props => props.theme.colors.card};
-  backdrop-filter: blur(${props => props.theme.glass.blur});
-  border: ${props => props.theme.glass.border};
+  background-color: ${props => props.theme.ui.background.card};
+  backdrop-filter: blur(${props => props.theme.config.glass.blur});
+  border: ${props => props.theme.config.glass.border};
   border-radius: 1rem;
   padding: 1.25rem 0.75rem;
   z-index: 50;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: ${props => props.theme.shadows.card};
+  box-shadow: ${props => props.theme.config.shadows.card};
   white-space: nowrap;
   flex-shrink: 0;
 `;
@@ -28,7 +28,7 @@ const PanelContainer = styled(motion.div) <{ $isRTL?: boolean, $isOpen: boolean 
 const ToggleButton = styled.button<{ $isRTL?: boolean }>`
   background: transparent;
   border: none;
-  color: ${props => props.theme.colors.teal};
+  color: ${props => props.theme.ui.brand.primary};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -36,11 +36,11 @@ const ToggleButton = styled.button<{ $isRTL?: boolean }>`
   padding: 0.5rem;
   margin-bottom: 1rem;
   border-radius: 0.5rem;
-  transition: all ${props => props.theme.animations.fast};
+  transition: ${props => props.theme.config.transitions.fast};
   align-self: flex-start;
 
   &:hover {
-    background: ${props => props.theme.colors.tealDim};
+    background: ${props => props.theme.palette.teal.dim};
   }
 `;
 
@@ -62,13 +62,13 @@ const MetricCard = styled(motion.div) <{ $borderColor?: string }>`
   border-radius: 1rem;
   padding: 1rem;
   position: relative;
-  transition: all ${props => props.theme.animations.normal};
+  transition: ${props => props.theme.config.transitions.normal};
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 
   &:hover {
-    border-color: ${props => props.$borderColor || props.theme.colors.tealDim};
+    border-color: ${props => props.$borderColor || props.theme.palette.teal.dim};
     background-color: rgba(0, 0, 0, 0.4);
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   }
@@ -82,14 +82,14 @@ const ClosedMetricItem = styled(motion.button) <{ $color?: string }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${props => props.$color || props.theme.colors.teal};
+  color: ${props => props.$color || props.theme.ui.brand.primary};
   cursor: pointer;
-  transition: all ${props => props.theme.animations.fast};
+  transition: ${props => props.theme.config.transitions.fast};
   margin-bottom: 0.5rem;
 
   &:hover {
     background: rgba(255, 255, 255, 0.05);
-    border-color: ${props => props.$color || props.theme.colors.tealDim};
+    border-color: ${props => props.$color || props.theme.palette.teal.dim};
     box-shadow: 0 0 10px ${props => props.$color ? props.$color + '40' : 'rgba(0, 242, 195, 0.2)'};
   }
 `;
@@ -97,7 +97,7 @@ const ClosedMetricItem = styled(motion.button) <{ $color?: string }>`
 const TooltipContent = styled(motion.div) <{ $color?: string, $isRTL?: boolean }>`
   position: fixed;
   transform: translateY(-50%);
-  background-color: ${props => props.theme.colors.card};
+  background-color: ${props => props.theme.ui.background.card};
   border: 1px solid ${props => props.$color ? props.$color + '80' : 'rgba(255,255,255,0.1)'};
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   padding: 0.5rem 0.75rem;
@@ -112,7 +112,7 @@ const TooltipContent = styled(motion.div) <{ $color?: string, $isRTL?: boolean }
   gap: 0.25rem;
   font-weight: 500;
   letter-spacing: 0.05em;
-  backdrop-filter: blur(${props => props.theme.glass.blur});
+  backdrop-filter: blur(${props => props.theme.config.glass.blur});
 `;
 
 const CardHeader = styled(Flex)`
@@ -145,7 +145,7 @@ const MetricValue = styled.span`
 
 const MetricUnit = styled.span`
   font-size: 0.7rem;
-  color: ${props => props.theme.colors.textDim};
+  color: ${props => props.theme.ui.text.dim};
   font-weight: 500;
 `;
 
@@ -198,9 +198,13 @@ const ClosedStateContainer = styled(motion.div)`
 
 const Bar = styled(motion.div) <{ $color?: string }>`
   flex: 1;
-  background-color: ${props => props.$color || props.theme.colors.teal};
-  border-radius: 1px 1px 0 0;
+  background-color: ${props => props.$color || props.theme.ui.brand.primary};
+  border-radius: 2px 2px 0 0;
+  min-height: 2px;
+  opacity: 0.8;
 `;
+
+
 
 const ProgressTrack = styled.div`
   height: 0.25rem;
@@ -212,8 +216,8 @@ const ProgressTrack = styled.div`
 
 const ProgressFill = styled(motion.div) <{ $color?: string }>`
   height: 100%;
-  background-color: ${props => props.$color || props.theme.colors.purple};
-  box-shadow: 0 0 10px ${props => props.$color || props.theme.colors.purple};
+  background-color: ${props => props.$color || props.theme.palette.purple.main};
+  box-shadow: 0 0 10px ${props => props.$color || props.theme.palette.purple.main};
 `;
 
 const SmallBadge = styled.span<{ $color?: string }>`
@@ -323,11 +327,11 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('age_label'),
             value: `${Math.round((1 - ageRatio) * 100)}`,
             unit: '%',
-            color: ageRatio > 0.8 ? theme.colors.red : ageRatio > 0.5 ? theme.colors.purple : theme.colors.teal,
+            color: ageRatio > 0.8 ? theme.palette.red.main : ageRatio > 0.5 ? theme.palette.purple.main : theme.palette.teal.main,
             renderVisual: () => (
                 <ProgressTrack>
                     <ProgressFill
-                        $color={theme.colors.purple}
+                        $color={theme.palette.purple.main}
                         initial={{ width: 0 }}
                         animate={{ width: `${(1 - ageRatio) * 100}%` }}
                         transition={{ type: "spring", stiffness: 50 }}
@@ -341,13 +345,13 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('heart_rate'),
             value: bpm,
             unit: t('unit_bpm'),
-            color: bpm > 100 ? theme.colors.red : bpm < 50 ? theme.colors.blue : theme.colors.teal,
+            color: bpm > 100 ? theme.palette.red.main : bpm < 50 ? theme.palette.blue.main : theme.palette.teal.main,
             renderVisual: () => (
                 <VisualContainer>
                     {[0.3, 0.5, 0.4, 0.8, 0.6, 0.9, 0.7, 0.4, 0.6, 0.5, 0.8, 0.3, 0.5, 0.9, 0.2].map((h, i) => (
                         <Bar
                             key={i}
-                            $color={theme.colors.teal}
+                            $color={theme.palette.teal.main}
                             animate={{ height: `${(h + Math.random() * 0.2) * 100}%` }}
                             transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse", delay: i * 0.05 }}
                         />
@@ -361,12 +365,12 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('stress_index'),
             value: `${Math.round(stressIndex * 100)}`,
             unit: '%',
-            color: stressIndex > 0.6 ? theme.colors.red : stressIndex > 0.3 ? theme.colors.purple : theme.colors.teal,
+            color: stressIndex > 0.6 ? theme.palette.red.main : stressIndex > 0.3 ? theme.palette.purple.main : theme.palette.teal.main,
             badge: stressIndex > 0.6 ? 'HIGH' : stressIndex > 0.3 ? 'MED' : 'LOW',
             renderVisual: () => (
                 <ProgressTrack>
                     <ProgressFill
-                        $color={theme.colors.purple}
+                        $color={theme.palette.purple.main}
                         initial={{ width: 0 }}
                         animate={{ width: `${stressIndex * 100}%` }}
                         transition={{ type: "spring", stiffness: 50 }}
@@ -380,14 +384,14 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('hrv_variation'),
             value: hrv,
             unit: t('unit_ms'),
-            color: hrv < 30 ? theme.colors.red : hrv > 70 ? theme.colors.teal : theme.colors.blue,
+            color: hrv < 30 ? theme.palette.red.main : hrv > 70 ? theme.palette.teal.main : theme.palette.blue.main,
             renderVisual: () => (
                 <VisualContainer>
                     <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 24">
                         <motion.path
                             d="M 0,12 Q 25,0 50,12 T 100,12"
                             fill="none"
-                            stroke={theme.colors.blue}
+                            stroke={theme.palette.blue.main}
                             strokeWidth="2"
                             initial={{ pathLength: 0 }}
                             animate={{ pathLength: 1 }}
@@ -403,7 +407,7 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('homeostasis_label'),
             value: `${Math.round(vitality * 100)}`,
             unit: '%',
-            color: vitality > 0.6 ? theme.colors.teal : vitality > 0.3 ? theme.colors.purple : theme.colors.red,
+            color: vitality > 0.6 ? theme.palette.teal.main : vitality > 0.3 ? theme.palette.purple.main : theme.palette.red.main,
             badge: vitality > 0.6 ? 'STABLE →' : 'UNSTABLE ↘',
             renderVisual: () => null // Minimal pure text metric like reference
         },
@@ -413,7 +417,7 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('latency_label'),
             value: latency.toFixed(0),
             unit: 'ms',
-            color: latency > 300 ? theme.colors.red : latency > 150 ? theme.colors.purple : theme.colors.teal,
+            color: latency > 300 ? theme.palette.red.main : latency > 150 ? theme.palette.purple.main : theme.palette.teal.main,
             renderVisual: () => null
         },
         {
@@ -422,7 +426,7 @@ export const BiometricsPanel: React.FC<BiometricsPanelProps> = React.memo(({
             title: t('gen_label'),
             value: generation,
             unit: '',
-            color: theme.colors.blue,
+            color: theme.palette.blue.main,
             renderVisual: () => null
         }
     ];

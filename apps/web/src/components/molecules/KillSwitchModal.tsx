@@ -7,7 +7,7 @@ import { FlexCol } from '../shared/Layout';
 const ModalOverlay = styled(motion.div)`
   position: fixed;
   inset: 0;
-  background: ${props => props.theme.colors.ui.bgOverlay};
+  background: ${props => props.theme.ui.background.overlay};
   backdrop-filter: blur(10px);
   z-index: 100;
   display: flex;
@@ -17,8 +17,8 @@ const ModalOverlay = styled(motion.div)`
 `;
 
 const ModalContent = styled(motion.div)`
-  background: ${props => props.theme.colors.card};
-  border: 1px solid ${props => props.theme.colors.red};
+  background: ${props => props.theme.ui.background.card};
+  border: 1px solid ${props => props.theme.ui.status.error};
   padding: 2rem;
   width: 100%;
   max-width: 400px;
@@ -27,39 +27,39 @@ const ModalContent = styled(motion.div)`
 `;
 
 const ModalTitle = styled.h2`
-  color: ${props => props.theme.colors.red};
-  font-size: ${props => props.theme.typography.h2.size};
-  font-weight: ${props => props.theme.typography.h2.weight};
-  letter-spacing: ${props => props.theme.typography.h2.spacing};
+  color: ${props => props.theme.ui.status.error};
+  font-size: ${props => props.theme.config.typography.h2.size};
+  font-weight: ${props => props.theme.config.typography.h2.weight};
+  letter-spacing: ${props => props.theme.config.typography.h2.spacing};
   margin-bottom: 1rem;
   text-align: center;
 `;
 
 const ModalText = styled.p`
-  color: ${props => props.theme.colors.textDim};
+  color: ${props => props.theme.ui.text.dim};
   margin-bottom: 2rem;
   text-align: center;
-  font-size: ${props => props.theme.typography.body.size};
+  font-size: ${props => props.theme.config.typography.body.size};
   line-height: 1.5;
 `;
 
 const OptionButton = styled.button<{ $danger?: boolean }>`
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid ${props => props.$danger ? props.theme.colors.redDim : props.theme.colors.ui.borderDim};
+  border: 1px solid ${props => props.$danger ? props.theme.palette.red.dim : props.theme.ui.border.dim};
   padding: 1rem;
   width: 100%;
   cursor: pointer;
   text-align: left;
-  transition: all ${props => props.theme.animations.fast};
+  transition: ${props => props.theme.config.transitions.fast};
 
   &:hover {
-    background: ${props => props.theme.colors.action.hover};
-    border-color: ${props => props.$danger ? props.theme.colors.red : props.theme.colors.teal};
+    background: ${props => props.theme.ui.action.hover};
+    border-color: ${props => props.$danger ? props.theme.ui.status.error : props.theme.ui.brand.primary};
   }
 `;
 
 const OptionTitle = styled.div<{ $danger?: boolean }>`
-  color: ${props => props.$danger ? props.theme.colors.red : props.theme.colors.teal};
+  color: ${props => props.$danger ? props.theme.ui.status.error : props.theme.ui.brand.primary};
   font-weight: bold;
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
@@ -67,7 +67,7 @@ const OptionTitle = styled.div<{ $danger?: boolean }>`
 `;
 
 const OptionDesc = styled.div`
-  color: ${props => props.theme.colors.textDim};
+  color: ${props => props.theme.ui.text.dim};
   font-size: 0.75rem;
 `;
 
@@ -76,14 +76,14 @@ const CancelButton = styled.button`
   width: 100%;
   background: transparent;
   border: none;
-  color: ${props => props.theme.colors.textDim};
+  color: ${props => props.theme.ui.text.dim};
   cursor: pointer;
   font-size: 0.75rem;
   letter-spacing: 0.1em;
   padding: 0.5rem;
 
   &:hover {
-    color: ${props => props.theme.colors.text};
+    color: ${props => props.theme.ui.text.primary};
   }
 `;
 

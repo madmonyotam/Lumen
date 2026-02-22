@@ -7,7 +7,7 @@ import { FlexCol } from './shared/Layout';
 const Container = styled(FlexCol)`
     height: 100vh;
     width: 100vw;
-    background-color: ${props => props.theme.colors.bg};
+    background-color: ${props => props.theme.ui.background.main};
     align-items: center;
     justify-content: center;
     position: relative;
@@ -39,7 +39,7 @@ const Title = styled.h1`
 `;
 
 const Subtitle = styled.p`
-    color: ${props => props.theme.colors.textDim};
+    color: ${props => props.theme.ui.text.dim};
     font-size: 1rem;
     letter-spacing: 0.1em;
     margin-bottom: 3rem;

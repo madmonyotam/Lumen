@@ -10,9 +10,9 @@ const GuardContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    background: ${props => props.theme.colors.bg};
-    color: ${props => props.theme.colors.teal};
-    font-family: ${props => props.theme.fonts.code};
+    background: ${props => props.theme.ui.background.main};
+    color: ${props => props.theme.ui.brand.primary};
+    font-family: ${props => props.theme.config.fonts.code};
 `;
 
 export const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {

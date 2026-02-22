@@ -23,16 +23,16 @@ const ChatContainer = styled(FlexCol)`
 `;
 
 const ChatMessage = styled(motion.div) <{ $sender: 'user' | 'lumen' }>`
-  align-self: ${props => props.$sender === 'user' ? 'flex-end' : 'flex-start'};
-  background: ${props => props.$sender === 'user' ? 'rgba(255,255,255,0.05)' : props.theme.colors.tealDim};
+  align-self: flex-end;
+  background: ${props => props.$sender === 'user' ? 'rgba(255,255,255,0.05)' : props.theme.palette.teal.dim};
   padding: 0.75rem 1.25rem;
   border-radius: 1rem;
-  color: ${props => props.$sender === 'user' ? props.theme.colors.text : props.theme.colors.teal};
-  border: 1px solid ${props => props.$sender === 'user' ? 'rgba(255,255,255,0.1)' : props.theme.colors.tealDim};
+  color: ${props => props.$sender === 'user' ? props.theme.ui.text.primary : props.theme.ui.brand.primary};
+  border: 1px solid ${props => props.$sender === 'user' ? 'rgba(255,255,255,0.1)' : props.theme.palette.teal.dim};
   font-size: 1rem;
   line-height: 1.4;
   backdrop-filter: blur(5px);
-  box-shadow: ${props => props.$sender === 'user' ? props.theme.shadows.card : props.theme.shadows.neonTeal};
+  box-shadow: ${props => props.$sender === 'user' ? props.theme.config.shadows.card : props.theme.config.shadows.neonTeal};
 `;
 
 interface ChatHistoryProps {

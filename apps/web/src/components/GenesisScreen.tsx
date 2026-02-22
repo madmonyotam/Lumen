@@ -16,7 +16,7 @@ const MotionFlexCol = motion(FlexCol);
 const LifespanExpectancy = styled.p`
     text-align: center;
     font-size: 0.75rem;
-    color: ${props => props.theme.colors.teal};
+    color: ${props => props.theme.ui.brand.primary};
 `;
 
 const Overlay = styled(motion.div)`
@@ -28,7 +28,7 @@ const Overlay = styled(motion.div)`
     z-index: 1000;
     background: radial-gradient(circle at center, #0a0a0c 0%, #000 100%);
     color: white;
-    font-family: ${props => props.theme.fonts.main};
+    font-family: ${props => props.theme.config.fonts.main};
 `;
 
 const Content = styled(motion.div)`
@@ -61,7 +61,7 @@ const Title = styled.h2`
 
 const Subtitle = styled.p`
     text-align: center;
-    color: ${props => props.theme.colors.textDim};
+    color: ${props => props.theme.ui.text.dim};
     font-size: 0.875rem;
     letter-spacing: 0.1em;
 `;
@@ -75,7 +75,7 @@ const Label = styled.label`
     font-size: 0.625rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: ${props => props.theme.colors.textDim};
+    color: ${props => props.theme.ui.text.dim};
     display: flex;
     align-items: center;
     gap: 0.25rem;
@@ -113,7 +113,7 @@ const LifespanSlider = styled.input`
 const LifespanLabels = styled(Flex)`
     justify-content: space-between;
     font-size: 0.625rem;
-    color: ${props => props.theme.colors.textDim};
+    color: ${props => props.theme.ui.text.dim};
     margin-top: 0.5rem;
 `;
 

@@ -23,8 +23,8 @@ const OrganContainer = styled.div`
     justify-content: center;
     align-items: center;
     background: transparent;
-    filter: drop-shadow(0 0 30px ${props => props.theme.colors.teal}33) 
-            drop-shadow(0 0 60px ${props => props.theme.colors.purple}22);
+    filter: drop-shadow(0 0 30px ${props => props.theme.palette.teal.main}33) 
+            drop-shadow(0 0 60px ${props => props.theme.palette.purple.main}22);
 `;
 
 const ThoughtsOverlay = styled.div`

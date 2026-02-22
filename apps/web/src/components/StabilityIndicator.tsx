@@ -24,7 +24,7 @@ const Header = styled.div`
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: ${props => props.theme.colors.textDim};
+    color: ${props => props.theme.ui.text.dim};
 `;
 
 const HeaderTitle = styled.div`
@@ -45,9 +45,9 @@ const ScoreBar = styled.div`
 const ScoreFill = styled(motion.div) <{ $score: number }>`
     height: 100%;
     background: ${props => {
-        if (props.$score > 80) return props.theme.colors.teal;
-        if (props.$score > 50) return props.theme.colors.yellow;
-        return props.theme.colors.red;
+        if (props.$score > 80) return props.theme.ui.brand.primary;
+        if (props.$score > 50) return props.theme.ui.status.warning;
+        return props.theme.ui.status.error;
     }};
 `;
 
@@ -63,11 +63,11 @@ const ConflictItem = styled(motion.div)`
     align-items: center;
     gap: 0.5rem;
     font-size: 0.75rem;
-    color: ${props => props.theme.colors.red};
-    background: ${props => `${props.theme.colors.red}1A`}; // 10% opacity
+    color: ${props => props.theme.ui.status.error};
+    background: ${props => `${props.theme.ui.status.error}1A`}; // 10% opacity
     padding: 0.5rem;
     border-radius: 0.5rem;
-    border: 1px solid ${props => `${props.theme.colors.red}33`}; // 20% opacity
+    border: 1px solid ${props => `${props.theme.ui.status.error}33`}; // 20% opacity
 `;
 
 interface Props {
@@ -82,10 +82,10 @@ export const StabilityIndicator: React.FC<Props> = ({ stability, conflicts }) =>
         <Container initial={false}>
             <Header>
                 <HeaderTitle>
-                    <Activity size={14} color={stability > 50 ? theme.colors.teal : theme.colors.red} />
+                    <Activity size={14} color={stability > 50 ? theme.ui.brand.primary : theme.ui.status.error} />
                     <span>{t('neural_stability')}</span>
                 </HeaderTitle>
-                <span style={{ color: stability > 50 ? theme.colors.teal : theme.colors.red }}>{stability}%</span>
+                <span style={{ color: stability > 50 ? theme.ui.brand.primary : theme.ui.status.error }}>{stability}%</span>
             </Header>
             <ScoreBar>
                 <ScoreFill

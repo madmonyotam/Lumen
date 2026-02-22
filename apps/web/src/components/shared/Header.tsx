@@ -33,7 +33,7 @@ const Logo = styled.div`
     font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: 0.2em;
-    color: ${props => props.theme.colors.teal};
+    color: ${props => props.theme.ui.brand.primary};
 `;
 
 const StatusDotContainer = styled(Relative)`
@@ -45,14 +45,14 @@ const StatusDotCore = styled.div`
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background-color: ${props => props.theme.colors.teal};
+  background-color: ${props => props.theme.ui.brand.primary};
 `;
 
 const StatusDotPing = styled.div`
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background-color: ${props => props.theme.colors.teal};
+  background-color: ${props => props.theme.ui.brand.primary};
   opacity: 0.5;
   animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
 
@@ -65,7 +65,7 @@ const StatusDotPing = styled.div`
 `;
 
 const Slogan = styled.div`
-    color: ${props => props.theme.colors.textDim};
+    color: ${props => props.theme.ui.text.dim};
     font-size: 0.75rem;
     font-weight: 300;
     letter-spacing: 0.1em;
@@ -101,7 +101,7 @@ const AvatarImg = styled.img`
     transition: border-color 0.2s;
 
     &:hover {
-        border-color: ${props => props.theme.colors.teal};
+        border-color: ${props => props.theme.ui.brand.primary};
     }
 `;
 
@@ -111,12 +111,12 @@ const Dropdown = styled(motion.div) <{ $isRTL?: boolean }>`
     ${props => props.$isRTL ? 'left' : 'right'}: 0;
     margin-top: 0.5rem;
     background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(${props => props.theme.glass.blur});
+    backdrop-filter: blur(${props => props.theme.config.glass.blur});
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 8px;
     padding: 0.5rem;
     min-width: 180px;
-    box-shadow: ${props => props.theme.shadows.neonTeal};
+    box-shadow: ${props => props.theme.config.shadows.neonTeal};
     z-index: 1001;
     transform-origin: top right;
 `;
@@ -126,10 +126,10 @@ const MenuItem = styled.button`
     padding: 0.75rem 1rem;
     background: transparent;
     border: none;
-    color: ${props => props.theme.colors.text};
+    color: ${props => props.theme.ui.text.primary};
     text-align: center;
     cursor: pointer;
-    font-family: ${props => props.theme.fonts.main};
+    font-family: ${props => props.theme.config.fonts.main};
     letter-spacing: 0.05em;
     font-size: 0.9rem;
     border-radius: 4px;
@@ -137,7 +137,7 @@ const MenuItem = styled.button`
 
     &:hover {
         background: rgba(255, 255, 255, 0.05);
-        color: ${props => props.theme.colors.teal};
+        color: ${props => props.theme.ui.brand.primary};
         transform: scale(1.02);
     }
 `;

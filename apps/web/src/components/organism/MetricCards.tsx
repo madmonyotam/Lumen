@@ -6,17 +6,17 @@ import { Flex, FlexCol } from '../shared/Layout';
 import { useTranslation } from '../../hooks/useTranslation';
 
 const Card = styled.div<{ $borderColor?: string }>`
-  background-color: ${props => props.theme.colors.card};
-  backdrop-filter: blur(${props => props.theme.glass.blur});
-  border: ${props => props.theme.glass.border};
+  background-color: ${props => props.theme.ui.background.card};
+  backdrop-filter: blur(${props => props.theme.config.glass.blur});
+  border: ${props => props.theme.config.glass.border};
   border-radius: 1rem;
   padding: 1.5rem;
   position: relative;
-  transition: all ${props => props.theme.animations.normal};
+  transition: ${props => props.theme.config.transitions.normal};
 
   &:hover {
-    border-color: ${props => props.$borderColor || props.theme.colors.tealDim};
-    box-shadow: ${props => props.theme.shadows.card};
+    border-color: ${props => props.$borderColor || props.theme.palette.teal.dim};
+    box-shadow: ${props => props.theme.config.shadows.card};
   }
 `;
 
@@ -30,7 +30,7 @@ const CardHeader = styled(Flex)`
 
 const CardTitle = styled.span`
   font-size: 0.625rem;
-  color: ${props => props.theme.colors.textDim};
+  color: ${props => props.theme.ui.text.dim};
   letter-spacing: 0.2em;
 `;
 
@@ -49,9 +49,9 @@ const MetricValue = styled.span`
 
 const MetricLabel = styled.span`
   font-size: 0.8rem;
-  color: ${props => props.theme.colors.textDim};
+  color: ${props => props.theme.ui.text.dim};
   font-weight: 500;
-  transition: color ${props => props.theme.animations.fast};
+  transition: color ${props => props.theme.config.transitions.fast};
 `;
 
 const HeartRateVisual = styled(Flex)`
@@ -65,7 +65,7 @@ const HeartRateVisual = styled(Flex)`
 
 const HeartBar = styled(motion.div)`
   width: 0.375rem;
-  background-color: ${props => props.theme.colors.teal};
+  background-color: ${props => props.theme.ui.brand.primary};
   border-radius: 2px 2px 0 0;
 `;
 
@@ -75,13 +75,13 @@ const StressBarContainer = styled.div`
   background-color: rgba(0,0,0,0.5);
   border-radius: 9999px;
   overflow: hidden;
-  border: 1px solid ${props => props.theme.colors.ui.borderDim};
+  border: 1px solid ${props => props.theme.ui.border.dim};
 `;
 
 const StressBarFill = styled(motion.div)`
   height: 100%;
-  background-color: ${props => props.theme.colors.purple};
-  box-shadow: ${props => props.theme.shadows.neonPurple};
+  background-color: ${props => props.theme.palette.purple.main};
+  box-shadow: ${props => props.theme.config.shadows.neonPurple};
 `;
 
 const CardsContainer = styled(FlexCol)`
@@ -106,9 +106,9 @@ export const MetricCards: React.FC<MetricCardProps> = React.memo(({ bpm, stressI
   return (
     <CardsContainer>
       {/* Heart Rate */}
-      <Card $borderColor={`${theme.colors.teal}80`}>
+      <Card $borderColor={`${theme.palette.teal.main}80`}>
         <CardHeader>
-          <Heart size={16} color={theme.colors.teal} />
+          <Heart size={16} color={theme.palette.teal.main} />
           <CardTitle>{t('heart_rate')}</CardTitle>
         </CardHeader>
         <MetricContainer>
@@ -127,9 +127,9 @@ export const MetricCards: React.FC<MetricCardProps> = React.memo(({ bpm, stressI
       </Card>
 
       {/* Stress Index */}
-      <Card $borderColor={`${theme.colors.purple}80`}>
+      <Card $borderColor={`${theme.palette.purple.main}80`}>
         <CardHeader>
-          <Zap size={16} color={theme.colors.purple} />
+          <Zap size={16} color={theme.palette.purple.main} />
           <CardTitle>{t('stress_index')}</CardTitle>
         </CardHeader>
         <StressMetricContainer>
@@ -145,9 +145,9 @@ export const MetricCards: React.FC<MetricCardProps> = React.memo(({ bpm, stressI
       </Card>
 
       {/* HRV */}
-      <Card $borderColor={`${theme.colors.blue}80`}>
+      <Card $borderColor={`${theme.palette.blue.main}80`}>
         <CardHeader>
-          <Activity size={16} color={theme.colors.blue} />
+          <Activity size={16} color={theme.palette.blue.main} />
           <CardTitle>{t('hrv_variation')}</CardTitle>
         </CardHeader>
         <MetricContainer>

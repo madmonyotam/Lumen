@@ -29,7 +29,7 @@ const Tabs = styled(Flex)`
 const Tab = styled.button<{ $active: boolean }>`
     background: ${props => props.$active ? 'rgba(0, 242, 254, 0.1)' : 'transparent'};
     border: 1px solid ${props => props.$active ? '#00f2fe' : 'rgba(255, 255, 255, 0.1)'};
-    color: ${props => props.$active ? '#00f2fe' : props.theme.colors.textDim};
+    color: ${props => props.$active ? '#00f2fe' : props.theme.ui.text.dim};
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
     font-size: 0.75rem;
@@ -76,7 +76,7 @@ const StrengthCard = styled(motion.div) <{ $selected: boolean }>`
     cursor: ${props => props.$selected ? 'default' : 'pointer'};
     opacity: ${props => props.$selected ? 0.5 : 1};
     font-size: 0.875rem;
-    color: ${props => props.$selected ? 'white' : props.theme.colors.textDim};
+    color: ${props => props.$selected ? 'white' : props.theme.ui.text.dim};
     transition: all 0.2s ease;
     user-select: none;
 
@@ -120,7 +120,7 @@ const RankSlot = styled(Reorder.Item)`
 `;
 
 const RankNumber = styled.span<{ $isRTL?: boolean }>`
-    font-family: ${props => props.theme.fonts.code || props.theme.fonts.main};
+    font-family: ${props => props.theme.config.fonts.code || props.theme.config.fonts.main};
     color: #00f2fe;
     font-size: 0.75rem;
     margin-right: ${props => props.$isRTL ? '0' : '1rem'};
@@ -131,7 +131,7 @@ const RankNumber = styled.span<{ $isRTL?: boolean }>`
 const RemoveBtn = styled.button`
     background: none;
     border: none;
-    color: ${props => props.theme.colors.textDim};
+    color: ${props => props.theme.ui.text.dim};
     cursor: pointer;
     padding: 0.25rem;
     display: flex;

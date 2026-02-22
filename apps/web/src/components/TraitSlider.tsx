@@ -20,7 +20,7 @@ const Header = styled.div`
 
 const Label = styled.span`
     font-size: 0.75rem;
-    color: ${props => props.theme.colors.textDim};
+    color: ${props => props.theme.ui.text.dim};
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-weight: 500;
@@ -29,7 +29,7 @@ const Label = styled.span`
 const ValueLabel = styled.span`
     font-size: 0.75rem;
     color: #4facfe;
-    font-family: ${props => props.theme.fonts.code || 'monospace'};
+    font-family: ${props => props.theme.config.fonts.code || 'monospace'};
     font-weight: bold;
 `;
 
@@ -93,7 +93,7 @@ const Tooltip = styled(motion.div)`
     white-space: nowrap;
     color: #00f2fe;
     font-size: 1rem;
-    font-family: ${props => props.theme.fonts.code || 'monospace'};
+    font-family: ${props => props.theme.config.fonts.code || 'monospace'};
     pointer-events: none;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(8px);

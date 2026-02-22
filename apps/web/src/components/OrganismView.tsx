@@ -12,9 +12,9 @@ import { MemoryFog } from './d3/MemoryFog';
 
 const Container = styled(FlexCol)`
   height: 100vh;
-  background-color: ${props => props.theme.colors.bg};
-  color: ${props => props.theme.colors.teal};
-  font-family: ${props => props.theme.fonts.main};
+  background-color: ${props => props.theme.ui.background.main};
+  color: ${props => props.theme.ui.brand.primary};
+  font-family: ${props => props.theme.config.fonts.main};
   position: relative;
   overflow: hidden;
   padding-top: 64px;
@@ -23,14 +23,14 @@ const Container = styled(FlexCol)`
   padding-right: 1rem;
   
   ::selection {
-    background: ${props => props.theme.colors.teal};
+    background: ${props => props.theme.ui.brand.primary};
     color: #000;
   }
 `;
 
 const BackgroundGradient = styled(AbsoluteFill)`
   z-index: 0;
-  background: radial-gradient(circle at center, ${props => props.theme.colors.gradientStart} 0%, ${props => props.theme.colors.bg} 70%);
+  background: radial-gradient(circle at center, ${props => props.theme.ui.background.gradientStart} 0%, ${props => props.theme.ui.background.main} 70%);
   opacity: 0.6;
 `;
 
@@ -69,7 +69,7 @@ const ThoughtBubble = styled(motion.div)`
   position: absolute;
   top: 5%;
   text-align: center;
-  color: ${props => props.theme.colors.teal};
+  color: ${props => props.theme.ui.brand.primary};
   opacity: 0.4;
   font-size: 1rem;
   font-style: italic;
@@ -103,16 +103,16 @@ const FloatingInputContainer = styled(motion.div) <{ $isRTL?: boolean }>`
   display: flex;
   align-items: center; /* Ensures strict vertical centering for child items */
   background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(${props => props.theme.glass.blur});
+  backdrop-filter: blur(${props => props.theme.config.glass.blur});
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 99px; /* Give it a more rounded pill shape */
   padding: 1rem 2rem; /* Even padding all around for vertical balance */
-  transition: all ${props => props.theme.animations.fast};
+  transition: ${props => props.theme.config.transitions.fast};
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 
   &:focus-within {
-    border-color: ${props => props.theme.colors.teal};
-    box-shadow: 0 0 15px ${props => props.theme.colors.teal}40;
+    border-color: ${props => props.theme.ui.brand.primary};
+    box-shadow: 0 0 15px ${props => props.theme.palette.teal.dim};
   }
 `;
 
@@ -120,8 +120,8 @@ const ChatTextarea = styled.textarea<{ $isRTL?: boolean }>`
   flex: 1;
   background: transparent;
   border: none;
-  color: ${props => props.theme.colors.text};
-  font-family: ${props => props.theme.fonts.main};
+  color: ${props => props.theme.ui.text.primary};
+  font-family: ${props => props.theme.config.fonts.main};
   font-size: 1.1rem;
   line-height: 1.5;
   padding: 0;
@@ -145,7 +145,7 @@ const ChatTextarea = styled.textarea<{ $isRTL?: boolean }>`
   }
   
   &::placeholder {
-    color: ${props => props.theme.colors.textDim};
+    color: ${props => props.theme.ui.text.dim};
     line-height: 1.5;
   }
 `;
@@ -157,17 +157,17 @@ const SendButton = styled.button<{ $isRTL?: boolean }>`
   border-radius: 50%;
   border: none;
   background: transparent;
-  color: ${props => props.theme.colors.teal};
+  color: ${props => props.theme.ui.brand.primary};
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all ${props => props.theme.animations.fast};
+  transition: ${props => props.theme.config.transitions.fast};
   transform: ${props => props.$isRTL ? 'scaleX(-1)' : 'scaleX(1)'};
   margin-bottom: -2px;
   
   &:hover {
-    background: ${props => props.theme.colors.tealDim};
+    background: ${props => props.theme.palette.teal.dim};
     transform: ${props => props.$isRTL ? 'scaleX(-1) scale(1.1)' : 'scaleX(1) scale(1.1)'};
   }
   &:disabled {
