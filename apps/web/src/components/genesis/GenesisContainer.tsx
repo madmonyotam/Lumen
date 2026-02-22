@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { LUMEN_CONFIG } from '../../lumen.config';
 import { useGenesisOptions } from '../../hooks/useGenesisOptions';
 import { validateGenesisState } from '../../utils/genesisValidation';
@@ -37,7 +37,7 @@ export const GenesisContainer: React.FC = () => {
         }
     }, [traitValues]);
 
-    const handleGenesis = async () => {
+    const handleGenesis = useCallback(async () => {
         const ocean: Partial<BigFiveScores> = {};
         const internal: Partial<InternalScores> = {};
 
@@ -83,7 +83,7 @@ export const GenesisContainer: React.FC = () => {
             console.error(e);
             alert("The spark failed to ignite. Check neural connection.");
         }
-    };
+    }, [traitValues, validation.conflicts, options?.mechanics, name, gender, language, lifespanIndex, selectedStrengths, token]);
 
     const ViewComponent = isMobile ? GenesisScreenMobile : GenesisScreen;
 

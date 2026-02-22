@@ -47,7 +47,6 @@ const ContentArea = styled.div`
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
-    min-height: 400px;
 `;
 
 const AvailableList = styled.div`
@@ -159,7 +158,7 @@ interface Props {
     onUpdateSelection: (ids: string[]) => void;
 }
 
-export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, selectedIds, onUpdateSelection }) => {
+export const SignatureStrengths: React.FC<Props> = React.memo(({ availableStrengths, selectedIds, onUpdateSelection }) => {
     const [activeTab, setActiveTab] = useState<StrengthCategory>('Wisdom');
     const { t, isRTL } = useTranslation();
 
@@ -250,4 +249,4 @@ export const SignatureStrengths: React.FC<Props> = ({ availableStrengths, select
             </ContentArea>
         </Container>
     );
-};
+});

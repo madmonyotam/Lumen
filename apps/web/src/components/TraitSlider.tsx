@@ -109,7 +109,7 @@ interface Props {
     getTooltipText: (val: number) => string;
 }
 
-export const TraitSlider: React.FC<Props> = ({ label, value, onChange, onCommit, getTooltipText }) => {
+export const TraitSlider: React.FC<Props> = React.memo(({ label, value, onChange, onCommit, getTooltipText }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [localValue, setLocalValue] = useState(value);
@@ -210,4 +210,4 @@ export const TraitSlider: React.FC<Props> = ({ label, value, onChange, onCommit,
             </TrackContainer>
         </SliderContainer>
     );
-};
+});

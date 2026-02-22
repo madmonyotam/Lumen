@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useOrgan } from '../../context/OrganContext';
 import { useNeuralUplink } from '../../hooks/useNeuralUplink';
 import { useBiometricsSync } from '../../hooks/useBiometricsSync';
@@ -55,13 +55,13 @@ export const OrganismContainer: React.FC = () => {
         // Or we should update this one to point to GenesisContainer
     }
 
-    const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const handleTextareaChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
         e.target.style.height = 'auto'; // Reset height briefly to calculate scrollHeight correctly
         e.target.style.height = `${e.target.scrollHeight}px`;
         setInputValue(e.target.value);
-    };
+    }, [setInputValue]);
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSend();
@@ -69,7 +69,7 @@ export const OrganismContainer: React.FC = () => {
             const target = e.target as HTMLTextAreaElement;
             target.style.height = 'auto';
         }
-    };
+    }, [handleSend]);
 
     const ViewComponent = isMobile ? OrganismViewMobile : OrganismView;
 

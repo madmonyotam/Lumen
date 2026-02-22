@@ -39,7 +39,7 @@ interface ChatHistoryProps {
     currentInteraction: { text: string; sender: 'user' | 'lumen'; timestamp: number } | null;
 }
 
-export const ChatHistory: React.FC<ChatHistoryProps> = ({ currentInteraction }) => {
+export const ChatHistory: React.FC<ChatHistoryProps> = React.memo(({ currentInteraction }) => {
     return (
         <RightColumn>
             <ChatContainer>
@@ -60,4 +60,4 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ currentInteraction }) 
             </ChatContainer>
         </RightColumn>
     );
-};
+});

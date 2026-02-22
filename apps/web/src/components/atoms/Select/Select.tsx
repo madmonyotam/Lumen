@@ -51,6 +51,7 @@ const OptionsList = styled(motion.ul)`
   box-shadow: ${props => props.theme.config.shadows.card};
   list-style: none;
   margin: 0;
+  transform-origin: top;
 `;
 
 const OptionItem = styled.li<{ $isSelected: boolean }>`
@@ -84,7 +85,7 @@ interface SelectProps {
     placeholder?: string;
 }
 
-export const Select: React.FC<SelectProps> = ({ options, value, onChange, placeholder = 'Select...' }) => {
+export const Select: React.FC<SelectProps> = React.memo(({ options, value, onChange, placeholder = 'Select...' }) => {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -121,10 +122,10 @@ export const Select: React.FC<SelectProps> = ({ options, value, onChange, placeh
             <AnimatePresence>
                 {isOpen && (
                     <OptionsList
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.2 }}
+                        initial={{ opacity: 0, scaleY: 0 }}
+                        animate={{ opacity: 1, scaleY: 1 }}
+                        exit={{ opacity: 0, scaleY: 0 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
                     >
                         {options.map((option) => (
                             <OptionItem
@@ -141,4 +142,4 @@ export const Select: React.FC<SelectProps> = ({ options, value, onChange, placeh
             </AnimatePresence>
         </SelectContainer>
     );
-};
+});

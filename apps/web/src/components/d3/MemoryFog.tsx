@@ -18,7 +18,7 @@ const Container = styled.div`
 const VISUAL_LIFESPAN = 10000;
 const MAX_WORDS = 6;
 
-export const MemoryFog: React.FC = () => {
+export const MemoryFog: React.FC = React.memo(() => {
     const { organState } = useOrgan();
     const activeMemories = organState?.status?.activeMemories || [];
 
@@ -140,4 +140,4 @@ export const MemoryFog: React.FC = () => {
             />
         </Container>
     );
-};
+});
