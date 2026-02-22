@@ -14,17 +14,17 @@ This task outlines a comprehensive refactoring of the frontend application to al
   - Update complex components to be configuration-driven, using configuration objects/values for flexible behavior.
 
 ## Phase 2: Styling System & Layout Strategy
-- [ ] **Styled-Components Migration & Strictness:**
+- [x] **Styled-Components Migration & Strictness:**
   - Ensure `styled-components` is used *exclusively* across the frontend. Remove inline styles, CSS modules, or other styling paradigms if present.
   - **Layout-First Approach:** Stabilize structure and layout using styled components before implementing detailed styling.
-- [ ] **Theme System implementation:**
+- [x] **Theme System implementation:**
   - Implement/Refine the global **Theme** system for sizes, spacing, typography, and colors.
   - Establish a two-layer **Color Architecture**:
     - `Palette`: Base hex codes.
     - `Usage/UI`: Semantic tokens (e.g., `primary`, `background`, `error`).
 
 ## Phase 3: Responsive Strategy & Split-Rendering
-- [ ] **Strict Split-Rendering:**
+- [x] **Strict Split-Rendering:**
   - Audit current responsive implementations (media queries).
   - Implement a `useMobile` hook.
   - Where necessary/complex, use the strict split-rendering approach to yield completely different component trees for Web vs. Mobile experiences.

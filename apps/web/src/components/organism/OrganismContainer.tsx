@@ -4,13 +4,16 @@ import { useNeuralUplink } from '../../hooks/useNeuralUplink';
 import { useBiometricsSync } from '../../hooks/useBiometricsSync';
 import { useTranslation } from '../../hooks/useTranslation';
 import { LUMEN_CONFIG } from '../../lumen.config';
+import { useMobile } from '../../hooks/useMobile';
 import OrganismView from '../OrganismView';
+import OrganismViewMobile from '../OrganismViewMobile';
 
 export const OrganismContainer: React.FC = () => {
     const { organState, isConnected } = useOrgan();
     const { inputValue, setInputValue, handleSend } = useNeuralUplink();
     const { biometricsRef } = useBiometricsSync(organState);
     const { t, isRTL } = useTranslation();
+    const isMobile = useMobile();
 
     const [thought, setThought] = useState<string>(t('organism_silent'));
     const [currentInteraction, setCurrentInteraction] = useState<{ text: string, sender: 'user' | 'lumen', timestamp: number } | null>(null);
@@ -68,8 +71,10 @@ export const OrganismContainer: React.FC = () => {
         }
     };
 
+    const ViewComponent = isMobile ? OrganismViewMobile : OrganismView;
+
     return (
-        <OrganismView
+        <ViewComponent
             isConnected={isConnected}
             organState={organState}
             inputValue={inputValue}

@@ -6,6 +6,8 @@ import type { ValidationResult } from '../../utils/genesisValidation';
 import type { LumenPersona, BigFiveScores, InternalScores } from '@lumen/shared/types/index';
 import { useAuth } from '../../context/AuthContext';
 import GenesisScreen from '../GenesisScreen';
+import GenesisScreenMobile from '../GenesisScreenMobile';
+import { useMobile } from '../../hooks/useMobile';
 
 export const GenesisContainer: React.FC = () => {
     const [name, setName] = useState('Lumen');
@@ -18,6 +20,7 @@ export const GenesisContainer: React.FC = () => {
 
     const { token } = useAuth();
     const { options, loading, error } = useGenesisOptions();
+    const isMobile = useMobile();
 
     const [validation, setValidation] = useState<ValidationResult>({
         conflicts: [],
@@ -82,8 +85,10 @@ export const GenesisContainer: React.FC = () => {
         }
     };
 
+    const ViewComponent = isMobile ? GenesisScreenMobile : GenesisScreen;
+
     return (
-        <GenesisScreen
+        <ViewComponent
             name={name}
             setName={setName}
             gender={gender}
