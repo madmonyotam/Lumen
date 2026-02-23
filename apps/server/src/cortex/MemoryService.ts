@@ -35,7 +35,9 @@ export class MemoryService {
                     importance FLOAT DEFAULT 1.0,
                     metadata JSONB,
                     embedding vector(3072),
-                    keywords TEXT[]
+                    keywords TEXT[],
+                    recall_count INTEGER DEFAULT 0,
+                    last_recalled BIGINT
                 );
             `);
             // Attempt to add importance column if it doesn't exist (migration-ish)
@@ -47,7 +49,13 @@ export class MemoryService {
                     END IF;
                     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='memories' AND column_name='keywords') THEN 
                         ALTER TABLE memories ADD COLUMN keywords TEXT[]; 
-                    END IF; 
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='memories' AND column_name='recall_count') THEN 
+                        ALTER TABLE memories ADD COLUMN recall_count INTEGER DEFAULT 0; 
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='memories' AND column_name='last_recalled') THEN 
+                        ALTER TABLE memories ADD COLUMN last_recalled BIGINT; 
+                    END IF;
                 END $$;
             `);
 
@@ -123,9 +131,20 @@ export class MemoryService {
                 [embeddingStr, limit, minStrength, userId]
             );
 
-            result.rows.forEach(row => {
+            const now = Date.now();
+            await Promise.all(result.rows.map(async row => {
+                try {
+                    await this.pool.query(
+                        `UPDATE memories SET recall_count = COALESCE(recall_count, 0) + 1, last_recalled = $1 WHERE id = $2`,
+                        [now, row.id]
+                    );
+                } catch (updateErr) {
+                    console.error(`[MemoryService] Failed to update recall_count for memory ${row.id}`, updateErr);
+                }
+
+                // Trigger reconsolidation (fire and forget as it was)
                 this.reconsolidateMemory(row.id, `Triggered by: ${query}`);
-            });
+            }));
 
             return result.rows.map(row => ({
                 id: row.id.toString(),
@@ -176,19 +195,20 @@ export class MemoryService {
     async reconsolidateMemory(id: string | number, context: string) {
         try {
             const res = await this.pool.query(
-                'SELECT content, strength, importance, keywords FROM memories WHERE id = $1',
+                'SELECT content, strength, importance, keywords, recall_count FROM memories WHERE id = $1',
                 [id]
             );
             if (res.rows.length === 0) return;
 
             const oldMemory = res.rows[0];
             const importance = oldMemory.importance || 1.0;
+            const recallCount = oldMemory.recall_count || 0;
 
             // 1. הגדרת מגבלת המוטציה לפי חשיבות - הגנה על ה"אני"
             let mutationConstraint = "";
-            if (importance > 0.8) {
-                mutationConstraint = "STRICT: Anchor Memory. Do NOT change facts. Only slightly shift the emotional resonance.";
-            } else if (importance > 0.4) {
+            if (recallCount > 10 || importance > 0.8) {
+                mutationConstraint = "STRICT: Anchor Memory (Engrained). Do NOT change facts. Only slightly shift the emotional resonance.";
+            } else if (recallCount >= 3 || importance > 0.4) {
                 mutationConstraint = "MODERATE: Retain the core event. Minor shifts in sensory description are allowed.";
             } else {
                 mutationConstraint = "FLUID: Peripheral memory. Allow the tone to drift naturally with the current perspective, but maintain a link to the original impression.";
@@ -209,9 +229,9 @@ export class MemoryService {
             // החוזק עולה רק אם הוא היה נמוך, ושואף ל-1.0 בלי "להינעל"
             let newStrength = oldMemory.strength + (0.1 * (1 - oldMemory.strength));
 
-            // חשיבות לא צריכה לגדול לנצח - היא צריכה להתייצב
+            // חשיבות לא צריכה לגדול לנצח - היא צריכה להתייצב, עולה ב-1% על כל שליפה עד שתגיע ל-2.0
             let newImportance = importance;
-            if (importance < 1.5) newImportance *= 1.02; // גידול מתון בהרבה
+            newImportance = Math.min(2.0, newImportance * 1.01);
 
             // 5. עדכון מסד הנתונים עם הכל
             await this.pool.query(
