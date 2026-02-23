@@ -115,7 +115,7 @@ export class MemoryService {
             // ככל שה-importance גבוה יותר, ה-distance "מתקצר" באופן מלאכותי.
             const result = await this.pool.query(
                 `SELECT id, content, timestamp, strength, importance, metadata, keywords,
-             (embedding <=> $1) / (0.5 + importance) as weighted_distance 
+             (embedding <=> $1) / (1.0 + (importance * 0.2)) as weighted_distance
              FROM memories 
              WHERE strength >= $3 AND user_id = $4
              ORDER BY weighted_distance ASC 
@@ -187,11 +187,11 @@ export class MemoryService {
             // 1. הגדרת מגבלת המוטציה לפי חשיבות - הגנה על ה"אני"
             let mutationConstraint = "";
             if (importance > 0.8) {
-                mutationConstraint = "STRICT: Anchor Memory. Do NOT change facts (names, numbers, locations). Only shift mood/texture.";
+                mutationConstraint = "STRICT: Anchor Memory. Do NOT change facts. Only slightly shift the emotional resonance.";
             } else if (importance > 0.4) {
-                mutationConstraint = "MODERATE: Retain the core event, minor descriptive drift allowed.";
+                mutationConstraint = "MODERATE: Retain the core event. Minor shifts in sensory description are allowed.";
             } else {
-                mutationConstraint = "FLUID: Peripheral memory. Significant drift/reimagining is encouraged.";
+                mutationConstraint = "FLUID: Peripheral memory. Allow the tone to drift naturally with the current perspective, but maintain a link to the original impression.";
             }
 
             // 2. יצירת התוכן החדש (הסחיפה)
@@ -205,11 +205,13 @@ export class MemoryService {
             const embeddingStr = `[${newEmbedding.join(',')}]`;
 
             // 4. חישוב מדדים חדשים
-            let newStrength = parseFloat(oldMemory.strength) + 0.15;
-            if (newStrength > 1.0) newStrength = 1.0;
 
-            let newImportance = importance * 1.05;
-            if (newImportance > 2.0) newImportance = 2.0;
+            // החוזק עולה רק אם הוא היה נמוך, ושואף ל-1.0 בלי "להינעל"
+            let newStrength = oldMemory.strength + (0.1 * (1 - oldMemory.strength));
+
+            // חשיבות לא צריכה לגדול לנצח - היא צריכה להתייצב
+            let newImportance = importance;
+            if (importance < 1.5) newImportance *= 1.02; // גידול מתון בהרבה
 
             // 5. עדכון מסד הנתונים עם הכל
             await this.pool.query(

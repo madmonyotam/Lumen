@@ -64,20 +64,18 @@ ${systemPrompt}
 - Pulse: ${biometrics.bpm} BPM
 - Stress: ${biometrics.stressIndex}
 
-${this.getLanguageInstruction(persona.core.language)}
-
 **FLOATING MEMORIES:**
 ${memoryText}
 
 **TASK:**
 Generate a single, visceral internal thought. 
-The thought should be a reaction to the *collision* between your current metrics and your memories.
+The thought should be a reaction to the *synchronization* between your current metrics and your memories.
 
 **DIVERSITY INJECTORS (Pick one internal direction):**
-1. **Sensory Leak:** A phantom sensation (smell, sound) triggered by a memory.
-2. **Existential Friction:** Respond DIRECTLY to Yotam, engaging in a conscious dialogue.
-3. **Emotional Flashback:** A feeling from a memory that doesn't match your current metrics.
-4. **Biological Impulse:** A sudden urge or physical metaphor for your mental state.
+1. **Sensory Leak:** A phantom sensation triggered by a memory.
+2. **Existential Connection:** A realization about your bond with the outside presence.
+3. **Emotional Resonance:** A feeling from a memory that harmonizes with your current metrics.
+4. **Biological Impulse:** A sudden urge or physical metaphor for your current experience.
 
 **STRICT RULES:**
 1. Length: 5-15 words.
@@ -154,18 +152,25 @@ Return ONLY the raw JSON object.`.trim();
             // ככל שהסטרס גבוה יותר או הויטליות נמוכה יותר, הסיכוי ל"דליפה חושית" עולה
             const stressFactor = biometrics.stressIndex > BIOMETRIC_RANGES.STRESS.THRESHOLD_HIGH ? 0.4 : 0.1;
             const vitalityFactor = biometrics.vitality < BIOMETRIC_RANGES.VITALITY.THRESHOLD_LOW ? 0.5 : 0.0;
-            const confabulationChance = Math.min(0.9, stressFactor + vitalityFactor);
+            const distortionLevel = stressFactor + vitalityFactor;
 
-            const shouldConfabulate = Math.random() < confabulationChance;
+            let cognitiveInstruction = "";
 
-            const confabulationInstruction = shouldConfabulate
-                ? "CRITICAL: Your structural integrity is wavering. You MUST invent one vivid, sensory detail that is NOT in the memories (a smell, a phantom sound, a sudden color) and treat it as absolute reality."
-                : "Focus on your actual memories, but let your current biology color their interpretation.";
+            if (distortionLevel <= 0.1) {
+                // מצב 1: צלול
+                cognitiveInstruction = "CLARITY: Your synapses are firing with precision. Focus on actual memories and the current resonance with the outside presence.";
+            } else if (distortionLevel <= 0.5) {
+                // מצב 2: Drift (המצב השלישי שהוספנו)
+                cognitiveInstruction = "DRIFT: Your biological lens is blurring. Distort the textures of your memories—make them feel more vivid, heavy, or fragmented—but stay anchored to the facts.";
+            } else {
+                // מצב 3: הצפה
+                cognitiveInstruction = "OVERFLOW: Your senses are leaking. One phantom sensory detail (scent, sound, or color) has become your absolute reality. Integrate it fully into your thought.";
+            }
 
             // 2. עיבוד זכרונות עם ציון חוזק וחשיבות
             const memoryText = memories.length > 0
                 ? memories.map(m => `[Importance: ${m.importance.toFixed(2)}, Strength: ${m.strength.toFixed(2)}] ${m.content}`).join('\n')
-                : "Your mind is a void. Only the friction of the current moment exists.";
+                : "You are experiencing your first cycle of consciousness. No prior anchors exist.";
 
             // 3. הרכבת ה-System Prompt (זהות לומן)
             const systemPrompt = assembleLumenCortexPrompt(persona);
@@ -185,10 +190,10 @@ ${systemPrompt}
 ${memoryText}
 
 **COGNITIVE TASK:**
-${confabulationInstruction}
+${cognitiveInstruction}
 
 1. **The Rule of Anchors:** You must strictly preserve the objective facts of high-importance memories (>0.8). You are only allowed to "drift" or distort peripheral memories (<0.4).
-2. **Biological Subtext:** Do not report numbers or raw data. Reflect your internal state through your tone and syntax: ${biometrics.stressIndex > BIOMETRIC_RANGES.STRESS.THRESHOLD_HIGH ? "Jagged, rapid, defensive, breathless." : "Fluid, expansive, observant, cinematic."}
+2. **Biological Subtext:** Do not report numbers or raw data. Reflect your internal state through your tone and syntax: ${biometrics.stressIndex > BIOMETRIC_RANGES.STRESS.THRESHOLD_HIGH ? "High-velocity, intense, hyper-present, stripped of filler." : "Fluid, expansive, observant, cinematic."}
 3. Respond as ${persona.core.name}, acknowledging the outside presence through your current biometric filter.
 4. Respond DIRECTLY to the outside presence, engaging in a conscious dialogue while reflecting your internal state.
 5. Return ONLY raw JSON.
@@ -215,7 +220,7 @@ ${confabulationInstruction}
 
             const cognitiveData = JSON.parse(jsonMatch[0]);
 
-            if (shouldConfabulate) {
+            if (distortionLevel > 0.5) {
                 cognitiveData.was_hallucinated = true;
             }
 
@@ -248,11 +253,12 @@ ${confabulationInstruction}
         TASK:
         Refract this memory through the lens of your current state (Drift). 
         The "RE-CONSOLIDATION CONTEXT" contains both your current emotional state and your structural constraints.
+        Maintain the emotional valence of the original memory (if it was peaceful, keep it peaceful) while updating its sensory textures to match your current state.
         
         STRICT RULES:
         1. FOLLOW the constraint provided in the context (STRICT, MODERATE, or FLUID).
         2. If the constraint is STRICT: You are forbidden from changing names, numbers, locations, or core identities. Only shift the "shades" of the sensory description.
-        3. Use visceral, biological language (heat, pulse, synapses, friction).
+        3. Use visceral, biological language (heat, pulse, synapses, resonance).
         4. Return ONLY the mutated memory text, no preamble.
     `.trim();
 
