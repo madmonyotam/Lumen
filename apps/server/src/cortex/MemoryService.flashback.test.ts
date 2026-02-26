@@ -47,11 +47,11 @@ describe('MemoryService Flashback Unit Test', () => {
 
         expect(pool.query).toHaveBeenCalledWith(
             expect.stringContaining('SELECT id, content, timestamp, strength, importance, metadata, keywords'),
-            [2]
+            [2, 'test_user']
         );
         expect(pool.query).toHaveBeenCalledWith(
             expect.stringContaining('FROM memories'),
-            [2]
+            [2, 'test_user']
         );
         expect(pool.query).toHaveBeenCalledWith(
             expect.stringContaining('WHERE importance >= 0.8 AND user_id = $2'),
@@ -59,7 +59,7 @@ describe('MemoryService Flashback Unit Test', () => {
         );
         expect(pool.query).toHaveBeenCalledWith(
             expect.stringContaining('ORDER BY RANDOM()'),
-            [2]
+            [2, 'test_user']
         );
 
         expect(memories).toHaveLength(2);

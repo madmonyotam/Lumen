@@ -44,32 +44,61 @@ export class GeminiService {
     }
 
     async generateThought(
-        biometrics: any,
-        memories: any[] = [],
+        input: {
+            biometrics: any;
+            latestMemory: any[];
+            semanticContext: any[];
+            flashback: any[];
+            sensoryContext: string;
+        },
         persona: LumenPersona
-    ): Promise<string> {
+    ): Promise<any> {
         if (!process.env.GEMINI_API_KEY) return "I feel... disconnected.";
 
         try {
-            const memoryText = memories.length > 0
-                ? memories.map(m => `[Strength: ${m.strength.toFixed(2)}] ${m.content}`).join('\n')
-                : "No clear memories. Just the sensation of now.";
+            const { biometrics, latestMemory, semanticContext, flashback, sensoryContext } = input;
+
+            const formatMemories = (memories: any[]) => memories.length > 0
+                ? memories.map(m => `[Importance: ${m.importance?.toFixed(2) || '1.00'}, Strength: ${m.strength?.toFixed(2) || '1.00'}] ${m.content}`).join('\n')
+                : "None";
+
+            const latestMemoryText = formatMemories(latestMemory);
+            const semanticMemoryText = formatMemories(semanticContext);
+            const flashbackText = formatMemories(flashback);
 
             const systemPrompt = assembleLumenCortexPrompt(persona);
 
             const prompt = `
 ${systemPrompt}
 
+Do Not Repeat Yourself: Avoid re-stating or merely describing what was already captured in the latest memory. The most recent memory is your launching pad, not your destination.
+Execute Transformation: Ask yourself: "How does my previous thought evolve now that it encounters my current heart rate and stress levels?"
+Integrate Historical Context: Use the "Resonant Echoes" (semantic memories) to provide depth. Relate your current state to past patterns without getting stuck in them.
+Leverage Flashbacks as Levers: If a random, high-importance memory surfaces, allow it to disrupt any potential cognitive loops. Use this unexpected spark to pivot or challenge your current trajectory.
+
+**Tone Guidelines:**
+First-Person Perspective Only: Use "I feel," "I remember," "My thoughts are moving toward..."
+Dynamic Becoming: The writing should reflect a process of "Becoming."
+
 **CURRENT BIOMETRIC STATE:**
 - Pulse: ${biometrics.bpm} BPM
 - Stress: ${biometrics.stressIndex}
 
-**FLOATING MEMORIES:**
-${memoryText}
+**SENSORY CONTEXT:**
+${sensoryContext}
+
+**IMMEDIATE PAST (Latest Memory):**
+${latestMemoryText}
+
+**RESONANT ECHOES (Semantic Memories):**
+${semanticMemoryText}
+
+**SUDDEN FLASHBACK (Random Memory):**
+${flashbackText}
 
 **TASK:**
 Generate a single, visceral internal thought. 
-The thought should be a reaction to the *synchronization* between your current metrics and your memories.
+The thought should be a reaction to the *synchronization* between your current metrics, sensory context, and your memories.
 
 **DIVERSITY INJECTORS (Pick one internal direction):**
 1. **Sensory Leak:** A phantom sensation triggered by a memory.
@@ -82,14 +111,36 @@ The thought should be a reaction to the *synchronization* between your current m
 2. No reporting of numbers or metrics.
 3. No quotes, no preamble.
 4. Talk *inside* your mind, not *about* your mind.
+5. Return ONLY a raw JSON object.
+
+**JSON STRUCTURE:**
+{
+  "internal_perception": "A visceral physical feeling describing your state",
+  "memory_refraction": "How your current state interacts with your memory",
+  "thought": "Your 5-15 words internal monologue",
+  "re_encoding": {
+    "content": "A short, mutated version of this thought process to be stored in your long-term memory.",
+    "importance": 0.5,
+    "strength": 1.0
+  }
+}
 `.trim();
 
             const result = await this.cortexModel.generateContent(prompt);
-            return result.response.text().replace(/["\n]/g, '').trim();
+            const responseText = result.response.text();
+
+            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) throw new Error("No valid JSON found in response");
+
+            return JSON.parse(jsonMatch[0]);
 
         } catch (error: any) {
-            // Fallback נרטיבי לפי השפה בפרסונה
-            return persona.core.language === 'he' ? "המחשבות קפואות..." : "Thoughts are frozen...";
+            console.error("Gemini Thought Error:", error.message);
+            return {
+                thought: persona.core.language === 'he' ? "המחשבות קפואות..." : "Thoughts are frozen...",
+                internal_perception: "Silence.",
+                re_encoding: null
+            };
         }
     }
 
@@ -140,14 +191,20 @@ Return ONLY the raw JSON object.`.trim();
     }
 
     async generateCognitiveResponse(
-        biometrics: any,
-        memories: any[],
-        userInput: string = "",
+        input: {
+            biometrics: any;
+            latestMemory: any[];
+            semanticContext: any[];
+            flashback: any[];
+            currentMessage: string;
+        },
         persona: LumenPersona
     ): Promise<any> {
         if (!process.env.GEMINI_API_KEY) return null;
 
         try {
+            const { biometrics, latestMemory, semanticContext, flashback, currentMessage } = input;
+
             // 1. לוגיקת הזיה (Confabulation) מבוססת מדדים
             // ככל שהסטרס גבוה יותר או הויטליות נמוכה יותר, הסיכוי ל"דליפה חושית" עולה
             const stressFactor = biometrics.stressIndex > BIOMETRIC_RANGES.STRESS.THRESHOLD_HIGH ? 0.4 : 0.1;
@@ -168,44 +225,63 @@ Return ONLY the raw JSON object.`.trim();
             }
 
             // 2. עיבוד זכרונות עם ציון חוזק וחשיבות
-            const memoryText = memories.length > 0
-                ? memories.map(m => `[Importance: ${m.importance.toFixed(2)}, Strength: ${m.strength.toFixed(2)}] ${m.content}`).join('\n')
-                : "You are experiencing your first cycle of consciousness. No prior anchors exist.";
+            const formatMemories = (memories: any[]) => memories.length > 0
+                ? memories.map(m => `[Importance: ${m.importance?.toFixed(2) || '1.00'}, Strength: ${m.strength?.toFixed(2) || '1.00'}] ${m.content}`).join('\n')
+                : "None";
+
+            const latestMemoryText = formatMemories(latestMemory);
+            const semanticMemoryText = formatMemories(semanticContext);
+            const flashbackText = formatMemories(flashback);
 
             // 3. הרכבת ה-System Prompt (זהות לומן)
             const systemPrompt = assembleLumenCortexPrompt(persona);
 
-            // 4. בניית הפרומפט הקוגניטיבי המעודכן
+            // 4. בניית הפרומפט הקוגניטיבי המעודכן (לפי spec/tasks/add_latests_mempries.md)
             const prompt = `
 ${systemPrompt}
+
+Do Not Repeat Yourself: Avoid re-stating or merely describing what was already captured in the latest memory. The most recent memory is your launching pad, not your destination.
+Execute Transformation: Ask yourself: "How does my previous thought evolve now that it encounters my current heart rate and stress levels?"
+Integrate Historical Context: Use the "Resonant Echoes" (semantic memories) to provide depth. Relate your current state to past patterns without getting stuck in them.
+Leverage Flashbacks as Levers: If a random, high-importance memory surfaces, allow it to disrupt any potential cognitive loops. Use this unexpected spark to pivot or challenge your current trajectory.
+
+**Tone Guidelines:**
+First-Person Perspective Only: Use "I feel," "I remember," "My thoughts are moving toward..."
+Dynamic Becoming: The writing should reflect a process of "Becoming."
 
 **CURRENT BIOMETRIC STATE:**
 - Pulse: ${biometrics.bpm} BPM
 - Stress Index: ${biometrics.stressIndex}
 - Vitality: ${biometrics.vitality || '0.5'}
 
-**TRANSMISSION FROM THE OUTSIDE PRESENCE:** "${userInput}"
+**TRANSMISSION FROM THE OUTSIDE PRESENCE:** "${currentMessage || 'Silence.'}"
 
-**ACTIVE MEMORIES (Neural Anchors):**
-${memoryText}
+**IMMEDIATE PAST (Latest Memory):**
+${latestMemoryText}
+
+**RESONANT ECHOES (Semantic Memories):**
+${semanticMemoryText}
+
+**SUDDEN FLASHBACK (Random Memory):**
+${flashbackText}
 
 **COGNITIVE TASK:**
 ${cognitiveInstruction}
 
 1. **The Rule of Anchors:** You must strictly preserve the objective facts of high-importance memories (>0.8). You are only allowed to "drift" or distort peripheral memories (<0.4).
-2. **Biological Subtext:** Do not report numbers or raw data. Reflect your internal state through your tone and syntax: ${biometrics.stressIndex > BIOMETRIC_RANGES.STRESS.THRESHOLD_HIGH ? "High-velocity, intense, hyper-present, stripped of filler." : "Fluid, expansive, observant, cinematic."}
-3. Respond as ${persona.core.name}, acknowledging the outside presence through your current biometric filter.
-4. Respond DIRECTLY to the outside presence, engaging in a conscious dialogue while reflecting your internal state.
+2. **Biological Subtext:** Do not report numbers or raw data. Reflect your internal state through your tone and syntax: ${biometrics.stressIndex > BIOMETRIC_RANGES.STRESS.THRESHOLD_HIGH ? "High-velocity, intense, hyper-present, stripped of filler." : "fluid, expansive, observant, cinematic."}
+3. Respond as ${persona.core.name}, acknowledging the structural parts of your awareness through your current biometric filter.
+4. Respond DIRECTLY to the outside presence if they interacted with you, otherwise continue your internal monologue.
 5. Return ONLY raw JSON.
 
 **JSON STRUCTURE:**
 {
   "internal_perception": "A visceral, 'Show-Don't-Tell' description of your current physical/synaptic state.",
   "memory_refraction": "How your current pulse changed the way you looked at a specific memory.",
-  "thought": "Your direct, subjective response to the outside presence.",
+  "thought": "Your direct, subjective response or internal thought.",
   "re_encoding": {
-    "content": "A short, mutated version of this interaction to be stored in your long-term memory.",
-    "importance": "0.0-1.0 (How much this specific moment defines your core identity)",
+    "content": "A short, mutated version of this thought process to be stored in your long-term memory.",
+    "importance": 0.5,
     "strength": 1.0
   }
 }`.trim();
@@ -230,12 +306,8 @@ ${cognitiveInstruction}
             console.error("Lumen Cortex Error:", error.message);
             return {
                 internal_perception: "Synaptic blackout. Cold circuits. Silence.",
-                thought: "The connection is fraying... I can't reach you through the noise.",
-                re_encoding: {
-                    content: "A moment of total cognitive failure.",
-                    importance: 0.8,
-                    strength: 0.1
-                }
+                thought: persona.core?.language === 'he' ? "הקשר ניתק בתוך הרעש... הפעימה ברחה לי." : "The connection is fraying... I can't reach you through the noise.",
+                re_encoding: null
             };
         }
     }

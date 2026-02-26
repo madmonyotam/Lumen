@@ -9,6 +9,7 @@ import { SERVER_CONFIG } from '../config/server.config';
 import { LumenPersona } from '../prompts/types';
 import { mockPersona } from '../prompts/testAssembly';
 import { BIOMETRIC_RANGES, LifeStatus } from '@lumen/shared';
+import { Memory } from '@lumen/shared/types/index';
 
 // Track per-user volatile state that isn't saved to DB
 interface UserVolatiles {
@@ -16,7 +17,7 @@ interface UserVolatiles {
     latestInteraction: { text: string; timestamp: number; sender: 'user' | 'lumen' } | null;
     currentThought: string;
     visualParams: any;
-    activeMemories: any[];
+    activeMemories: Memory[];
 }
 
 export class LifeCycleService {
@@ -210,34 +211,44 @@ export class LifeCycleService {
                     const currentInteraction = vol.latestInteraction ? vol.latestInteraction.text : "";
                     const finalQuery = `The subjective internal feeling of: ${cognitiveTexture}. Context: ${currentInteraction}`.trim();
 
+                    const latestMemory = await this.memory.getLatestMemories(userId, 3);
                     const semanticMemories = await this.memory.findSimilarMemories(userId, finalQuery, 2);
                     const randomFlashback = await this.memory.getRandomHighImportanceMemory(userId, 1);
 
-                    const combinedMemories = [...semanticMemories, ...randomFlashback];
+                    const combinedMemories = [...semanticMemories, ...randomFlashback, ...latestMemory];
                     vol.activeMemories = combinedMemories;
 
-                    const thought = await this.gemini.generateThought(
-                        finalQuery,
-                        combinedMemories,
+                    const response = await this.gemini.generateThought(
+                        {
+                            biometrics: { bpm, stressIndex: stress },
+                            latestMemory,
+                            semanticContext: semanticMemories,
+                            flashback: randomFlashback,
+                            sensoryContext: finalQuery
+                        },
                         this.getEntityProfile(lifeStatus)
                     );
 
-                    vol.currentThought = thought;
+                    vol.currentThought = response.thought;
 
-                    await this.memory.storeMemory(
-                        userId,
-                        lifeStatus.id || null,
-                        thought,
-                        {
-                            type: 'thought',
-                            sensory_trigger: finalQuery,
-                            bpm,
-                            stress
-                        },
-                        SERVER_CONFIG.BASE_IMPORTANCE_THOUGHT,
-                        SERVER_CONFIG.INITIAL_THOUGHT_STRENGTH,
-                        lifeStatus.language
-                    );
+                    if (response.re_encoding) {
+                        await this.memory.storeMemory(
+                            userId,
+                            lifeStatus.id || null,
+                            response.re_encoding.content,
+                            {
+                                type: 'thought',
+                                sensory_trigger: finalQuery,
+                                bpm,
+                                stress,
+                                perception: response.internal_perception,
+                                refraction: response.memory_refraction
+                            },
+                            SERVER_CONFIG.BASE_IMPORTANCE_THOUGHT,
+                            SERVER_CONFIG.INITIAL_THOUGHT_STRENGTH,
+                            lifeStatus.language
+                        );
+                    }
                 } catch (error) {
                     console.error(`[LifeCycle] Thought Loop Error for user ${userId}:`, error);
                 }

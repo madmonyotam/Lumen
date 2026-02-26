@@ -192,6 +192,34 @@ export class MemoryService {
         }
     }
 
+    async getLatestMemories(userId: string, limit: number): Promise<Memory[]> {
+        await this.initializationPromise;
+        try {
+            const result = await this.pool.query(
+                `SELECT id, content, timestamp, strength, importance, metadata, keywords
+                 FROM memories
+                 WHERE user_id = $1
+                 ORDER BY timestamp DESC
+                 LIMIT $2`,
+                [userId, limit]
+            );
+
+            return result.rows.map(row => ({
+                id: row.id.toString(),
+                content: row.content,
+                timestamp: parseInt(row.timestamp),
+                strength: row.strength,
+                importance: row.importance,
+                metadata: row.metadata,
+                keywords: row.keywords || [],
+                embedding: []
+            }));
+        } catch (err) {
+            console.error("[MemoryService] Latest Memories Error:", err);
+            return [];
+        }
+    }
+
     async reconsolidateMemory(id: string | number, context: string) {
         try {
             const res = await this.pool.query(
@@ -264,9 +292,9 @@ export class MemoryService {
             await this.pool.query(`
             UPDATE memories 
             SET 
-                strength = strength * (1 - $1),
-                importance = importance * (1 - ($1 * 0.2)) 
-            WHERE strength > $2 AND user_id = $3
+                strength = strength * (1 - $1::numeric),
+                importance = importance * (1 - ($1::numeric * 0.2)) 
+            WHERE strength > $2::numeric AND user_id = $3
         `, [effectiveDecay, BIO_CONFIG.drift_parameters.strength_decay_threshold, userId]);
 
             // ניקוי זכרונות שמתו
@@ -326,5 +354,9 @@ export class MemoryService {
             console.error("[MemoryService] Health Check Failed:", e);
             return false;
         }
+    }
+
+    async disconnect() {
+        await this.pool.end();
     }
 }
