@@ -24,18 +24,18 @@ describe('TemporalEngine', () => {
     });
 
     test('should progress normally at 60 BPM and 0 stress', () => {
-        let state = { isAlive: true, age: 0, lifespan: 1000 } as any;
+        let state = { isAlive: true, age: 0, birthTime: 0, lifespan: 1000 } as any;
         const start = engine.getSubjectiveTime(state);
         state = engine.calculateSubjectiveTime(state, 60, 0, 1000); // 1 sec real time
         const next = engine.getSubjectiveTime(state);
         const diff = next - start;
 
-        // 60/60 * (1 + 0) = 1.0 factor
-        expect(diff).toBeCloseTo(1000);
+        // 60/60 * (1 + 0.3) = 1.3 factor
+        expect(diff).toBeCloseTo(1300);
     });
 
     test('should accelerate time under stress and high BPM', () => {
-        let state = { isAlive: true, age: 0, lifespan: 10000 } as any;
+        let state = { isAlive: true, age: 0, birthTime: 0, lifespan: 10000 } as any;
         const start = engine.getSubjectiveTime(state);
         // 120 beats / 60 = 2.0
         // Stress 1.0 -> factor 1.5
@@ -44,11 +44,14 @@ describe('TemporalEngine', () => {
         const next = engine.getSubjectiveTime(state);
         const diff = next - start;
 
-        expect(diff).toBeCloseTo(3000); // 3x speed relative to real time
+        // Stress Factor: 1 + (1.0 * 0.5 * 1.3) = 1.65
+        // BPM Factor: 2 * 1.3 = 2.6
+        // Total Factor: 2.6 * 1.65 = 4.29
+        expect(diff).toBeCloseTo(4290); // 4.29x speed relative to real time
     });
 
     test('should slow down time (min factor) at low BPM', () => {
-        let state = { isAlive: true, age: 0, lifespan: 10000 } as any;
+        let state = { isAlive: true, age: 0, birthTime: 0, lifespan: 10000 } as any;
         const start = engine.getSubjectiveTime(state);
         // 30 beats / 60 = 0.5
         // Stress 0 -> 1.0
@@ -57,6 +60,9 @@ describe('TemporalEngine', () => {
         const next = engine.getSubjectiveTime(state);
         const diff = next - start;
 
-        expect(diff).toBeCloseTo(500); // 0.5x speed
+        // Stress factor: 1 + 0 = 1
+        // BPM Factor : 0.5 * 1.3 = 0.65
+        // Total Factor: 0.65
+        expect(diff).toBeCloseTo(650); // 0.65x speed
     });
 });

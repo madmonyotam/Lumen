@@ -227,7 +227,11 @@ app.post('/api/chat', verifyToken, async (req: AuthenticatedRequest, res) => {
                 const vitality = 1 - (lifeStatus.age / lifeStatus.lifespan);
 
                 const retrievalContext = `User says: "${message}". Current State: BPM ${bpm}, Stress ${stress}`;
-                const memories = await memoryService.findSimilarMemories(userId, retrievalContext, 3);
+
+                // Cognitive Memory Retrieval (Spec: add_latests_mempries.md)
+                const latestMemory = await memoryService.getLatestMemories(userId, 3);
+                const semanticContext = await memoryService.findSimilarMemories(userId, retrievalContext, 2);
+                const flashback = await memoryService.getRandomHighImportanceMemory(userId, 1);
 
                 const biometrics = { bpm, stressIndex: stress, vitality };
                 const entityProfile: LumenPersona = lifeStatus.persona || {
@@ -240,7 +244,10 @@ app.post('/api/chat', verifyToken, async (req: AuthenticatedRequest, res) => {
                     }
                 };
 
-                const response = await geminiService.generateCognitiveResponse(biometrics, memories, message, entityProfile);
+                const response = await geminiService.generateCognitiveResponse(
+                    { biometrics, latestMemory, semanticContext, flashback, currentMessage: message },
+                    entityProfile
+                );
 
                 if (response) {
                     console.log(`[Interaction] Response for ${userId}: "${response.thought}"`);
