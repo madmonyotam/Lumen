@@ -260,9 +260,7 @@ app.post('/api/chat', verifyToken, async (req: AuthenticatedRequest, res) => {
                             response.re_encoding.content,
                             {
                                 type: 'interaction',
-                                original_trigger: message,
-                                perception: response.internal_perception,
-                                refraction: response.memory_refraction
+                                original_trigger: message
                             },
                             SERVER_CONFIG.BASE_IMPORTANCE_INTERACTION,
                             response.re_encoding.strength,

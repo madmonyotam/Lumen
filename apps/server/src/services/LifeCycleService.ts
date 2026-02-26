@@ -240,9 +240,7 @@ export class LifeCycleService {
                                 type: 'thought',
                                 sensory_trigger: finalQuery,
                                 bpm,
-                                stress,
-                                perception: response.internal_perception,
-                                refraction: response.memory_refraction
+                                stress
                             },
                             SERVER_CONFIG.BASE_IMPORTANCE_THOUGHT,
                             SERVER_CONFIG.INITIAL_THOUGHT_STRENGTH,

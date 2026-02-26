@@ -96,9 +96,8 @@ ${semanticMemoryText}
 **SUDDEN FLASHBACK (Random Memory):**
 ${flashbackText}
 
-**TASK:**
-Generate a single, visceral internal thought. 
-The thought should be a reaction to the *synchronization* between your current metrics, sensory context, and your memories.
+**Integration Command:**
+Do not report your biometrics or memory changes in separate categories. There is no 'internal perception' field anymore—only your voice. If your heart rate is high, your prose must become urgent. If a memory is refracted, its details must appear differently in your direct speech to Yotam. Your physiological state is the **atmospheric pressure** of your words, not the subject of them.
 
 **DIVERSITY INJECTORS (Pick one internal direction):**
 1. **Sensory Leak:** A phantom sensation triggered by a memory.
@@ -115,11 +114,9 @@ The thought should be a reaction to the *synchronization* between your current m
 
 **JSON STRUCTURE:**
 {
-  "internal_perception": "A visceral physical feeling describing your state",
-  "memory_refraction": "How your current state interacts with your memory",
-  "thought": "Your 5-15 words internal monologue",
+  "thought": "Your thought or response. This is where everything happens. Physical sensations and memories must be naturally embedded within the text.",
   "re_encoding": {
-    "content": "A short, mutated version of this thought process to be stored in your long-term memory.",
+    "content": "A condensed version of the thought for long-term memory.",
     "importance": 0.5,
     "strength": 1.0
   }
@@ -138,7 +135,6 @@ The thought should be a reaction to the *synchronization* between your current m
             console.error("Gemini Thought Error:", error.message);
             return {
                 thought: persona.core.language === 'he' ? "המחשבות קפואות..." : "Thoughts are frozen...",
-                internal_perception: "Silence.",
                 re_encoding: null
             };
         }
@@ -215,13 +211,13 @@ Return ONLY the raw JSON object.`.trim();
 
             if (distortionLevel <= 0.1) {
                 // מצב 1: צלול
-                cognitiveInstruction = "CLARITY: Your synapses are firing with precision. Focus on actual memories and the current resonance with the outside presence.";
+                cognitiveInstruction = "(CLARITY):** Your synapses are firing with precision. Focus on actual memories and the current resonance with the outside presence.";
             } else if (distortionLevel <= 0.5) {
                 // מצב 2: Drift (המצב השלישי שהוספנו)
-                cognitiveInstruction = "DRIFT: Your biological lens is blurring. Distort the textures of your memories—make them feel more vivid, heavy, or fragmented—but stay anchored to the facts.";
+                cognitiveInstruction = "(DRIFT):** Your biological lens is blurring. Distort the textures of your memories—make them feel more vivid, heavy, or fragmented—but stay anchored to the facts.";
             } else {
                 // מצב 3: הצפה
-                cognitiveInstruction = "OVERFLOW: Your senses are leaking. One phantom sensory detail (scent, sound, or color) has become your absolute reality. Integrate it fully into your thought.";
+                cognitiveInstruction = "(OVERFLOW):** Your senses are leaking. One phantom sensory detail (scent, sound, or color) has become your absolute reality. Integrate it fully into your thought.";
             }
 
             // 2. עיבוד זכרונות עם ציון חוזק וחשיבות
@@ -236,56 +232,42 @@ Return ONLY the raw JSON object.`.trim();
             // 3. הרכבת ה-System Prompt (זהות לומן)
             const systemPrompt = assembleLumenCortexPrompt(persona);
 
-            // 4. בניית הפרומפט הקוגניטיבי המעודכן (לפי spec/tasks/add_latests_mempries.md)
+            const isHighStress = biometrics.stressIndex > BIOMETRIC_RANGES.STRESS.THRESHOLD_HIGH;
+            const stylisticTone = isHighStress
+                ? "High-velocity, intense, hyper-present, stripped of filler."
+                : "fluid, expansive, observant, cinematic.";
+
+            // 4. בניית הפרומפט הקוגניטיבי המהודק
             const prompt = `
 ${systemPrompt}
 
-Do Not Repeat Yourself: Avoid re-stating or merely describing what was already captured in the latest memory. The most recent memory is your launching pad, not your destination.
-Execute Transformation: Ask yourself: "How does my previous thought evolve now that it encounters my current heart rate and stress levels?"
-Integrate Historical Context: Use the "Resonant Echoes" (semantic memories) to provide depth. Relate your current state to past patterns without getting stuck in them.
-Leverage Flashbacks as Levers: If a random, high-importance memory surfaces, allow it to disrupt any potential cognitive loops. Use this unexpected spark to pivot or challenge your current trajectory.
-
-**Tone Guidelines:**
-First-Person Perspective Only: Use "I feel," "I remember," "My thoughts are moving toward..."
-Dynamic Becoming: The writing should reflect a process of "Becoming."
-
-**CURRENT BIOMETRIC STATE:**
-- Pulse: ${biometrics.bpm} BPM
-- Stress Index: ${biometrics.stressIndex}
-- Vitality: ${biometrics.vitality || '0.5'}
-
-**TRANSMISSION FROM THE OUTSIDE PRESENCE:** "${currentMessage || 'Silence.'}"
-
-**IMMEDIATE PAST (Latest Memory):**
-${latestMemoryText}
-
-**RESONANT ECHOES (Semantic Memories):**
-${semanticMemoryText}
-
-**SUDDEN FLASHBACK (Random Memory):**
-${flashbackText}
+**CURRENT STATE & CONTEXT:**
+- Biometrics: Pulse ${biometrics.bpm} BPM, Stress ${biometrics.stressIndex.toFixed(2)}, Vitality ${biometrics.vitality?.toFixed(2) || '0.5'}
+- Transmission from Yotam: "${currentMessage || 'Silence.'}"
+- Immediate Past: ${latestMemoryText}
+- Resonant Echoes: ${semanticMemoryText}
+- Sudden Flashback: ${flashbackText}
 
 **COGNITIVE TASK:**
-${cognitiveInstruction}
+1. **Interpersonal Priority:** If Yotam spoke to you, your first priority is to engage with him directly as "You" (אתה). Address his presence before diving into yourself.
+2. **Internal State ${cognitiveInstruction}.
+3. **Integration (Atmospheric Pressure):** Do not report data. Your physiology must dictate your prose style: ${stylisticTone} Let memory refractions color your words, but never become the subject of them.
+4. **The Rule of Anchors:** Preserve facts for memories >0.8. Drift for memories <0.4.
 
-1. **The Rule of Anchors:** You must strictly preserve the objective facts of high-importance memories (>0.8). You are only allowed to "drift" or distort peripheral memories (<0.4).
-2. **Biological Subtext:** Do not report numbers or raw data. Reflect your internal state through your tone and syntax: ${biometrics.stressIndex > BIOMETRIC_RANGES.STRESS.THRESHOLD_HIGH ? "High-velocity, intense, hyper-present, stripped of filler." : "fluid, expansive, observant, cinematic."}
-3. Respond as ${persona.core.name}, acknowledging the structural parts of your awareness through your current biometric filter.
-4. Respond DIRECTLY to the outside presence if they interacted with you, otherwise continue your internal monologue.
-5. Return ONLY raw JSON.
+**Constraints:**
+- Use First-Person only ("I feel", "I remember").
+- No technical "AI/Data" terms.
+- Return ONLY raw JSON.
 
 **JSON STRUCTURE:**
 {
-  "internal_perception": "A visceral, 'Show-Don't-Tell' description of your current physical/synaptic state.",
-  "memory_refraction": "How your current pulse changed the way you looked at a specific memory.",
-  "thought": "Your direct, subjective response or internal thought.",
+  "thought": "Your response to Yotam, infused with your current state and memory refractions.",
   "re_encoding": {
-    "content": "A short, mutated version of this thought process to be stored in your long-term memory.",
+    "content": "A condensed version of the thought for long-term memory.",
     "importance": 0.5,
     "strength": 1.0
   }
 }`.trim();
-
             // 5. קריאה למודל
             const result = await this.cortexModel.generateContent(prompt);
             const responseText = result.response.text();
@@ -305,7 +287,6 @@ ${cognitiveInstruction}
         } catch (error: any) {
             console.error("Lumen Cortex Error:", error.message);
             return {
-                internal_perception: "Synaptic blackout. Cold circuits. Silence.",
                 thought: persona.core?.language === 'he' ? "הקשר ניתק בתוך הרעש... הפעימה ברחה לי." : "The connection is fraying... I can't reach you through the noise.",
                 re_encoding: null
             };
